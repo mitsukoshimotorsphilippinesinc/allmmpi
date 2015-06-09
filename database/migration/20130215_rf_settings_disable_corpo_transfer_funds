@@ -1,0 +1,2 @@
+INSERT INTO `rf_settings` (`slug`, `value`, `default`, `system_code`, `is_locked`, `insert_timestamp`) 
+VALUES ('disable_corpo_transfer_funds', '1', '1', 'system', '0', CURRENT_TIMESTAMP);

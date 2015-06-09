@@ -1,0 +1,1 @@
+ALTER TABLE rf_product_types add is_regular tinyint(1) DEFAULT 1 AFTER is_visible;

@@ -1,0 +1,1 @@
+INSERT INTO `rf_settings` (`slug`, `value`, `default`, `system_code`, `is_locked`, `insert_timestamp`) VALUES ('autogenerate_card_length', '12', '12', 'system', 0, NOW());

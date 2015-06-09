@@ -1,0 +1,1 @@
+ALTER TABLE  `sm_featured_members` ADD  `image_filename` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `title`

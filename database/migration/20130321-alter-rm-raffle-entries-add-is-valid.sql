@@ -1,0 +1,1 @@
+ALTER TABLE rm_raffle_entries ADD is_valid tinyint(1) DEFAULT 1 AFTER is_active;

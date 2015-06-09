@@ -1,0 +1,1 @@
+ALTER TABLE po_payout_periods ADD COLUMN `rerun_status` VARCHAR(20) DEFAULT 'INACTIVE' AFTER `is_official`;

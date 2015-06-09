@@ -1,0 +1,1 @@
+ALTER TABLE `tr_member_acct_credit_logs` ADD COLUMN `tariff` decimal(10,2) NOT NULL DEFAULT '0.00' AFTER `sms_sent`;

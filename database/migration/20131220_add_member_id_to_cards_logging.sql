@@ -1,0 +1,1 @@
+ALTER TABLE  `tr_cards_logging` ADD  `member_id` int(11) DEFAULT NULL AFTER  `cards_entered` ;

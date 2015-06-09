@@ -1,0 +1,1 @@
+INSERT INTO `rf_settings` (`slug`, `value`, `default`, `system_code`, `is_locked`, `insert_timestamp`) VALUES ('announcements_on_dashboard', '4', '4', 'system', '0', CURRENT_TIMESTAMP);

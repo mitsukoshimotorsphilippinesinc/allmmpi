@@ -1,0 +1,1 @@
+ALTER TABLE is_payment_transactions ADD is_override tinyint(1) DEFAULT 0 AFTER rate_to_use; 
