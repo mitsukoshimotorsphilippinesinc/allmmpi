@@ -1,1 +1,0 @@
-ALTER TABLE  `is_items` CHANGE  `unit_id`  `unit_id` INT( 11 ) NOT NULL DEFAULT  '1'

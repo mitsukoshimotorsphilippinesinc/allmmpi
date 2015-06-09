@@ -1,1 +1,0 @@
-ALTER TABLE cm_member_account_product_transaction ADD status varchar(20) DEFAULT 'UNUSED' AFTER product_id;

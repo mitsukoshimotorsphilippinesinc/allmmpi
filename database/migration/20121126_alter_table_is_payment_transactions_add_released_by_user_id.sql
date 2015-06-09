@@ -1,1 +1,0 @@
-ALTER TABLE  `is_payment_transactions` ADD  `released_by_user_id` INT( 11 ) UNSIGNED NULL DEFAULT  '0' AFTER  `refunded_amount`

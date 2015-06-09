@@ -1,3 +1,0 @@
-INSERT INTO `sm_contents` (`parent_content_id`, `user_id`, `title`, `slug`, `body`, `thumb`, `excerpt`, `is_active`, `path`, `content_type`, `updated_timestamp`, `insert_timestamp`)
-VALUES
-	(0, 0, 'Voided Transaction', 'void_transaction', '<p>Hi {@=first_name} {@=last_name},</p>\n<p>&nbsp;</p>\n<p>Please be advised that your transaction with Transaction Code {@=transaction_code} created on {@=date} has been CANCELLED by Vital C on {@=cancel_date}.</p>\n<p>&nbsp;</p>\n<p>{@=payment_html}</p>\n<p>&nbsp;</p>\n<p>Thanks,<br />Vital-C</p>', '', '', 1, '', 'email_template', '0000-00-00 00:00:00', '2013-11-29 19:44:46');

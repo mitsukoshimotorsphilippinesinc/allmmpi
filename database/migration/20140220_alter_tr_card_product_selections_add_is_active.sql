@@ -1,1 +1,0 @@
-ALTER TABLE tr_card_product_selections ADD COLUMN is_active tinyint(1) DEFAULT 1 AFTER original_member_id;

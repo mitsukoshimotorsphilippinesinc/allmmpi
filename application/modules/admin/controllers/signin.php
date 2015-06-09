@@ -43,15 +43,16 @@ class SignIn extends Admin_Controller
 				// check the default user page
 				$user_details = $this->users_model->get_users("username = '{$username}' OR email = '{$username}'");
 				
-				$redirect_url = $user_details[0]->default_page;
-							
+				//$redirect_url = $user_details[0]->default_page;
+				$redirect_url = "/admin";
+			
 				redirect($redirect_url);				
 				return;
 			}
-			else
-			{
-				$invalid_login = true;
-			}
+			//else
+			//{
+			//	$invalid_login = true;
+			//}
 		}
 		
 		// assign data to be sent to view

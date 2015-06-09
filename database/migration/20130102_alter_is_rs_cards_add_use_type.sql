@@ -1,1 +1,0 @@
-ALTER TABLE `is_rs_cards` ADD `use_type` varchar(64) DEFAULT NULL AFTER `issued_to`;

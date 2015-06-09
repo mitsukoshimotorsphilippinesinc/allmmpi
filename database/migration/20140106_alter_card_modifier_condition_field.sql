@@ -1,1 +1,0 @@
-ALTER TABLE rf_card_modifiers ADD `condition` varchar(10) DEFAULT 'NONE' AFTER user_id;

@@ -12,7 +12,7 @@ class Settings {
 		// load the settings model
 		ci()->load->model('settings_model');
 	
-		$this->get_all();
+		//$this->get_all();
 	}
 	
 	
@@ -80,7 +80,7 @@ class Settings {
 	/**
 	 * Get all settings
 	 */
-	public function get_all()
+	/*public function get_all()
 	{
 		if (self::$cache)
 		{
@@ -95,7 +95,7 @@ class Settings {
 		}
 
 		return self::$cache;
-	}
+	}*/
 	
 }
 

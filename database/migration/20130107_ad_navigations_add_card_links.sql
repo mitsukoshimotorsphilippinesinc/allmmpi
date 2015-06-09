@@ -1,4 +1,0 @@
-INSERT INTO `ad_navigations` (`system_code`, `code`, `title`, `url`, `ordering`, `parent_id`, `is_active`, `type`, `insert_timestamp`) VALUES ('system', 'cards', 'Cards', '#', '13', '0', '1', 'HEADER', CURRENT_TIMESTAMP);
-
-INSERT INTO `ad_navigations` (`system_code`, `code`, `title`, `url`, `ordering`, `parent_id`, `is_active`, `type`, `insert_timestamp`) VALUES ('system', 'card types', 'Card Types', '/admin/card_types', '14', '99', '1', 'LINK', CURRENT_TIMESTAMP);
-INSERT INTO `ad_navigations` (`system_code`, `code`, `title`, `url`, `ordering`, `parent_id`, `is_active`, `type`, `insert_timestamp`) VALUES ('system', 'card series', 'Card Series', '/admin/card_series', '14', '99', '1', 'LINK', CURRENT_TIMESTAMP);

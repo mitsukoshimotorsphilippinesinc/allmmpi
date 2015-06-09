@@ -1,1 +1,0 @@
-ALTER TABLE  `trg_commission_deduct_completion` ADD  `credit_flag` TINYINT( 1 ) NOT NULL DEFAULT  '0' AFTER  `account_id` ;

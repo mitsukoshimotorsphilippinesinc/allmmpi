@@ -74,9 +74,9 @@ body > .container > #content {
 		<div style="margin-top:40px;" class='content-wrapper'>
 			<div id='content'>
 		      <?php
-					if (!$this->users_model->is_user_allowed($this->uri->uri_string())) 
-						echo "<div class='alert alert-error'>You do not have access to this module. Please contact your administrator if you require accesss to this module</div>";
-					else 
+					//if (!$this->users_model->is_user_allowed($this->uri->uri_string())) 
+					//	echo "<div class='alert alert-error'>You do not have access to this module. Please contact your administrator if you require accesss to this module</div>";
+					//else 
 			      		echo $content;						
 			  ?>
 			</div>

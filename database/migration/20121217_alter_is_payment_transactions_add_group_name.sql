@@ -1,1 +1,0 @@
-ALTER TABLE  `is_payment_transactions` ADD  `group_name` VARCHAR( 100 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL AFTER  `released_by_user_id`

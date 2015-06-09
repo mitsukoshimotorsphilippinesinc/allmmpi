@@ -1,1 +1,0 @@
-ALTER TABLE rf_product_types ADD is_package TINYINT(1) DEFAULT 0;

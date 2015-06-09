@@ -1,5 +1,0 @@
-DELETE FROM ad_navigations WHERE code = 'cards';
-DELETE FROM ad_navigations WHERE code = 'card_verification';
-
-INSERT INTO `ad_navigations` ( `system_code`, `code`, `title`, `url`, `ordering`, `parent_id`, `is_active`, `type`) 
-SELECT 'system', 'card_verification', 'Card Verification', '/admin/card_verification/', ordering+3 , navigation_id, '1', 'LINK' FROM ad_navigations WHERE code = 'card_management';

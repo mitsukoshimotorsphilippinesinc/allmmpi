@@ -25,14 +25,15 @@ class Admin_Controller extends Base_Controller {
 		);
 		$this->authenticate->initialize($auth_config);
 		
-		// load the systems
-		$this->load->model(array('systems_model', 'users_model', 'facilities_model','logs_model','members_model','tracking_model'));
-		ci()->systems = $this->systems = $this->systems_model->get_systems(null, null, "ordering ASC");
-		ci()->current_system = $this->current_system = '';
+		// 20150609 - LOGIN
+		//// load the systems
+		//$this->load->model(array('systems_model', 'users_model', 'facilities_model','logs_model','members_model','tracking_model'));
+		//ci()->systems = $this->systems = $this->systems_model->get_systems(null, null, "ordering ASC");
+		//ci()->current_system = $this->current_system = '';
 
-		// get the seleced facility from session
-		$this->selected_facility = ci()->session->userdata("selected_facility");
-		ci()->selected_facility = $this->selected_facility;
+		//// get the seleced facility from session
+		//$this->selected_facility = ci()->session->userdata("selected_facility");
+		//ci()->selected_facility = $this->selected_facility;
 
 
 		if ($this->authenticate->is_logged_in()) {
