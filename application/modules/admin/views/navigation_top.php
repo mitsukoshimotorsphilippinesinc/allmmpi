@@ -8,6 +8,7 @@
 		<li class="'.$active_class.'"><a href="">Department 6</a><li>
 		<li class="'.$active_class.'"><a href="">Department 7</a><li>
 		<li class="'.$active_class.'"><a href="">Department 8</a><li>
-		<li class="'.$active_class.'"><a href="">Department 9</a><li>	
+		<li class="'.$active_class.'"><a href="">Department 9</a><li>
+		<li class="'.$active_class.'"><a href="">Department 10</a><li>	
 	</ul>
 </div>
