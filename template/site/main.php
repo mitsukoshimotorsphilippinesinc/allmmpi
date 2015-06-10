@@ -6,7 +6,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<title>Vital-C Health Products Inc</title>
+	<title>MMPI</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<meta name="google-site-verification" content="n3OStZb5h80YSMRjBwO8RTzDFXGEWuDdF-pYHUmNDus" />
@@ -14,7 +14,7 @@
 	<link rel="shortcut icon" href="<?= image_url('favicon.ico'); ?>" />
 	<?php echo css('bootstrap.css');?>
 	<?php echo css('main.css');?>
-	<?php echo css('vitalc.css');?>
+	<?php echo css('mmpi.css');?>
 	<?php echo css('slider.css');?>
 
 	<?php echo js('libs/jquery-1.8.3.min.js'); ?>
@@ -59,33 +59,33 @@
 	<header>
 		<div class="clearfix">
 			<h1 class="pull-left">
-				<a href="/">lemon</a>
-				<a href="/">VitalC</a>
+				<!--a href="/">lemon</a-->
+				<!--a href="/">VitalC</a-->
 			</h1>
-			<?= $this->load->view('snippets/menu', NULL, TRUE,'main');  ?>
-			<?= $this->load->view('snippets/navigation', NULL, TRUE,'main');  ?>
+			<!--?= $this->load->view('snippets/menu', NULL, TRUE,'main');  ?-->
+			<!--?= $this->load->view('snippets/navigation', NULL, TRUE,'main');  ?-->
 		</div>
 		
 	</header>
 	<div id='content'>
 		<div class='content-area'>
-			<?= $this->load->view('snippets/alerts', NULL, TRUE,'main');  ?>
+			<!--?= $this->load->view('snippets/alerts', NULL, TRUE,'main');  ?-->
 		</div>
 		<?= $content ?>
 	</div>
 	<footer>
 		<div class="grid12">
 			<div class="row">
-				<p class="span4">@2012 Vital C Health Products Inc. All Rights Reserved.</p>
+				<p class="span4">@2015 Mitsukoshi Motors Philippines, Inc. All Rights Reserved.</p>
 				<ul class="span8" class="text-align:right;">
 					<li><a href="/">Home</a></li>
 					<li><a href="/pages/privacy-policy">Privacy Policy</a></li>
 					<li><a href="/pages/terms-and-conditions">Terms and Conditions</a></li>
-					<li><a href="/pages/careers-at-vitalc">Careers</a></li>
+					<li><a href="/pages/careers-at-mmpi">Careers</a></li>
 				</ul>
 			</div>
 			<div class="row">	
-				<p class='span12'>Powered by<a href="http://www.gobeyondstudios.com"> Go Beyond Studios, Inc.</a></p>
+				<p class='span12'>Powered by<a href="http://www.mitsukoshimotors.com"> MMPI elITes</a></p>
 			</div>
 		</div>
 	</footer>
