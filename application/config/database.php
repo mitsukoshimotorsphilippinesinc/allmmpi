@@ -92,5 +92,24 @@ $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 $db['default']['failover'] = array();
 
+$db['spare_parts']['dsn']      = '';
+$db['spare_parts']['hostname'] = '195.100.100.7';
+$db['spare_parts']['username'] = 'devteam';
+$db['spare_parts']['password'] = 'D3vteam';
+$db['spare_parts']['database'] = 'spare_parts';
+$db['spare_parts']['dbdriver'] = 'mysql';
+$db['spare_parts']['dbprefix'] = '';
+$db['spare_parts']['pconnect'] = FALSE;
+$db['spare_parts']['db_debug'] = TRUE;
+$db['spare_parts']['cache_on'] = FALSE;
+$db['spare_parts']['cachedir'] = '';
+$db['spare_parts']['char_set'] = 'utf8';
+$db['spare_parts']['dbcollat'] = 'utf8_unicode_ci';
+$db['spare_parts']['swap_pre'] = '';
+$db['spare_parts']['autoinit'] = TRUE;
+$db['spare_parts']['stricton'] = FALSE;
+$db['spare_parts']['failover'] = array();
+
+
 /* End of file database.php */
 /* Location: ./application/config/database.php */
