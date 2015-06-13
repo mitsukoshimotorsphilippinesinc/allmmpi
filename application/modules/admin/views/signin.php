@@ -1,7 +1,7 @@
 <section id='admin_signin'>
 	<div class='row'>
 		<div class='offset4 span4'>
-			<div><img src="/assets/media/mitsu_logo_min.png" style="height:180px;max-width:200%;margin-left:-140px;" alt=""></div>			
+			<div><img src="/assets/media/mitsu_logo_min.png" style="height:140px;max-width:200%;margin-left:-135px;" alt=""></div>			
 			<h3 style="font-family:Consolas;margin-left:5px;">Systems Administration Portal</h3>
 			<div class='well' style='padding: 30px; margin-top:15px;'>
 			<?php if (isset($invalid_login)) if ($invalid_login) :?>
