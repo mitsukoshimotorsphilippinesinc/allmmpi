@@ -16,7 +16,8 @@
 	<?php echo css('base.css');?>
 	<?php echo css('main.css');?>
 	<?php echo css('google-code-prettify/prettify.css');?>
-	
+	<?php echo css('simple-sidebar.css');?>
+
 	<!--[if lt IE 9]>
 		<?php echo js('libs/html5shiv.js'); ?>
 	<![endif]-->

@@ -1,7 +1,7 @@
 <div class="subnav subnav-fixed">
 	<ul class="nav nav-pills">	
-		<li class="'.$active_class.'"><a href="">Department 1</a><li>
-		<li class="'.$active_class.'"><a href="">Department 2</a><li>
+		<li class="'.$active_class.'"><a href="/warehouse">Warehouse</a><li>
+		<li class="'.$active_class.'"><a href="">Spare Parts</a><li>
 		<li class="'.$active_class.'"><a href="">Department 3</a><li>
 		<li class="'.$active_class.'"><a href="">Department 4</a><li>
 		<li class="'.$active_class.'"><a href="">Department 5</a><li>

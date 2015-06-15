@@ -19,6 +19,7 @@
 	<?php echo css('base.css');?>
 	<?php echo css('main.css');?>
 	<?php echo css('google-code-prettify/prettify.css');?>
+	<?php echo css('simple-sidebar.css');?>
 	<!--?php echo css('switcherMenu.css');?-->
 
 	<?php echo css('tablesorter.css'); ?>
