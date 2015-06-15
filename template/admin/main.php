@@ -17,6 +17,7 @@
 	<?php echo css('base.css');?>
 	<?php echo css('main.css');?>
 	<?php echo css('google-code-prettify/prettify.css');?>
+	<?php echo css('simple-sidebar/css/simple-sidebar.css');?>	
 	<!--?php echo css('switcherMenu.css');?>
 	<!--?php echo css('keyboard.css');?>
 	
@@ -45,8 +46,8 @@ body > .container > #content {
 	<?php echo js('libs/base_plugins.min.js'); ?>
 	<?php echo js('libs/jquery.hotkeys.js'); ?>
 	<?php echo js('apps/core.js'); ?>
-	<?php echo js('apps/site.js'); ?> 
-	
+	<?php echo js('apps/site.js'); ?>
+
 	<script type='text/javascript'>
 		var base_url = "<?=$this->config->item('base_url');?>";
 	</script>
@@ -70,6 +71,8 @@ body > .container > #content {
 		</div>
 	</div>
 	
+	<?= $this->load->view('navigation_side', null, TRUE, 'admin');  ?>
+
 	<div class="container">
 		<div style="margin-top:40px;" class='content-wrapper'>
 			<div id='content'>
