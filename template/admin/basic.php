@@ -16,6 +16,8 @@
 	<?php echo css('base.css');?>
 	<?php echo css('main.css');?>
 	<?php echo css('google-code-prettify/prettify.css');?>
+	<?php echo css('simple-sidebar/css/simple-sidebar.css');?>	
+	<?php echo css('/assets/css/tablesorter.css');?>	
 	
 	<!--[if lt IE 9]>
 		<?php echo js('libs/html5shiv.js'); ?>
@@ -39,7 +41,7 @@
 	<?php echo js('apps/core.js'); ?>
 	<?php echo js('apps/site.js'); ?> 
 
-	<div class="container">
+	<div class="container-signin">
 		<div id='content'>
 			<?= $content ?>
 		</div>

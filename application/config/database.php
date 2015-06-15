@@ -92,7 +92,6 @@ $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 $db['default']['failover'] = array();
 
-$db['spare_parts']['dsn']      = '';
 $db['spare_parts']['hostname'] = '195.100.100.7';
 $db['spare_parts']['username'] = 'devteam';
 $db['spare_parts']['password'] = 'D3vteam';
@@ -109,6 +108,57 @@ $db['spare_parts']['swap_pre'] = '';
 $db['spare_parts']['autoinit'] = TRUE;
 $db['spare_parts']['stricton'] = FALSE;
 $db['spare_parts']['failover'] = array();
+
+$db['hrdatabase']['hostname'] = '195.100.100.7';
+$db['hrdatabase']['username'] = 'devteam';
+$db['hrdatabase']['password'] = 'D3vteam';
+$db['hrdatabase']['database'] = 'HRDataBase';
+$db['hrdatabase']['dbdriver'] = 'mysql';
+$db['hrdatabase']['dbprefix'] = '';
+$db['hrdatabase']['pconnect'] = FALSE;
+$db['hrdatabase']['db_debug'] = TRUE;
+$db['hrdatabase']['cache_on'] = FALSE;
+$db['hrdatabase']['cachedir'] = '';
+$db['hrdatabase']['char_set'] = 'utf8';
+$db['hrdatabase']['dbcollat'] = 'utf8_unicode_ci';
+$db['hrdatabase']['swap_pre'] = '';
+$db['hrdatabase']['autoinit'] = TRUE;
+$db['hrdatabase']['stricton'] = FALSE;
+$db['hrdatabase']['failover'] = array();
+
+$db['warehouse']['hostname'] = '195.100.100.7';
+$db['warehouse']['username'] = 'devteam';
+$db['warehouse']['password'] = 'D3vteam';
+$db['warehouse']['database'] = 'warehouse';
+$db['warehouse']['dbdriver'] = 'mysql';
+$db['warehouse']['dbprefix'] = '';
+$db['warehouse']['pconnect'] = FALSE;
+$db['warehouse']['db_debug'] = TRUE;
+$db['warehouse']['cache_on'] = FALSE;
+$db['warehouse']['cachedir'] = '';
+$db['warehouse']['char_set'] = 'utf8';
+$db['warehouse']['dbcollat'] = 'utf8_unicode_ci';
+$db['warehouse']['swap_pre'] = '';
+$db['warehouse']['autoinit'] = TRUE;
+$db['warehouse']['stricton'] = FALSE;
+$db['warehouse']['failover'] = array();
+
+$db['warehouse']['hostname'] = '195.100.100.7';
+$db['warehouse']['username'] = 'devteam';
+$db['warehouse']['password'] = 'D3vteam';
+$db['warehouse']['database'] = 'warehouse';
+$db['warehouse']['dbdriver'] = 'mysql';
+$db['warehouse']['dbprefix'] = '';
+$db['warehouse']['pconnect'] = FALSE;
+$db['warehouse']['db_debug'] = TRUE;
+$db['warehouse']['cache_on'] = FALSE;
+$db['warehouse']['cachedir'] = '';
+$db['warehouse']['char_set'] = 'utf8';
+$db['warehouse']['dbcollat'] = 'utf8_unicode_ci';
+$db['warehouse']['swap_pre'] = '';
+$db['warehouse']['autoinit'] = TRUE;
+$db['warehouse']['stricton'] = FALSE;
+$db['warehouse']['failover'] = array();
 
 
 /* End of file database.php */
