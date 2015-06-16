@@ -52,6 +52,8 @@ class Dealer extends Admin_Controller {
 		$this->template->transfers = $transfers;
 		
 		$this->template->view('dealer/approval');	
+		
+
 	}	
 
 

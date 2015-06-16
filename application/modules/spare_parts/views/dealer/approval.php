@@ -93,8 +93,6 @@
 			},
 			on_success: function(data){
 
-				//alert(dealer_request_id + '|' + dealer_request_code + '|' + is_approved);
-
 				if (data.status == "1")	{
 				
 					// show add form modal					
