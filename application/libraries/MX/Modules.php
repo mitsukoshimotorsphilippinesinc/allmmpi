@@ -53,8 +53,8 @@ class Modules
 	* Run a module controller method
 	* Output from module is buffered and returned.
 	**/
-	public static function run($module) {
-		
+	public static function run($module) {				
+
 		$method = 'index';
 		
 		if(($pos = strrpos($module, '/')) != FALSE) {
@@ -63,13 +63,21 @@ class Modules
 		}
 
 		if($class = self::load($module)) {
-			
+
 			if (method_exists($class, $method))	{
 				ob_start();
 				$args = func_get_args();
 				$output = call_user_func_array(array($class, $method), array_slice($args, 1));
 				$buffer = ob_get_clean();
-				return ($output !== NULL) ? $output : $buffer;
+
+				if($output === NULL && $buffer === '')
+				{ 
+				     $output = CI::$APP->output->get_output(); 
+				}
+
+				return $output;
+
+				//return ($output !== NULL) ? $output : $buffer;
 			}
 		}
 		

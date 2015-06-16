@@ -131,6 +131,12 @@ header > ul > li > .dropdown-menu > li > a:hover{
 
 }
 
+.content-admin{
+	width: 1000px;
+	margin: 0 auto;
+	padding: 10px 0;
+	max-width: 90%;
+}
 /***** =content-area *****/
 .content-area{
 	width: 960px;

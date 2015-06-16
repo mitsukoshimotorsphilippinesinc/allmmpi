@@ -117,11 +117,11 @@ class Dealer extends Admin_Controller {
 			
 		} else {
 	
-			// change status to COMPLETED
+			// change status to DENIED
 			$current_datetime = date("Y-m-d H:i:s");
 			
 			if ($is_approved == 'no') {
-				$new_remarks = "[" . $current_datetime . "] " . $remarks . "<br/>" . $dealer_request->remarks;
+				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $dealer_request->remarks;
 
 				$data = array(
 					'status' => "DENIED",
@@ -136,6 +136,7 @@ class Dealer extends Admin_Controller {
 				$this->return_json("1","Denied Dealer Request.",array("html" => $html, "title" => $title));		
 
 			} else {
+				// change status to APPROVED
 				$data = array(
 					'status' => "APPROVED",
 					'approved_by' => $this->user->user_id,					
@@ -155,6 +156,210 @@ class Dealer extends Admin_Controller {
 		return;	
 	}
 
+
+	public function view_details()
+	{
+		$dealer_request_id = $this->input->post("dealer_request_id");
+		$dealer_request_code = $this->input->post("dealer_request_code");
+			
+		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);		
+
+		if (empty($dealer_request)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
+			$title = "Error: View Details";
+
+			$this->return_json("0","Dealer Request Code not found in DB", array("html" => $html, "title" => $title));	
+			
+		} else {
+		
+			$data = array(
+				'dealer_request' => $dealer_request
+			);
+		
+			$html = $this->load->view("dealer/view_details",$data,true);
+			 
+			$title = "View Details :: " . $dealer_request_code;
+			$this->return_json("1","View Details Dealer Request", array("html" => $html, "title" => $title));
+			
+		}
+			
+		return;
+	}
+
+	
+	public function download_check()
+	{
+		$start_date = trim($this->input->post("start_date"));
+		$end_date = trim($this->input->post("end_date"));
+
+		// check if start_date and end_date is null
+		if (((empty($start_date)) && (empty($start_date))) || (($start_date == NULL) && ($start_date == NULL)))
+		{
+			$this->return_json("error","Enter both Start Date and End Date.");
+			return;
+		}
+
+		if ((empty($start_date)) || ($start_date == NULL))
+		{
+			$this->return_json("error","Enter Start Date.");
+			return;
+		}
+
+		if ((empty($end_date)) || ($end_date == NULL))
+		{
+			$this->return_json("error","Enter End Date.");
+			return;
+		}
+
+		// check if start_date is greater than end_date
+		if ($start_date > $end_date)
+		{
+			$this->return_json("error","Start Date must not exceed End Date.");
+			return;
+		}
+
+		$current_date = date("Y-n-j");
+
+
+		// start date must not exceed the current date
+		if ($start_date > $current_date)
+		{
+			$this->return_json("error","Start Date must not exceed Current Date.");
+			return;
+		}
+
+		$proper_start_date = date('F d, Y', strtotime($start_date));
+		$proper_end_date = date('F d, Y', strtotime($end_date));
+
+		// check if query will return records to execute
+		$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
+
+		$pending_count = $this->spare_parts_model->get_dealer_request($where);
+
+		if (empty($pending_count))
+		{
+			$return_html = "<span>No Dealer Request from <strong>{$proper_start_date}</strong> to <strong>{$proper_end_date}</strong>.</span>";
+			$this->return_json("ok",$return_html);
+			return;
+		} else
+		{
+			$return_html = "<span>You are to generate a Dealer Requests Report ranging from <strong>{$proper_start_date}</strong> to <strong>{$proper_end_date}</strong>.<br/>Do you want to proceed?</span>";
+			$this->return_json("ok",$return_html);
+			return;
+		}
+	}
+
+	public function download_proceed()
+	{
+		$start_date = trim($this->input->post("start_date"));
+		$end_date = trim($this->input->post("end_date"));
+		
+		$current_timestamp = date('Y-m-d H:i:s');
+
+		$return_html = "<span>Request Completed.<br/><br/>You may now download the generated spreadsheet file.</span>";
+
+		$this->return_json("ok",$return_html);
+		return;
+
+	}
+
+	function export_xls($start_date,$end_date)
+	{
+		$this->load->library('PHPExcel');
+        $this->load->library('PHPExcel/IOFactory');
+		
+		try {
+			
+			// adjusting memory limit to accomodate PHPExcel processing 
+			set_time_limit(0); // eliminating the timeout
+			ini_set('memory_limit', '512M');
+
+	        $objPHPExcel = new PHPExcel();
+	        $objPHPExcel->getProperties()->setTitle("dealer requests")->setDescription("none");
+			$start_column_num = 3;
+
+			$worksheet = $objPHPExcel->setActiveSheetIndex(0);
+
+			$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
+			$dealer_request_count = $this->spare_parts_model->get_dealer_request_count($where);
+
+			$filename = "dealer_requests_" . str_replace("-", "", $start_date) . "-" . str_replace("-", "", $end_date) . ".xls";
+
+			//set width of first column
+			$worksheet->getColumnDimension('A')->setWidth(12.00);
+
+			// set column header to bold
+			$worksheet->getStyle('A1')->getFont()->setBold(true);
+			$worksheet->getStyle('A' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('B' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('C' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('D' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('E' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('F' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('G' . $start_column_num)->getFont()->setBold(true);
+
+			//center column names
+			$worksheet->getStyle('A' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('B' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('C' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('D' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('E' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('F' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('G' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);			
+			
+			//set column names
+			$worksheet->setCellValue('A1', "Dealer Requests from {$start_date} to {$end_date}");
+			$worksheet->setCellValue('A' . $start_column_num, 'Request Code');
+			$worksheet->setCellValue('B' . $start_column_num, 'Status');
+			$worksheet->setCellValue('C' . $start_column_num, 'Dealer ID');
+			$worksheet->setCellValue('D' . $start_column_num, 'Agent ID');
+			$worksheet->setCellValue('E' . $start_column_num, 'PO Number');
+			$worksheet->setCellValue('F' . $start_column_num, 'Remarks');
+			$worksheet->setCellValue('G' . $start_column_num, 'Date Created');
+			
+
+			$row = 4;
+
+			$allowed_rows = 5000;
+
+			for($prow = 0;$prow < ceil($dealer_request_count/$allowed_rows)+1; $prow++)
+			{
+				$dealer_requests = $this->spare_parts_model->get_dealer_request($where, array('rows' => $allowed_rows, 'offset' => $prow*$allowed_rows), 'insert_timestamp ASC');
+
+				foreach ($dealer_requests as $dr)
+				{
+
+					$worksheet->setCellValue('A'. $row, $dr->request_code);
+					$worksheet->setCellValue('A'. $row, $dr->status);
+					$worksheet->setCellValue('C'. $row, $dr->dealer_id);
+					$worksheet->setCellValue('D'. $row, $dr->agent_id);
+					$worksheet->setCellValue('E'. $row, $dr->purchase_order_number);
+					$worksheet->setCellValue('F'. $row, $dr->remarks);
+					$worksheet->setCellValue('G'. $row, $dr->insert_timestamp);
+					
+					// auto resize columns
+					$worksheet->getColumnDimension('A')->setAutoSize(false);
+					$worksheet->getColumnDimension('B')->setAutoSize(true);
+					$worksheet->getColumnDimension('C')->setAutoSize(true);
+					$worksheet->getColumnDimension('D')->setAutoSize(true);
+					$worksheet->getColumnDimension('E')->setAutoSize(true);
+					$worksheet->getColumnDimension('F')->setAutoSize(true);
+					$worksheet->getColumnDimension('G')->setAutoSize(true);
+					$row++;
+				}
+			}
+
+			header('Content-Type: application/vnd.ms-excel');
+			header('Content-Disposition: attachment;filename='.$filename.'');
+			header('Cache-Control: max-age=0');
+
+			$objWriter = IOFactory::createWriter($objPHPExcel, 'Excel5');
+			$objWriter->save('php://output');
+			exit(0);
+			
+		} catch (Exception $e) {
+			exit($e->getMessage());
+		}
+	}
+
 }
-
-

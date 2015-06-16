@@ -1,4 +1,4 @@
-<div><h2>For Approval</h2></div>
+<div><h2>For Approval<a class='btn btn-small btn-default'id="download-btn" style="float:right;" title='Download'><i class='icon-download'></i>&nbsp;Download</a></h2></div>
 
 <br>
 <table class='table table-striped table-bordered'>
@@ -6,8 +6,8 @@
 		<tr>			
 			<th style=''>Request Code</th>
 			<th>Status</th>
-			<th style=''>Dealer ID</th>
-			<th style=''>Agent ID</th>
+			<th style=''>Dealer Name</th>
+			<th style=''>Agent Name</th>
 			<th style=''>PO Number</th>
 			<th style=''>Remarks</th>
 			<th style=''>Date Created</th>			
@@ -36,17 +36,15 @@
 			?>
 
 			<?php
-			// get dealer name
-			$dealer = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
+				// get dealer name
+				$dealer = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
 
-			if (empty($dealer)) {
-				var_dump("missing dealer info. Please contact IT Department.");
-				return;
-			}
-
+				if (empty($dealer)) {
+					echo "<td>N/A</td>";
+				} else {
+					echo "<td><?= $dealer->complete_name; ?></td>";
+				}
 			?>	
-
-			<td><?= $dealer->complete_name; ?></td>
 
 			<?php
 			// get agent name
@@ -67,7 +65,7 @@
 			
 
 			<td data1="<?= $t->dealer_request_id ?>" data2="<?= $t->request_code ?>">
-				<a style="cursor:pointer;">Details</a> |
+				<a class='view-details' style="cursor:pointer;">Details</a> |
 				<a class='btn btn-small btn-primary process-btn' data='yes' title="Yes"><i class="icon-white icon-ok"></i>&nbsp;Yes</a>				
 				<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i>&nbsp;No</a>
 			</td>
@@ -198,57 +196,46 @@
 		return false;			
 	});
 	
-	
-	
-
-
-
-
-
-
-
-
-
-
-
-	$(".info-btn").click(function(){
-		var payout_period_id = $(this).attr("data");
+	$(".view-details").click(function(){
+		var dealer_request_id = $(this).parent().attr("data1");
+		var dealer_request_code = $(this).parent().attr("data2");
 	
 		b.request({
-			url: "/admin/payout_periods/info",
+			url: "/spare_parts/dealer/view_details",
 			data: {
-				"payout_period_id" : payout_period_id
+				"dealer_request_id" : dealer_request_id,
+				"dealer_request_code" : dealer_request_code,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
 				
 					// show add form modal					
-					withPendingModal = b.modal.new({
+					viewDetailsModal = b.modal.new({
 						title: data.data.title,
 						width:450,
 						disableClose: true,
 						html: data.data.html,
 						buttons: {
 							'Close' : function() {
-								withPendingModal.hide();								 							
+								viewDetailsModal.hide();								 							
 							}									
 						}
 					});
-					withPendingModal.show();
+					viewDetailsModal.show();
 				} else {
 					// show add form modal					
-					var errorPendingModal = b.modal.new({
+					var errorViewDetailsModal = b.modal.new({
 						title: data.data.title,
 						width:450,
 						disableClose: true,
 						html: data.data.html,
 						buttons: {
 							'Close' : function() {
-								errorPendingModal.hide();								 							
+								errorViewDetailsModal.hide();								 							
 							}
 						}
 					});
-					errorPendingModal.show();		
+					errorViewDetailsModal.show();		
 				}
 			}	
 				
@@ -256,7 +243,7 @@
 		return false;			
 	});
 	
-	$("#download").click(function(){
+	$("#download-btn").click(function(){
 		var download_modal = b.modal.new({});
 		var years = "";
 		var months = "";
@@ -264,7 +251,7 @@
 
 		download_modal.init({
 
-			title: "Download Request Details",
+			title: "Download Dealer Requests",
 			width: 300,
 			html: '<label for="start_date">Start Date: </label>\n<div class="form-inline wc-date">\n<div class="input-append"><input type="text" class="input-medium" id="pp_start_date" name="pp_start_date" readonly="readonly" style="cursor:pointer;z-index:2050" /><span id="pp_start_date_icon" class="add-on" style="cursor:pointer;"><i class="icon-calendar"></i></span></div>\n</div>\n\
 			<br>\n\
@@ -281,7 +268,7 @@
 						$(this_button).addClass("no_clicking");
 
 						b.request({
-							url: "/admin/payout_periods/download_check",
+							url: "/spare_parts/dealer/download_check",
 							data: {
 								"start_date": start_date,
 								"end_date": end_date
@@ -319,7 +306,7 @@
 												{
 													$(this_button).addClass("no_clicking")
 													b.request({
-														url: "/admin/payout_periods/download_proceed",
+														url: "/spare_parts/dealer/download_proceed",
 														data: {
 															"start_date": start_date,
 															"end_date": end_date
@@ -349,7 +336,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/admin/payout_periods/export_xls/'+ start_date +'/' + end_date);
+																			redirect('/spare_parts/dealer/export_xls/'+ start_date +'/' + end_date);
 																
 																			
 																		}

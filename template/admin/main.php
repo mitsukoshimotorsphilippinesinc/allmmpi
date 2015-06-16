@@ -74,7 +74,7 @@ body > .container > #content {
 	<?= $this->load->view('navigation_side', null, TRUE, 'admin');  ?>
 
 	<div class="container">
-		<div style="margin-top:40px;" class='content-wrapper'>
+		<div style="margin-top:40px;width:1000px;" class='content-wrapper'>
 			<div id='content'>
 		      <?php
 					//if (!$this->users_model->is_user_allowed($this->uri->uri_string())) 
