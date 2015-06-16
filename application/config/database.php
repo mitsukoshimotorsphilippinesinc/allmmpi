@@ -110,6 +110,23 @@ $db['spare_parts']['autoinit'] = TRUE;
 $db['spare_parts']['stricton'] = FALSE;
 $db['spare_parts']['failover'] = array();
 
+$db['WHCarmona']['dsn']      = '';
+$db['WHCarmona']['hostname'] = '195.100.100.7';
+$db['WHCarmona']['username'] = 'devteam';
+$db['WHCarmona']['password'] = 'D3vteam';
+$db['WHCarmona']['database'] = 'WHCarmona';
+$db['WHCarmona']['dbdriver'] = 'mysql';
+$db['WHCarmona']['dbprefix'] = '';
+$db['WHCarmona']['pconnect'] = FALSE;
+$db['WHCarmona']['db_debug'] = TRUE;
+$db['WHCarmona']['cache_on'] = FALSE;
+$db['WHCarmona']['cachedir'] = '';
+$db['WHCarmona']['char_set'] = 'utf8';
+$db['WHCarmona']['dbcollat'] = 'utf8_unicode_ci';
+$db['WHCarmona']['swap_pre'] = '';
+$db['WHCarmona']['autoinit'] = TRUE;
+$db['WHCarmona']['stricton'] = FALSE;
+$db['WHCarmona']['failover'] = array();
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */
