@@ -3581,3 +3581,10 @@ a.thumbnail:hover {
   background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
   text-decoration: none;
 }
+
+.btn1 {
+  background: &H00808080&;
+  font-family: Tw Cen MT;
+  font-color:&H80000008&;
+  font-size: 10px;
+}

@@ -22,4 +22,13 @@ class Whcarmona_model extends Base_model {
 		$query->free_result();
 		return $row;
 	}
+
+	function get_matchedckd_count($where = null)
+	{
+		// do a sql count instead of row count
+		$query = $this->fetch('matchedckd', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
 }
