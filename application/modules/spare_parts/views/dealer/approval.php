@@ -1,16 +1,64 @@
-<div><h2>For Approval<a class='btn btn-small btn-default'id="download-btn" style="float:right;" title='Download'><i class='icon-download'></i>&nbsp;Download</a></h2></div>
+
+<div class='alert alert-danger'><h2>For Approval<a class='btn btn-small btn-default'id="download-btn" style="float:right;" title='Download'><i class='icon-download'></i>&nbsp;Download</a></h2></div>
 
 <br>
+
+<div >
+	<form id='search_details' method='get' action =''>
+
+		<strong>Status:&nbsp;</strong>
+		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
+			<option value="ALL">ALL</option>
+			<option value="FOR APPROVAL">FOR APPROVAL</option>
+			<option value="APPROVED">APPROVED</option>
+		</select>                 
+	
+		<br/>
+
+		<strong>Search By:&nbsp;</strong>
+		<select name="search_option" id="search_option" style="width:150px;" value="<?= $search_by ?>">
+			<option value="request_code">Code</option>
+			<option value="name">Name</option>
+		</select>                 
+
+		<input title="Search" class="input-large search-query" style="margin-top:-10px;margin-left:5px;" type="text" id="search_string" name="search_string" value="" maxlength='25' autofocus="">	
+
+		<button id="button_search" class='btn btn-primary' style="margin-top:-10px;margin-left:5px;"><span>Search</span></button>
+		<button id='button_refresh' class='btn' style="margin-top:-10px;"><span>Refresh</span></button>
+	
+		<br/>
+		<span id="search_error" class="label label-important" style="display:none">Search String must be at least three (3) characters.</span>	
+	
+		<?php
+		if ($search_text == "") {
+		?>	
+			<div id="search_summary" style="display:none;">
+		<?php
+		} else {
+		?>	
+			<div id="search_summary">
+		<?php
+		};
+		?>		
+		
+			<span class="label label-important">Search Results for:</span>
+			<span class="label label-default"><?= $search_status ?></span>
+			<span class="label label-default"><?= $search_by ?></span>
+			<span class="label label-default"><?= $search_text ?></span>
+		</div>		
+	</form>
+</div>
+
 <table class='table table-striped table-bordered'>
 	<thead>
 		<tr>			
 			<th style=''>Request Code</th>
 			<th>Status</th>
-			<th style=''>Dealer Name</th>
-			<th style=''>Agent Name</th>
+			<th style='width:100px;'>Dealer Name</th>
+			<th style='width:100px;'>Agent Name</th>
 			<th style=''>PO Number</th>
-			<th style=''>Remarks</th>
-			<th style=''>Date Created</th>			
+			<th style='width:150px;'>Remarks</th>
+			<th style='width:70px;'>Date Created</th>			
 			<th style=''>Action</th>
 		</tr>
 	</thead>
@@ -37,12 +85,12 @@
 
 			<?php
 				// get dealer name
-				$dealer = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
+				$dealer_data = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
 
-				if (empty($dealer)) {
+				if (count($dealer_data) == 0) {
 					echo "<td>N/A</td>";
 				} else {
-					echo "<td><?= $dealer->complete_name; ?></td>";
+					echo "<td>{$dealer_data->complete_name}</td>";
 				}
 			?>	
 
@@ -53,7 +101,7 @@
 			if (empty($agent)) {
 				echo "<td>N/A</td>";
 			} else {
-				echo "<td><?= $agent->complete_name; ?></td>";
+				echo "<td>{$agent->complete_name}</td>";
 			}
 
 			?>	
@@ -78,7 +126,18 @@
 <?= $this->pager->create_links($search_url);  ?>
 </div>
 <script type="text/javascript">
-	
+
+	$(document).ready(function(){
+                		
+		var _search_by = '<?= $search_by; ?>';
+		$("#search_option").val(_search_by);
+
+		var _search_status = '<?= $search_status; ?>';
+		$("#search_status").val(_search_status);             
+
+	});
+
+
 	$(".process-btn").click(function(){
 		var dealer_request_id = $(this).parent().attr("data1");
 		var dealer_request_code = $(this).parent().attr("data2");

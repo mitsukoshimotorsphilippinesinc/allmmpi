@@ -10,7 +10,7 @@
 				</a>
 				<ul id="dealer-menu" class="collapse" aria-expanded="true" style="">
 					<li>
-						<a href="#">Dashboard</a>
+						<a href="/spare_parts/dealer">Dashboard</a>
 					</li>
 					<li>
 						<a href="#">Search By Request</a>
@@ -56,3 +56,10 @@
 		</ul>	
 	</div>
 </div>
+
+<script type="text/javascript">
+	$("#sidebar-wrapper").click(function(){
+		alert('test');
+		$('#sidebar-wrapper').removeClass('hidden-xs');     
+	});
+</script>

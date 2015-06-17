@@ -12,7 +12,7 @@ class Dealer extends Admin_Controller {
 
 	public function index()
 	{
-		$test_id = abs($this->input->get('test_id'));		
+		//$test_id = abs($this->input->get('test_id'));		
 
 		//$db_spare_parts = $this->load->database('spare_parts', TRUE);
 
@@ -25,14 +25,31 @@ class Dealer extends Admin_Controller {
 	public function approval()
 	{
 
+		$search_status = trim($this->input->get("search_status"));
 		$search_by = trim($this->input->get("search_option"));
 		$search_text = trim($this->input->get("search_string"));
 
 		$search_url = "";
 		$count_is = 0;
 		$transfers = "";		
-		$where = "status = 'FOR APPROVAL'";
-		
+
+		if (empty($search_status)) {
+			$where = NULL;
+		} else {
+
+			if ($search_status == 'ALL') {
+				$where = NULL;
+			} else {
+				$where = "status = '". $search_status ."'";
+			}
+					
+			if ($where != NULL) {
+				$where = $where . " AND ". $search_by ." LIKE '%" . $search_text . "%'";
+			} else {
+				$where = $search_by ." LIKE '%" . $search_text . "%'";
+			}
+		}
+
 		// set pagination data
 		$config = array(
 				'pagination_url' => "/spare_parts/dealer/approval/",
@@ -46,6 +63,7 @@ class Dealer extends Admin_Controller {
 		$transfers = $this->spare_parts_model->get_dealer_request($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
 		
 		// search vars
+		$this->template->search_status = $search_status;
 		$this->template->search_by = $search_by;
 		$this->template->search_text = $search_text;
 		$this->template->search_url = $search_url;
