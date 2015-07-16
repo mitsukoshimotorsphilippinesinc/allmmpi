@@ -6,7 +6,10 @@ class Spare_parts extends Admin_Controller {
 	{
 		parent::__construct();
 	
-		$this->load->model('spare_parts_model');		
+		$this->load->model('spare_parts_model');
+		$this->load->model('human_relations_model');	
+
+		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);	
 	}
 
 	public function index()
@@ -60,8 +63,7 @@ class Spare_parts extends Admin_Controller {
 
 	public function pending_reservations()
 	{
-
-		
+	
 		$pending_reservations_count = $this->spare_parts_model->get_pending_warehouse_reservations_count();
 
 		$where = "ORDER BY insert_timestamp DESC LIMIT 20";
@@ -92,7 +94,75 @@ class Spare_parts extends Admin_Controller {
 		return;	
 	}
 	
+	public function display_mtr($request_code) 
+	{
+		$this->load->library('mpdf60/mpdf');
+		
+		$module_code = substr($request_code, 0, 2);
 
+		// get segment name
+		$department_module_details = $this->spare_parts_model->get_department_module_by_code($module_code);
+
+		// request_summary
+		$request_summary_sql = "SELECT a." . $department_module_details->segment_name . "_id as id, a.* FROM
+								is_" . $department_module_details->segment_name . " a
+							WHERE
+							a.request_code = '" . $request_code . "'";
+
+		$request_summary = $this->db_spare_parts->query($request_summary_sql);
+		$request_summary = $request_summary->result();		
+		$request_summary = $request_summary[0];				
+		
+		// get request details
+		$request_details_sql = "SELECT * FROM
+									is_" . $department_module_details->segment_name . "_detail
+								WHERE
+								" . $department_module_details->segment_name . "_id = '" . $request_summary->id . "'";
+		
+		$request_details = $this->db_spare_parts->query($request_details_sql);
+		$request_details = $request_details->result();								
+	
+		// get total amount and total quantity
+		$total_quantity_amount_sql = "SELECT 
+											(SUM(good_quantity) + SUM(bad_quantity)) AS total_items, (SUM(total_amount)) AS total_amount
+										FROM 
+											is_" . $department_module_details->segment_name . "_detail 
+										WHERE " . $department_module_details->segment_name . "_id = " . $request_summary->id . " AND status NOT IN ('CANCELLED', 'DELETED')";
+
+		$total_quantity_amount = $this->db_spare_parts->query($total_quantity_amount_sql);
+		$total_quantity_amount = $total_quantity_amount->result();						
+		$total_quantity_amount = $total_quantity_amount[0];
+		
+		$where = "id_number IN (LPAD('" . $request_summary->approved_by . "', 7, 0), LPAD('" . $request_summary->warehouse_approved_by . "', 7, 0))";
+		$approvals = $this->human_relations_model->get_employment_information_view($where);
+
+		// get requester details
+		$requester = $this->human_relations_model->get_employment_information_view_by_id($request_summary->id_number);
+
+		$warehouse = $this->spare_parts_model->get_warehouse_by_id($request_summary->warehouse_id);
+
+		$data = array(
+				'copy' => 'Original',
+				'request_code' => $request_code,
+				'requester' => $requester,
+				'request_summary' => $request_summary,
+				'request_details' => $request_details,
+				'warehouse' => $warehouse,
+				'total_quantity' => $total_quantity_amount->total_items,
+				'total_amount' => $total_quantity_amount->total_amount,
+				'approvals' => $approvals,
+			);
+
+		$this->mpdf->WriteHTML($this->load->view('mtr_pdf_view',$data,TRUE));			
+		$this->mpdf->AddPage();
+		$data['copy'] = 'Duplicate';
+		$this->mpdf->WriteHTML($this->load->view('mtr_pdf_view',$data,TRUE));
+		$this->mpdf->AddPage();
+		$data['copy'] = 'Triplicate';
+		$this->mpdf->WriteHTML($this->load->view('mtr_pdf_view',$data,TRUE));
+		$this->mpdf->Output($request_code, 'I');
+		
+	}
 
 
 

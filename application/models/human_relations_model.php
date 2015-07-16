@@ -202,7 +202,7 @@ class Human_relations_model extends Base_Model
 
 	function get_employment_information_view_by_id($id_number) 
 	{
-		$result = $this->get_employment_information(array('id_number' => $id_number));
+		$result = $this->get_employment_information_view(array('id_number' => $id_number));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];

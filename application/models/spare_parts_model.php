@@ -32,6 +32,8 @@ class Spare_parts_model extends Base_Model
 			'warehouse_reservation' => 'tr_warehouse_reservation',
 			'item' => 'is_item',
 			'item_view' => 'is_item_view',
+			'department_module_submodule' => 'rf_department_module_submodule',
+
 		);
 
 	}
@@ -524,14 +526,6 @@ class Spare_parts_model extends Base_Model
 		if (count($result) > 0) {
 			$row = $result[0];
 		}
-		return $row;
-	}
-	
-	function get_warehouse_request_detail_by_request_id($request_id) 
-	{
-		$result = $this->get_warehouse_request_detail(array('warehouse_request_id' => $request_id));
-		$row = $query->result();
-		$query->free_result();
 		return $row;
 	}
 	
@@ -1137,6 +1131,49 @@ class Spare_parts_model extends Base_Model
 	function get_item_view_count($where = null) {
 		// do a sql count instead of row count
 		$query = $this->fetch('item_view', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+	// ===========================================================================
+	// ===========================================================================
+	// department_module_submodule
+	function get_department_module_submodule($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('department_module_submodule', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_department_module_submodule($data) 
+	{
+		return $this->insert('department_module_submodule', $data);
+	}
+
+	function update_department_module_submodule($data, $where) 
+	{
+		return $this->update('department_module_submodule', $data, $where);
+	}
+
+	function delete_department_module_submodule($where) 
+	{
+		return $this->delete('department_module_submodule', $where);
+	}
+
+	function get_department_module_submodule_by_id($department_module_submodule_id) 
+	{
+		$result = $this->get_item(array('department_module_submodule_id' => $department_module_submodule_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+		
+	function get_department_module_submodule_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('department_module_submodule', 'count(1) as cnt', $where);
 		$row = $query->first_row();
 		$query->free_result();
 		return $row->cnt;

@@ -77,6 +77,7 @@ body > .container > #content {
 	} else {
 
 		$data = array(
+			'system_name' => $this->uri->segment(1),
 			'segment_name' => $this->uri->segment(2)
 		);
 

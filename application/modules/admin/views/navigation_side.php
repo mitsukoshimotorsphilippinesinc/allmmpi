@@ -7,6 +7,10 @@
 
 	$active_segment = $this->spare_parts_model->get_department_module_by_segment($segment_name);
 
+	// get all submodules of current segment
+	$where = "department_module_id = " . $active_segment->department_module_id;
+	$module_submodule_details = $this->spare_parts_model->get_department_module_submodule($where, NULL,'priority_order');
+
 ?>
 
 
@@ -21,21 +25,14 @@
 					<strong><span style="font-size:13px;color:black;"> <?= $active_segment->module_name ?> </span><i class='icon-arrow-down'></i></strong>
 				</a>
 				<ul id="dealer-menu" class="collapse" aria-expanded="true" style="">
-					<li>
-						<a href="/spare_parts/dealer">Dashboard</a>
-					</li>
-					<li>
-						<a href="#">Search By Request</a>
-					</li>
-					<li>
-						<a href="#">For Approval</a>
-					</li>	
-					<li>
-						<a href="#">Approved Requests</a>
-					</li>	
-					<li>
-						<a href="#">Reports</a>
-					</li>	
+					<?php
+						foreach ($module_submodule_details as $msd) {
+							$url = '/' . $system_name . '/' . $segment_name . $msd->submodule_url;
+							echo "<li>
+									<a href='{$url}'>{$msd->submodule_name}</a>
+								  </li>";
+						}
+					?>	
 				</ul>
 			</li>	
 			<li>
@@ -43,12 +40,10 @@
 			</li>
 			
 			<?php foreach ($department_module_details as $dmd) { 
-			?>
-
-			<li>
-				<a href="#"><?= $dmd->module_name ?></a>	
-			</li>
-			<?php } ?>
+				echo "<li>
+						<a href='{$this->config->item('base_url')}/{$system_name}/{$dmd->segment_name}'>{$dmd->module_name}</a>	
+					  </li>";
+			 } ?>
 		</ul>	
 	</div>
 </div>

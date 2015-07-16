@@ -134,7 +134,7 @@
 				}
 
 				if ($t->status == 'FORWARDED') {
-					echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR'><i class='icon-white icon-print'></i></a>";
+					echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
 				}					
 				?>
 			</td>
