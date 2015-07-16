@@ -11,6 +11,7 @@ class Whcarmona_model extends Base_model {
 		// assign the table for this model
 		$this->_TABLES = array(
 				'matchedckd' => 'MSMatchedCKD',
+				'tblmotorcycle' => 'tblMotorCycle',
 				);
 
 	}
@@ -23,6 +24,14 @@ class Whcarmona_model extends Base_model {
 		return $row;
 	}
 
+	function get_tblmotorcycle($where = null, $limit = null, $orderby = null, $fields = null)
+	{
+		$query = $this->fetch('tblmotorcycle', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+	}
+
 	function get_matchedckd_count($where = null)
 	{
 		// do a sql count instead of row count
@@ -30,5 +39,21 @@ class Whcarmona_model extends Base_model {
 		$row = $query->first_row();
 		$query->free_result();
 		return $row->cnt;
+	}
+	
+
+	function insert_matchedckd($data)
+	{
+		return $this->insert('matchedckd', $data);
+	}
+
+	function update_member($data, $where)
+	{
+		return $this->update('matchedckd', $data, $where);
+	}
+
+	function delete_member($where)
+	{
+		return $this->delete('matchedckd', $where);
 	}
 }
