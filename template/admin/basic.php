@@ -41,7 +41,7 @@
 	<?php echo js('apps/core.js'); ?>
 	<?php echo js('apps/site.js'); ?> 
 
-	<div class="container-signin">
+	<div class="container-full">
 		<div id='content'>
 			<?= $content ?>
 		</div>

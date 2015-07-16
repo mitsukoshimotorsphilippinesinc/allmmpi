@@ -34,11 +34,11 @@ class Dealer extends Admin_Controller {
 		$transfers = "";		
 
 		if (empty($search_status)) {
-			$where = NULL;
+			$where = "status IN ('FOR APPROVAL', 'APPROVED')";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = NULL;
+				$where = "status IN ('FOR APPROVAL', 'APPROVED')";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}
@@ -169,6 +169,14 @@ class Dealer extends Admin_Controller {
 			
 			$where = "dealer_request_id = " . $dealer_request_id;
 			$this->spare_parts_model->update_dealer_request($data, $where);
+
+			$data = array(
+				'status' => "PENDING",				
+				'update_timestamp' => $current_datetime
+			);
+
+			$where = "transaction_number = '{$warehouse_request_code}'";
+			$this->spare_parts_model->update_warehouse_reservation($data, $where);
 			
 			$this->return_json("1","Successful Approval of Dealer Request.",array("html" => $html, "title" => $title));
 						

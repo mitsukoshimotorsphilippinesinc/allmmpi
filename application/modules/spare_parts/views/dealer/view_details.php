@@ -1,6 +1,6 @@
 <fieldset >		
 	<div>
-		<label class='control-label' for='payout type'><strong>Request Code</strong></label>
+		<label class='control-label' for=''><strong>Request Code</strong></label>
 		<div class="controls">
 			<input disabled="disabled" value="<?= $dealer_request->request_code; ?>">
 		</div>	

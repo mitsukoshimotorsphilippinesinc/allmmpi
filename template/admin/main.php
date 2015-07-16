@@ -4,7 +4,7 @@
 <!--[if IE 8]>    <html class="no-js lt-ie9" lang="en"> <![endif]-->
 <!-- Consider adding a manifest.appcache: h5bp.com/d/Offline -->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-<html>
+<html>	
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -71,9 +71,21 @@ body > .container > #content {
 		</div>
 	</div>
 	
-	<?= $this->load->view('navigation_side', null, TRUE, 'admin');  ?>
+	<?php
+	if ($this->uri->segment(2) == NULL) {
+		echo "<div class='container-full'>";	
+	} else {
 
-	<div class="container">
+		$data = array(
+			'segment_name' => $this->uri->segment(2)
+		);
+
+	?>	
+	<?= $this->load->view('navigation_side', $data, TRUE, 'admin'); ?>
+	<?php		
+		echo "<div class='container'>";	
+	}
+	?>	
 		<div style="margin-top:40px;width:1000px;" class='content-wrapper'>
 			<div id='content'>
 		      <?php
@@ -83,7 +95,8 @@ body > .container > #content {
 			      		echo $content;						
 			  ?>
 			</div>
-		</div>
+		</div>		
+		<div style="clear:both;"></div>
 		<footer>
 			<p class="pull-right"></p>
 			<p></p>
