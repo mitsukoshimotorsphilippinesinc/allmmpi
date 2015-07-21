@@ -373,14 +373,21 @@ class Warehouse_claim extends Admin_Controller {
 
 			if ($listing_action == 'forward to warehouse') {
 				$title = "Forward To Warehouse :: " . $warehouse_claim_code;
-				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $warehouse_claim_code . "</strong>. <br/>
-							<div id='reasonremarks-container'>
-								<span><strong>MTR Number:</strong></span></br>
-								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='12345' /><br/>
-								<span id='error-mtrnumber' style='color:red;display:none'>MTR Number is required.</span>
-							</div>	
+				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $warehouse_claim_code . "</strong>. <br/>							
 							<br/>
 							Do you want to continue?</p>";
+			}
+
+			if ($listing_action == 'assign mtr') {
+				$title = "Assign MTR Number :: " . $warehouse_claim_code;
+				$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $warehouse_claim_code . "</strong>. <br/>
+							<div id='reasonremarks-container'>
+								<span><strong>P.O. Number:</strong></span></br>
+								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
+								<span id='error-mtrnumber' style='color:red;display:none'>P.O. Number is required.</span>
+							</div>	
+							<br/>
+							Click Proceed to continue...</p>";
 			}
 
 			if ($listing_action == 'cancel') {
@@ -414,6 +421,7 @@ class Warehouse_claim extends Admin_Controller {
 		$warehouse_claim_code = $this->input->post("warehouse_claim_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");
+		$mtr_number =  abs($this->input->post("mtr_number"));
 		
 		$warehouse_claim = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);		
 
@@ -462,7 +470,8 @@ class Warehouse_claim extends Admin_Controller {
 				$data = array(
 					'status' => "FORWARDED",
 					'approved_by' => $this->user->user_id,					
-					'approve_timestamp' => $current_datetime
+					'approve_timestamp' => $current_datetime,
+					'mtr_number' => $mtr_number
 				);
 
 				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$warehouse_claim_code}</strong>.";
@@ -477,6 +486,17 @@ class Warehouse_claim extends Admin_Controller {
 				$where = "transaction_number = '{$warehouse_claim_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
+			} else if ($listing_action == 'assign mtr') {
+
+				// change status to FOR APPROVAL
+				$data = array(					
+					'update_timestamp' => $current_datetime,
+					'mtr_number' => $mtr_number
+				);
+
+				$html = "You have successfully assigned a MTR Number to the request with Request Code: <strong>{$warehouse_claim_code}</strong>.";
+				$title = "Assign MTR Number :: " . $warehouse_claim_code;
+			
 			}
 			
 			$where = "warehouse_claim_id = " . $warehouse_claim_id;

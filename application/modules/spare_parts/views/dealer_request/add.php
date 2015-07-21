@@ -652,6 +652,8 @@ else
 						$('input[name="add_item_discount_price"]').val('');
 						$('input[name="add_item_remarks"]').val('');
 						$('#remarks_new').val('');
+						$('input[name="add_item_good_qty"]').attr("placeholder", "0");
+						$('input[name="add_item_bad_qty"]').attr("placeholder", "0");
 						
 					} else {			
 

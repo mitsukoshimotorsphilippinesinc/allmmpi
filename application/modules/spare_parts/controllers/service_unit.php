@@ -414,6 +414,7 @@ class Service_unit extends Admin_Controller {
 		$service_unit_code = $this->input->post("service_unit_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");
+		$mtr_number =  abs($this->input->post("mtr_number"));
 		
 		$service_unit = $this->spare_parts_model->get_service_unit_by_id($service_unit_id);		
 
@@ -461,7 +462,8 @@ class Service_unit extends Admin_Controller {
 				$data = array(
 					'status' => "FORWARDED",
 					'approved_by' => $this->user->user_id,					
-					'approve_timestamp' => $current_datetime
+					'approve_timestamp' => $current_datetime,
+					'mtr_number' => $mtr_number
 				);
 
 				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$service_unit_code}</strong>.";

@@ -116,7 +116,7 @@
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
 				if ($t->status == 'PENDING') {
-					echo "<a class='btn btn-small btn-warning process-btn' data='for approval' title='For Approval'><i class='icon-white icon-pencil'></i></a>
+					echo "<a class='btn btn-small btn-warning process-btn' data='for approval' title='For Approval'><i class='icon-white icon-file'></i></a>
 							<a class='btn btn-small btn-danger process-btn' data='cancel' title='Cancel'><i class='icon-white icon-remove'></i></a>
 						";
 				}
@@ -125,8 +125,12 @@
 					echo "<a class='btn btn-small btn-success process-btn' data='forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
 				}
 
-				if ($t->status == 'FORWARDED') {
-					echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
+				if ($t->status == 'COMPLETED') {
+					if (($t->mtr_number == 0) || ($t->mtr_number == NULL)) {
+						echo "<a class='btn btn-small btn-primary process-btn' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>";
+					} else {
+						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
+					}	
 				}					
 				?>
 			</td>
@@ -191,7 +195,7 @@
 								}	
 								$("#error-reasonremarks").hide();
 
-								if (listing_action == 'forward to warehouse') {
+								if (listing_action == 'assign mtr') {
 									
 									if ($.trim($("#txt-mtrnumber").val()) == "") {
 										$("#error-mtrnumber").show();
@@ -208,6 +212,7 @@
 										'salary_deduction_code' : salary_deduction_code,
 										'listing_action' : listing_action,
 										'remarks' : $("#txt-remarks").val(),
+										'mtr_number' : $("#txt-mtrnumber").val(),
 									},
 									on_success : function(data) {
 										

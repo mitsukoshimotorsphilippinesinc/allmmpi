@@ -119,7 +119,7 @@
 
 			
 
-			<td data1="<?= $t->dealer_id ?>" data2="<?= $t->request_code ?>">				
+			<td data1="<?= $t->dealer_request_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-primary view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
 				if ($t->status == 'FOR APPROVAL') {
@@ -152,15 +152,15 @@
 
 	$(".process-btn").click(function(){
 
-		var dealer_id = $(this).parent().attr("data1");
-		var dealer_code = $(this).parent().attr("data2");
+		var dealer_request_id = $(this).parent().attr("data1");
+		var dealer_request_code = $(this).parent().attr("data2");
 		var is_approved = $(this).attr("data");
 
 		b.request({
-			url: "/spare_parts/dealer/for_approval_confirm",
+			url: "/spare_parts/dealer_request/for_approval_confirm",
 			data: {
-				'dealer_id' : dealer_id,
-				'dealer_code' : dealer_code,
+				'dealer_request_id' : dealer_request_id,
+				'dealer_request_code' : dealer_request_code,
 				'is_approved' : is_approved,
 			},
 			on_success: function(data){
@@ -191,10 +191,10 @@
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/dealer/for_approval_proceed',
+									url : '/spare_parts/dealer_request/for_approval_proceed',
 									data : {				
-										'dealer_id' : dealer_id,
-										'dealer_code' : dealer_code,
+										'dealer_request_id' : dealer_request_id,
+										'dealer_request_code' : dealer_request_code,
 										'is_approved' : is_approved,
 										'remarks' : $("#txt-remarks").val(),
 									},
@@ -212,7 +212,7 @@
 												buttons: {
 													'Ok' : function() {
 														proceedApproveRequestModal.hide();
-														redirect('spare_parts/dealer/approval');
+														redirect('spare_parts/dealer_request/approval');
 													}
 												}
 											});
@@ -267,14 +267,14 @@
 	});
 	
 	$(".view-details").click(function(){
-		var dealer_id = $(this).parent().attr("data1");
-		var dealer_code = $(this).parent().attr("data2");
+		var dealer_request_id = $(this).parent().attr("data1");
+		var dealer_request_code = $(this).parent().attr("data2");
 	
 		b.request({
-			url: "/spare_parts/dealer/view_details",
+			url: "/spare_parts/dealer_request/view_details",
 			data: {
-				"dealer_id" : dealer_id,
-				"dealer_code" : dealer_code,
+				"dealer_request_id" : dealer_request_id,
+				"dealer_request_code" : dealer_request_code,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{

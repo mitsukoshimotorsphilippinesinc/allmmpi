@@ -341,7 +341,7 @@ class Spare_parts_model extends Base_Model
 		return $this->delete('dealer_request_detail', $where);
 	}
 
-	function get_dealer_request_detail_by_id($warehouse_request_detail_id) 
+	function get_dealer_request_detail_by_id($dealer_request_detail_id) 
 	{
 		$result = $this->get_dealer_request_detail(array('dealer_request_detail_id' => $dealer_request_detail_id));
 		$row = NULL;

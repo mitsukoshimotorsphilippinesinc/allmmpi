@@ -15,6 +15,8 @@
 				<th style="width: 280px;">Brand/Model</th>
 				<th style="width: 100px;">SRP</th>
 				<th style="width: 280px;">Warehouse</th>
+				<th style="width: 280px;">Good Qty</th>
+				<th style="width: 280px;">Bad Qty</th>
 				<th style="width: 280px;">Rack Location</th>
 				<th style="width: 80px;">&nbsp;</th>
 			</tr>
@@ -38,6 +40,8 @@
 				<td style="width: 280px;"><%= item.brand_model %></td>
 				<td style="width: 100px;"><%= item.srp %></td>
 				<td style="width: 280px;"><%= item.warehouse_name %></td>
+				<td style="width: 280px;text-align:right;"><%= item.good_quantity %></td>
+				<td style="width: 280px;text-align:right;"><%= item.bad_quantity %></td>
 				<td style="width: 280px;"><%= item.rack_location %></td>
 				<td style="width: 80px;"><button class='btn btn-small btn-info btn-select-item' data-id='<%= item.item_id %>'  data-description='<%= item.description %>' data-srp='<%= item.srp%>' data-good_quantity='<%= item.good_quantity%>' data-bad_quantity='<%= item.bad_quantity%>'>Select</button></td>
 			</tr>

@@ -60,7 +60,7 @@
 			<th style='width:100px;'>Approved By (Warehouse)</th>			
 			<th style='width:120px;'>Remarks</th>
 			<th style='width:70px;'>Date Created</th>			
-			<th style=''>Action</th>
+			<th style='width:150px;'>Action</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -119,11 +119,8 @@
 				<a class='btn btn-small btn-primary view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
 				if ($t->status == 'FOR APPROVAL') {
-					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>";
-				}
-
-				if (($t->status == 'FOR APPROVAL') || ($t->status == 'APPROVED')) {
-					echo "<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>";
+					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>
+					<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>";
 				}				
 				?>
 			</td>

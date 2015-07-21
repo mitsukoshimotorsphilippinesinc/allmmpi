@@ -374,14 +374,21 @@ class Warehouse_request extends Admin_Controller {
 
 			if ($listing_action == 'forward to warehouse') {
 				$title = "Forward To Warehouse :: " . $warehouse_request_code;
-				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $warehouse_request_code . "</strong>. <br/>
-							<div id='reasonremarks-container'>
-								<span><strong>MTR Number:</strong></span></br>
-								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='12345' /><br/>
-								<span id='error-mtrnumber' style='color:red;display:none'>MTR Number is required.</span>
-							</div>	
+				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $warehouse_request_code . "</strong>. <br/>							
 							<br/>
 							Do you want to continue?</p>";
+			}
+
+			if ($listing_action == 'assign mtr') {
+				$title = "Assign MTR Number :: " . $warehouse_request_code;
+				$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $warehouse_request_code . "</strong>. <br/>
+							<div id='reasonremarks-container'>
+								<span><strong>P.O. Number:</strong></span></br>
+								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
+								<span id='error-mtrnumber' style='color:red;display:none'>P.O. Number is required.</span>
+							</div>	
+							<br/>
+							Click Proceed to continue...</p>";
 			}
 
 			if ($listing_action == 'cancel') {
@@ -415,6 +422,7 @@ class Warehouse_request extends Admin_Controller {
 		$warehouse_request_code = $this->input->post("warehouse_request_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");
+		$mtr_number =  abs($this->input->post("mtr_number"));
 		
 		$warehouse_request = $this->spare_parts_model->get_warehouse_request_by_id($warehouse_request_id);		
 
@@ -463,7 +471,8 @@ class Warehouse_request extends Admin_Controller {
 				$data = array(
 					'status' => "FORWARDED",
 					'approved_by' => $this->user->user_id,					
-					'approve_timestamp' => $current_datetime
+					'approve_timestamp' => $current_datetime,
+					'mtr_number' =>	 $mtr_number
 				);
 
 				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$warehouse_request_code}</strong>.";
@@ -478,6 +487,17 @@ class Warehouse_request extends Admin_Controller {
 				$where = "transaction_number = '{$warehouse_request_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
+			} else if ($listing_action == 'assign mtr') {
+
+				// change status to FOR APPROVAL
+				$data = array(					
+					'update_timestamp' => $current_datetime,
+					'mtr_number' => $mtr_number
+				);
+
+				$html = "You have successfully assigned a MTR Number to the request with Request Code: <strong>{$warehouse_request_code}</strong>.";
+				$title = "Assign MTR Number :: " . $warehouse_request_code;
+			
 			}
 			
 			$where = "warehouse_request_id = " . $warehouse_request_id;
@@ -691,6 +711,9 @@ class Warehouse_request extends Admin_Controller {
 			$this->template->department_details = $department_details;
 			$this->template->position_details = $position_details;
 
+			$request_item_amount_total = get_items_total_amount($warehouse_request_details->request_code);
+			$this->template->request_item_amount_total = $request_item_amount_total;
+
 			// get request items
 			$where = "status NOT IN ('CANCELLED', 'DELETED') AND warehouse_request_id = " . $warehouse_request_id;
 			$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail($where);
@@ -733,14 +756,14 @@ class Warehouse_request extends Admin_Controller {
 
 		$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view('','', 'brand_name', 'motorcycle_brand_model_id, brand_name, model_name');
 		
-		$warehouse_details = $this->warehouse_model->get_warehouse("is_active = 1", '', '', 'warehouse_id, warehouse_name, description, manager_id_number, encoder_id_number');
+		$warehouse_details = $this->warehouse_model->get_warehouse("is_active = 1", '', '', 'warehouse_id, warehouse_name, description, manager_id_number, encoder_id_number');	
 
 		//$this->template->return_url = $return_url;
 		$this->template->items = $items_array;
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
 		$this->template->warehouse_request_details = $warehouse_request_details;
-		$this->template->department_module_details = $department_module_details;
+		$this->template->department_module_details = $department_module_details;		
 		$this->template->view('warehouse_request/add');
 	}
 
@@ -1110,10 +1133,12 @@ class Warehouse_request extends Admin_Controller {
 
 		$this->db_spare_parts->query($sql);
 
+		$request_item_amount_total = get_items_total_amount($request_code);
+
 		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been added successfully!</p>";
 		$title = "Add Item :: Item Request";
 
-		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id));
+		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id));
 		return;
 	}	
 

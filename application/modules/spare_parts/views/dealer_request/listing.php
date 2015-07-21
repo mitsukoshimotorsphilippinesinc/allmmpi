@@ -125,7 +125,7 @@
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
 				if ($t->status == 'PENDING') {
-					echo "<a class='btn btn-small btn-warning process-btn' data='for approval' title='For Approval'><i class='icon-white icon-pencil'></i></a>
+					echo "<a class='btn btn-small btn-warning process-btn' data='for approval' title='For Approval'><i class='icon-white icon-file'></i></a>
 							<a class='btn btn-small btn-danger process-btn' data='cancel' title='Cancel'><i class='icon-white icon-remove'></i></a>
 						";
 				}
@@ -134,9 +134,15 @@
 					echo "<a class='btn btn-small btn-success process-btn' data='forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
 				}
 
-				if ($t->status == 'FORWARDED') {
-					echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
-				}					
+				if ($t->status == 'COMPLETED') {
+					
+					if (($t->purchase_order_number == 0) || ($t->purchase_order_number == NULL)) {
+						echo "<a class='btn btn-small btn-primary process-btn' data='assign po' title='Assign P.O. Number'><i class='icon-white icon-pencil'></i></a>";
+					} else {
+						echo "<a href='/spare_parts/display_po/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print P.O.' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
+					}
+				}
+
 				?>
 			</td>
 		</tr>
@@ -200,7 +206,7 @@
 								}	
 								$("#error-reasonremarks").hide();
 
-								if (listing_action == 'forward to warehouse') {
+								if (listing_action == 'assign po') {
 									
 									if ($.trim($("#txt-mtrnumber").val()) == "") {
 										$("#error-mtrnumber").show();
@@ -217,6 +223,7 @@
 										'dealer_request_code' : dealer_request_code,
 										'listing_action' : listing_action,
 										'remarks' : $("#txt-remarks").val(),
+										'purchase_order_number' : $("#txt-mtrnumber").val(),
 									},
 									on_success : function(data) {
 										
@@ -280,6 +287,7 @@
 		return false;
 	}
 	
+	
 	$(".view-details").click(function(){
 		var dealer_request_id = $(this).parent().attr("data1");
 		var dealer_request_code = $(this).parent().attr("data2");
@@ -308,11 +316,11 @@
 								},
 								'For Approval' : function() {
 									processButtonAction(dealer_request_id, dealer_request_code, 'for approval');
-								},
-								'Edit' : function() {
-									//processButtonAction(dealer_request_id, dealer_request_code, 'edit');
-									redirect("/spare_parts/dealer_request/edit/" + dealer_request_id);
-								}									
+								}
+								//'Edit' : function() {
+								//	//processButtonAction(dealer_request_id, dealer_request_code, 'edit');
+								//	redirect("/spare_parts/dealer_request/edit/" + dealer_request_id);
+								//}									
 							}
 						});			
 					} else if (data.data.request_status == "APPROVED") {

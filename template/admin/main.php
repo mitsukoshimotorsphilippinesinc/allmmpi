@@ -14,7 +14,7 @@
 	
 	<?php echo css('jquery-ui/jquery-ui-1.9.1.css');?>
 	
-	<?php echo css('base.css');?>
+	<?php echo css('base.css');?>	
 	<?php echo css('main.css');?>
 	<?php echo css('google-code-prettify/prettify.css');?>
 	<?php echo css('simple-sidebar/css/simple-sidebar.css');?>	

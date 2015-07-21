@@ -216,6 +216,7 @@
 										'service_unit_code' : service_unit_code,
 										'listing_action' : listing_action,
 										'remarks' : $("#txt-remarks").val(),
+										'mtr_number' : $("#txt-mtrnumber").val(),
 									},
 									on_success : function(data) {
 										

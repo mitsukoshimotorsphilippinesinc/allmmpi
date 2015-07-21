@@ -725,6 +725,8 @@ else
 						$('input[name="add_item_discount"]>option:selected').text('0');
 						$('input[name="add_item_discount_price"]').val('');
 						$('input[name="add_item_remarks"]').val('');
+						$('input[name="add_item_good_qty"]').attr("placeholder", "0");
+						$('input[name="add_item_bad_qty"]').attr("placeholder", "0");
 						
 					} else {			
 

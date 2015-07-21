@@ -373,14 +373,21 @@ class Dealer_request extends Admin_Controller {
 
 			if ($listing_action == 'forward to warehouse') {
 				$title = "Forward To Warehouse :: " . $dealer_request_code;
-				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
-							<div id='reasonremarks-container'>
-								<span><strong>MTR Number:</strong></span></br>
-								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='12345' /><br/>
-								<span id='error-mtrnumber' style='color:red;display:none'>MTR Number is required.</span>
-							</div>	
+				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>							
 							<br/>
 							Do you want to continue?</p>";
+			}
+
+			if ($listing_action == 'assign po') {
+				$title = "Assign P.O. Number :: " . $dealer_request_code;
+				$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $dealer_request_code . "</strong>. <br/>
+							<div id='reasonremarks-container'>
+								<span><strong>P.O. Number:</strong></span></br>
+								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
+								<span id='error-mtrnumber' style='color:red;display:none'>P.O. Number is required.</span>
+							</div>	
+							<br/>
+							Click Proceed to continue...</p>";
 			}
 
 			if ($listing_action == 'cancel') {
@@ -414,6 +421,7 @@ class Dealer_request extends Admin_Controller {
 		$dealer_request_code = $this->input->post("dealer_request_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");
+		$purchase_order_number =  abs($this->input->post("purchase_order_number"));
 		
 		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);		
 
@@ -460,7 +468,7 @@ class Dealer_request extends Admin_Controller {
 				// change status to FORWARDED
 				$data = array(
 					'status' => "FORWARDED",
-					'approved_by' => $this->user->user_id,					
+					'approved_by' => $this->user->user_id,
 					'approve_timestamp' => $current_datetime
 				);
 
@@ -476,6 +484,17 @@ class Dealer_request extends Admin_Controller {
 				$where = "transaction_number = '{$dealer_request_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
+			} else if ($listing_action == 'assign po') {
+
+				// change status to FOR APPROVAL
+				$data = array(					
+					'update_timestamp' => $current_datetime,
+					'purchase_order_number' => $purchase_order_number
+				);
+
+				$html = "You have successfully assigned a P.O. Number to the request with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Assign P.O. Number :: " . $dealer_request_code;
+			
 			}
 			
 			$where = "dealer_request_id = " . $dealer_request_id;
@@ -487,9 +506,6 @@ class Dealer_request extends Admin_Controller {
 
 		return;	
 	}
-
-
-
 
 	
 	public function download_check()

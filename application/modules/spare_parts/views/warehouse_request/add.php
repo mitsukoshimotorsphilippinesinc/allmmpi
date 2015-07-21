@@ -320,8 +320,6 @@ else
 						$temp = json_decode($json_items, true);
 					}
 
-					//var_dump($temp);
-
 					for($i=0;$i<count($temp);$i++):?>
 						<!--?php if(set_value('item_qty['.$i.']') != '' || !$isAdd):?-->
 					<tr class="item_row">
@@ -355,10 +353,15 @@ else
 				</tbody>
 			</table>
 		</div>
-
-		
-		
-		
+		<div style="margin-left:30px;">
+			<?php 
+			if (!$isAdd) {
+				echo "<h3>Total Amount: <span id='total-amount'>{$request_item_amount_total->total_amount}</span></h3>";
+			} else {
+				echo "<h3>Total Amount: <span id='total-amount'>0.00</span></h3>";
+			}
+			?>
+		</div>
 		<hr/>
 		<div class="controls" align="right">
 			<!--a id='submit_order' class="btn btn-primary">Save Warehouse Request</a-->
@@ -697,6 +700,7 @@ else
 
 						$("#requester-request-code-label").text(data.data.request_code);
 						$("#item-request-code-label").text(data.data.request_code);
+						$("#total-amount").text(data.data.overall_total_amount);
 
 						$("#wr_items").append('<tr class="item_row">'+
 							item_entry_row({item_id: $('input[name="add_item_name"]').val(),
@@ -727,6 +731,8 @@ else
 						$('input[name="add_item_discount"]>option:selected').text('0');
 						$('input[name="add_item_discount_price"]').val('');
 						$('input[name="add_item_remarks"]').val('');
+						$('input[name="add_item_good_qty"]').attr("placeholder", "0");
+						$('input[name="add_item_bad_qty"]').attr("placeholder", "0");
 						
 					} else {			
 
