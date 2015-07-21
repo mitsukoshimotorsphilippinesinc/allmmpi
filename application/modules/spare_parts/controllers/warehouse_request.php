@@ -12,9 +12,13 @@ class Warehouse_request extends Admin_Controller {
 		$this->load->model('human_relations_model');
 		$this->load->model('warehouse_model');
 		$this->load->library('pager');		
+		$this->load->helper("spare_parts_helper");
 
 		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);
+
 	}
+
+	public $segment_name = "warehouse_request";
 
 	public function index()
 	{
@@ -192,9 +196,8 @@ class Warehouse_request extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				// TODO: UPDATE tr_warehouse_reservation status = 'DENIED' and update_timestamp = now()
-
-				// TODO: RETURN ITEMS TO WAREHOUSE INVENTORY
+				// from spare_parts helper
+				$return_html = return_reserved_items($warehouse_request_code, 'DENIED', $remarks);
 
 				$html = "You have denied the Warehouse Request Code: <strong>{$warehouse_request_code}</strong>.";
 				$title = "Denied :: " . $warehouse_request_code;
@@ -243,12 +246,13 @@ class Warehouse_request extends Admin_Controller {
 			$warehouse_request_details = $this->spare_parts_model->get_warehouse_request_detail($where);
 		
 			$data = array(
-				'warehouse_request' => $warehouse_request,
-				'warehouse_request_details' =>$warehouse_request_details,
+				//'warehouse_request' => $warehouse_request,
+				'segment_request_summary' => $warehouse_request,
+				'segment_request_details' =>$warehouse_request_details,
 				'listing_action' => $listing_action
 			);
-		
-			$html = $this->load->view("warehouse_request/view_details",$data,true);
+
+			$html = $this->load->view("template_view_details",$data,true);
 			 
 			$title = "View Details :: " . $warehouse_request_code;
 			$this->return_json("1","View Details Warehouse Request", array("html" => $html, "title" => $title, "request_status" => $warehouse_request->status));
@@ -428,9 +432,8 @@ class Warehouse_request extends Admin_Controller {
 			if ($listing_action == 'cancel') {
 				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $warehouse_request->remarks;
 
-				// TODO: RETURN ITEMS TO WAREHOUSE INVENTORY
-
-				// TODO: change tr_warehouse_reservation status = CANCELLED, update_timestamp = now()
+				// from spare_parts helper
+				$return_html = return_reserved_items($warehouse_request_code, 'CANCELLED', $remarks);
 
 				$data = array(
 					'status' => "CANCELLED",
@@ -666,13 +669,60 @@ class Warehouse_request extends Admin_Controller {
 		}
 	}
 
-	public function reports()
+	public function edit($warehouse_request_id = 0)
 	{
-		$this->template->view('warehouse_request/reports');
+		$this->add($warehouse_request_id);
 	}
 
-	public function add() 
+	public function add($warehouse_request_id = 0) 
 	{
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+		
+		$warehouse_request_details = $this->spare_parts_model->get_warehouse_request_by_id($warehouse_request_id);
+
+		if (!empty($warehouse_request_details)) {
+			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($warehouse_request_details->id_number);
+			
+			$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
+			$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
+
+			$this->template->requester_details = $requester_details;
+			$this->template->department_details = $department_details;
+			$this->template->position_details = $position_details;
+
+			// get request items
+			$where = "status NOT IN ('CANCELLED', 'DELETED') AND warehouse_request_id = " . $warehouse_request_id;
+			$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail($where);
+
+			$json_items = array();
+			for($k = 0;$k<count($warehouse_request_detail_details);$k++)
+			{
+				$warehouse_request_detail_id = $warehouse_request_detail_details[$k]->warehouse_request_detail_id;
+				
+				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
+				$po_items = array(
+						'warehouse_request_detail_id' => $warehouse_request_detail_id,
+						'item_id' => $warehouse_request_detail_details[$k]->item_id,
+						'srp' => $warehouse_request_detail_details[$k]->srp,
+						'discount' => $warehouse_request_detail_details[$k]->discount,
+						'discount_amount' => $warehouse_request_detail_details[$k]->discount_amount,
+						'good_quantity' => $warehouse_request_detail_details[$k]->good_quantity,
+						'bad_quantity' => $warehouse_request_detail_details[$k]->bad_quantity,
+						'total_amount' => $warehouse_request_detail_details[$k]->total_amount,
+						'remarks' => $warehouse_request_detail_details[$k]->remarks,
+
+				);
+				//creates an array of the items that will be json encoded later
+				array_push($json_items, $po_items);
+
+			}
+
+			$this->template->json_items = json_encode($json_items);
+
+		}
+
+
 		$items = $this->spare_parts_model->get_item(null,null,"sku ASC");
 		$items_array = array();
 		
@@ -681,7 +731,7 @@ class Warehouse_request extends Admin_Controller {
 			$items_array[$i->item_id] = $i;
 		}
 
-		$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view('','', 'brand_name', 'brand_name, brand_name, model_name');
+		$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view('','', 'brand_name', 'motorcycle_brand_model_id, brand_name, model_name');
 		
 		$warehouse_details = $this->warehouse_model->get_warehouse("is_active = 1", '', '', 'warehouse_id, warehouse_name, description, manager_id_number, encoder_id_number');
 
@@ -689,6 +739,8 @@ class Warehouse_request extends Admin_Controller {
 		$this->template->items = $items_array;
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
+		$this->template->warehouse_request_details = $warehouse_request_details;
+		$this->template->department_module_details = $department_module_details;
 		$this->template->view('warehouse_request/add');
 	}
 
@@ -976,7 +1028,9 @@ class Warehouse_request extends Admin_Controller {
 			// get last insert id
 			$sql = "SELECT LAST_INSERT_ID() AS last_id FROM is_warehouse_request";
 			$query = $this->db_spare_parts->query($sql);
-			$warehouse_request_id = $query->first_row();   	
+			$warehouse_request_id = $query->first_row();
+
+			$active_warehouse_request_id = $warehouse_request_id->last_id;
 
 			//var_dump($warehouse_request_id->last_id);
 
@@ -986,7 +1040,7 @@ class Warehouse_request extends Admin_Controller {
 					FROM
 						is_warehouse_request		
                     WHERE 
-                    	warehouse_request_id = " . $warehouse_request_id->last_id;
+                    	warehouse_request_id = " . $active_warehouse_request_id;
 
             $query = $this->db_spare_parts->query($sql);
 			$request_code_details = $query->first_row();  
@@ -997,7 +1051,7 @@ class Warehouse_request extends Admin_Controller {
 			$data_update = array(
 					'request_code' => $request_code
 				);
-			$where_update = "warehouse_request_id = " . $warehouse_request_id->last_id;
+			$where_update = "warehouse_request_id = " . $active_warehouse_request_id;
 			$this->spare_parts_model->update_warehouse_request($data_update, $where_update);
 
             //get department module id
@@ -1014,9 +1068,9 @@ class Warehouse_request extends Admin_Controller {
          	$this->spare_parts_model->insert_warehouse_reservation($data_insert);
 
 		} else {
-			// get request_code
-			// add items to the request_code
-			// TODO !!!
+			
+			$active_warehouse_request_details = $this->spare_parts_model->get_warehouse_request_by_code($request_code);
+			$active_warehouse_request_id = $active_warehouse_request_details->warehouse_request_id;
 		}	
 
 		// total amount
@@ -1030,7 +1084,7 @@ class Warehouse_request extends Admin_Controller {
 
 		// add item to details table
 		$data_insert = array(
-				'warehouse_request_id' => $warehouse_request_id->last_id,
+				'warehouse_request_id' => $active_warehouse_request_id,
 				'item_id' => $item_id,
 				'srp' => $srp,
 				'discount' => $discount,
@@ -1042,6 +1096,8 @@ class Warehouse_request extends Admin_Controller {
 			);
 
 		$this->spare_parts_model->insert_warehouse_request_detail($data_insert);
+
+		$active_warehouse_request_detail_id = $this->spare_parts_model->insert_id();
 
 		// deduct to warehouse
 		$sql = "UPDATE 
@@ -1057,18 +1113,22 @@ class Warehouse_request extends Admin_Controller {
 		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been added successfully!</p>";
 		$title = "Add Item :: Item Request";
 
-		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code));
+		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id));
 		return;
 	}	
 
 	public function confirm_remove_item() {
 		$request_code = $this->input->post("request_code");
-		$item_id = $this->input->post("item_id");
+		//$item_id = $this->input->post("item_id");
+		$warehouse_request_detail_id = $this->input->post("warehouse_request_detail_id");
 
 		// get warehouse_request_id
 		$warehouse_request_details = $this->spare_parts_model->get_warehouse_request_by_code($request_code);
 
-		$item_view_details = $this->spare_parts_model->get_item_view_by_id($item_id);
+		$warehouse_request_detail_info = $this->spare_parts_model->get_warehouse_request_detail_by_id($warehouse_request_detail_id);
+
+
+		$item_view_details = $this->spare_parts_model->get_item_view_by_id($warehouse_request_detail_info->item_id);
 		
 		$title = "Delete Item :: [SKU] " . $item_view_details->sku;
 		$html = "<p>You are about to delete an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
@@ -1089,17 +1149,19 @@ class Warehouse_request extends Admin_Controller {
 
 	public function proceed_remove_item() {
 		$warehouse_request_id = $this->input->post("warehouse_request_id");
-		$item_id = $this->input->post("item_id");
+		//$item_id = $this->input->post("item_id");
+		$warehouse_request_detail_id = $this->input->post("warehouse_request_detail_id");
 		$remarks = $this->input->post("remarks");
 
-		$where = "warehouse_request_id = '{$warehouse_request_id}' AND item_id = '{$item_id}'";
-		$warehouse_request_detail = $this->spare_parts_model->get_warehouse_request_detail($where);
-
+		//$where = "warehouse_request_id = '{$warehouse_request_id}' AND item_id = '{$item_id}'";
+		$where = "warehouse_request_detail_id = " . $warehouse_request_detail_id;
+		//$warehouse_request_detail = $this->spare_parts_model->get_warehouse_request_detail($where);
+		$warehouse_request_detail_info = $this->spare_parts_model->get_warehouse_request_detail_by_id($warehouse_request_detail_id);
 
 
 		$current_datetime = date('Y-m-d H:i:s');
 
-		$complete_remarks = $warehouse_request_detail[0]->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		$complete_remarks = $warehouse_request_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
 
 		// update status to DELETED
 		$data = array(
@@ -1117,4 +1179,241 @@ class Warehouse_request extends Admin_Controller {
 		return;
 
 	}
+
+
+	public function reports()
+	{
+		$this->generate_report();
+	}
+
+	public function generate_report()
+	{
+		$from_date = trim($this->input->get_post('from_date'));
+	    $to_date = trim($this->input->get_post('to_date'));
+		$filter = trim($this->input->get_post('filter'));
+		
+	    $export = $this->input->get_post('export');
+	    $where = "";
+		$where_conjuction = "";
+	    if (empty($from_date)) $from_date = date('Y-m-d');
+	    if (empty($to_date)) $to_date = date('Y-m-d');
+    
+	    //date set
+	    $from_dt = $from_date;
+	    $to_dt = $to_date;
+	    $from_single = "";
+	    $from_t = strtotime($from_date);
+	    $to_t = strtotime($to_date);
+	    if ($from_t !== false) $from_dt = date('Y-m-d', $from_t); 
+	    if ($to_t !== false) $to_dt = date('Y-m-d', $to_t); 
+       
+	    if ($from_t !== false && $to_t !== false)
+	      $where .= "(DATE(insert_timestamp) BETWEEN '{$from_dt}' AND '{$to_dt}') ";
+	    else if ($from_t !== false && $to_t === false)
+	      $where .= "insert_timestamp >= '{$from_dt}'";
+	    else if ($from_t === false && $to_t !== false)
+	      $where .= "insert_timestamp <= '{$to_dt}'";
+	
+	    $data = new ArrayClass(array(
+	      'from_date' => $from_date,
+	      'to_date' => $to_date,
+	      'where' => $where,
+	    ));
+    
+	    // check if to export
+	    if ($export == 'excel')
+	    {
+	      $this->_export($data);
+	    }
+	    else
+	    {
+			$display_data = "";
+			if($filter == 'yes')
+	      		$display_data = $this->report_view($data);
+    
+			$this->template->search_url = strlen($_SERVER['QUERY_STRING']) > 0 ? '?'.$_SERVER['QUERY_STRING'] : '';
+	      	$this->template->from_date = $from_date;
+	      	$this->template->to_date = $to_date;
+	      	$this->template->display_data = $display_data;
+	      	$this->template->view('warehouse_request/reports');
+	    }
+	}
+
+	public function report_view($data)
+	  {
+	    $from_date = slugify($data->from_date);
+	    $to_date = slugify($data->to_date);
+	    $where = $data->where;
+	    $current_date = date('Y-m-d');
+    
+		$total_records = $this->spare_parts_model->get_warehouse_request_count($where);
+
+		$config = array(
+			'pagination_url' => '/spare_parts/warehouse_request/generate_report',
+			'total_items' => $total_records,
+			'per_page' => 10,
+			'uri_segment' => 4,
+		);
+		$this->pager->set_config($config);
+		$warehouse_request_details = $this->spare_parts_model->get_warehouse_request($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");
+
+		$html = "<table class='table table-bordered table-condensed'>
+			<thead>
+				<th>Request Code</th>
+				<th>ID Number</th>
+				<th>Motocycle Brand Model ID</th>
+				<th>Engine</th>
+				<th>Chassis</th>
+				<th>Status</th>
+				<th>Warehouse ID</th>
+				<th>MTR Number</th>
+				<th>Remarks</th>
+				<th>Date Created</th>
+			</thead>
+			<tbody>";
+		
+		if(empty($warehouse_request_details))
+		{
+			$html .= "<tr><td colspan='7' style='text-align:center'>No records found.</td></tr>";
+		}
+		foreach($warehouse_request_details as $wrd)
+		{
+			
+			$html .= "<tr>
+				<td>{$wrd->request_code}</td>
+				<td>{$wrd->id_number}</td>
+				<td>{$wrd->motorcycle_brand_model_id}</td>
+				<td>{$wrd->engine}</td>
+				<td>{$wrd->chassis}</td>
+				<td>{$wrd->status}</td>
+				<td>{$wrd->warehouse_id}</td>
+				<td>{$wrd->mtr_number}</td>
+				<td>{$wrd->remarks}</td>	
+				<td>{$wrd->insert_timestamp}</td>
+			</tr>";
+		}
+
+	    $html .= "</tbody></table>";
+	    $html .= $this->pager->create_links(strlen($_SERVER['QUERY_STRING']) > 0 ? '?'.$_SERVER['QUERY_STRING'] : '');
+        
+	    return $html; 
+	  }
+
+	  public function _export($data)
+	  {
+		$from_date = slugify($data->from_date);
+	    $to_date = slugify($data->to_date);
+	    $where = $data->where;
+	    $current_date = date('Y-m-d');
+    
+	    $current_year = date('Y');
+	    $current_month = date('m');
+	    $current_day = date('d');
+	    $date = $current_month . '-' . $current_day . '-' . $current_year;
+	    
+	    $this->load->library('PHPExcel');
+	    $this->load->library('PHPExcel/IOFactory');
+	    $objPHPExcel = new PHPExcel();
+
+	    $warehouse_request_details = $this->spare_parts_model->get_warehouse_request($where, null, "insert_timestamp DESC");
+
+	    if (!empty($warehouse_request_details))
+	    {
+	      	$objPHPExcel->getProperties()->setTitle("export")->setDescription("none");
+	      	$start_column_num = 4;
+      	
+	      	$objPHPExcel->setActiveSheetIndex(0);
+	      	$objPHPExcel->getActiveSheet()->setTitle("Warehouse Request List");
+      
+	      	// auto resize columns
+	      	$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+	      	$objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+	      	$objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+			$objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+			$objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+			$objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+			$objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+			$objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
+	      	$objPHPExcel->getActiveSheet()->getColumnDimension('I')->setAutoSize(true);
+	      	$objPHPExcel->getActiveSheet()->getColumnDimension('J')->setAutoSize(true);
+      
+	      	// set column header to bold    
+	      	$objPHPExcel->getActiveSheet()->getStyle('A' . $start_column_num . ':J' . $start_column_num)->getFont()->setBold(true);
+        
+	      	//center column names
+	      	$objPHPExcel->getActiveSheet()->getStyle('A' . $start_column_num . ':J' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+      
+	      	$header = "SPARE PARTS SYSTEM";
+			$header2 = "Warehouse Request List";
+			$header3 = "From " . $from_date . " to " . $to_date;
+			$print_date = date('M d, Y H:i:s');
+			$print_date_header = " (Printed On: {$print_date})";
+			$header3 .= $print_date_header;
+	      	$objPHPExcel->getActiveSheet()->getStyle('A' . 1)->getFont()->setBold(true);
+	      	$objPHPExcel->getActiveSheet()->getStyle('A' . 1)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		    $objPHPExcel->getActiveSheet()->mergeCells('A1:J1');
+		    $objPHPExcel->getActiveSheet()->setCellValue('A' . 1, $header);
+			
+			$objPHPExcel->getActiveSheet()->getStyle('A' . 2)->getFont()->setBold(true);
+	      	$objPHPExcel->getActiveSheet()->getStyle('A' . 2)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		    $objPHPExcel->getActiveSheet()->mergeCells('A2:J2');
+		    $objPHPExcel->getActiveSheet()->setCellValue('A' . 2, $header2);
+		
+			$objPHPExcel->getActiveSheet()->getStyle('A' . 3)->getFont()->setBold(true);
+	      	$objPHPExcel->getActiveSheet()->getStyle('A' . 3)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+		    $objPHPExcel->getActiveSheet()->mergeCells('A3:J3');
+		    $objPHPExcel->getActiveSheet()->setCellValue('A' . 3, $header3);
+        
+	      	//set column names
+	      	$objPHPExcel->getActiveSheet()->setCellValue('A' . $start_column_num, 'REQUEST CODE');
+	      	$objPHPExcel->getActiveSheet()->setCellValue('B' . $start_column_num, 'REQUESTED BY');
+	      	$objPHPExcel->getActiveSheet()->setCellValue('C' . $start_column_num, 'BRAND/MODEL');
+			$objPHPExcel->getActiveSheet()->setCellValue('D' . $start_column_num, 'ENGINE');
+			$objPHPExcel->getActiveSheet()->setCellValue('E' . $start_column_num, 'CHASSIS');
+			$objPHPExcel->getActiveSheet()->setCellValue('F' . $start_column_num, 'STATUS');
+			$objPHPExcel->getActiveSheet()->setCellValue('G' . $start_column_num, 'WAREHOUSE NAME');
+			$objPHPExcel->getActiveSheet()->setCellValue('H' . $start_column_num, 'MTR NUMBER');
+			$objPHPExcel->getActiveSheet()->setCellValue('I' . $start_column_num, 'REMARKS');
+			$objPHPExcel->getActiveSheet()->setCellValue('J' . $start_column_num, 'DATE CREATED');
+        	
+	      	$objPHPExcel->getActiveSheet()->freezePane('A5');
+      
+	      	$row = $start_column_num + 1;
+	      	$current_item_date = 0;
+	      	foreach ($warehouse_request_details as $wrd)
+	      	{
+	        	$objPHPExcel->getActiveSheet()->getStyle('A' . $row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+	        	$objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+	        	$objPHPExcel->getActiveSheet()->getStyle('C' . $row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+	
+				$objPHPExcel->getActiveSheet()->setCellValue('A' . $row, $wrd->request_code);
+				$objPHPExcel->getActiveSheet()->setCellValue('B' . $row, $wrd->id_number);
+				$objPHPExcel->getActiveSheet()->setCellValue('C' . $row, $wrd->motorcycle_brand_model_id);
+				$objPHPExcel->getActiveSheet()->setCellValue('D' . $row, $wrd->engine);
+				$objPHPExcel->getActiveSheet()->setCellValue('E' . $row, $wrd->chassis);
+				$objPHPExcel->getActiveSheet()->setCellValue('F' . $row, $wrd->status);
+				$objPHPExcel->getActiveSheet()->setCellValue('G' . $row, $wrd->warehouse_id);
+				$objPHPExcel->getActiveSheet()->setCellValue('H' . $row, $wrd->mtr_number);
+				$objPHPExcel->getActiveSheet()->setCellValue('I' . $row, $wrd->remarks);
+				$objPHPExcel->getActiveSheet()->setCellValue('J' . $row, $wrd->insert_timestamp);
+        
+	        	$row++;
+	      	}
+	    }else
+	    {
+    
+	    }
+  		$objPHPExcel->setActiveSheetIndex(0);   
+		if($from_date == $to_date)
+			$filename_date = $from_date;
+		else
+	    	$filename_date = $from_date . '_to_' . $to_date;
+    
+	    header('Content-Type: application/vnd.ms-excel');
+	    header('Content-Disposition: attachment;filename="warehouse_requests_'.$filename_date.'.xls"');
+	    header('Cache-Control: max-age=0');   
+	    $objWriter = IOFactory::createWriter($objPHPExcel, 'Excel5');
+	    $objWriter->save('php://output');   
+	}
+
 }

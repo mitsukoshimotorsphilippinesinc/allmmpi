@@ -6,14 +6,14 @@
 			<tbody>
 				<tr>
 					<td><strong>Request Code:</strong></td>
-					<td><?= $service_unit->request_code; ?></td>
+					<td><?= $free_of_charge->request_code; ?></td>
 					<td><strong>Engine:</strong></td>
-					<td><?= $service_unit->engine; ?></td>
+					<td><?= $free_of_charge->engine; ?></td>
 				</tr>	
 				<tr>
 					<td><strong>Requestor:</strong></td>
 					<?php
-					$requestor_details = $this->human_relations_model->get_employment_information_by_id($segment_details->id_number);
+					$requestor_details = $this->human_relations_model->get_employment_information_by_id($free_of_charge->id_number);
 
 					if (count($requestor_details) == 0) {
 						echo "<td>N/A</td>";
@@ -22,14 +22,14 @@
 					}		
 					?>					
 					<td><strong>Chassis:</strong></td>
-					<td><?= $service_unit->chassis; ?></td>
+					<td><?= $free_of_charge->chassis; ?></td>
 				</tr>
 				<tr>
 					<td><strong>Status:</strong></td>
-					<td><?= $service_unit->status; ?></td>
+					<td><?= $free_of_charge->status; ?></td>
 					<td><strong>Brand/Model:</strong></td>					
 					<?php
-					$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($service_unit->motorcycle_brand_model_id);				
+					$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($free_of_charge->motorcycle_brand_model_id);				
 
 					if (count($motor_brand_model_details) == 0) {
 						echo "<td>N/A</td>";
@@ -41,7 +41,7 @@
 				<tr>
 					<td><strong>Warehouse:</strong></td>
 					<?php
-					$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($service_unit->warehouse_id);
+					$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($free_of_charge->warehouse_id);
 
 					if (count($warehouse_details) == 0) {
 						echo "<td>N/A</td>";
@@ -51,7 +51,7 @@
 					?>
 					<td><strong>Approved By (Warehouse):</strong></td>					
 					<?php
-					$warehouse_approvedby_details = $this->human_relations_model->get_employment_information_by_id($service_unit->warehouse_approved_by);
+					$warehouse_approvedby_details = $this->human_relations_model->get_employment_information_by_id($free_of_charge->warehouse_approved_by);
 
 					if (count($warehouse_approvedby_details) == 0) {
 						echo "<td>N/A</td>";
@@ -68,38 +68,30 @@
 		<table  class='table table-striped table-bordered'>
 			<thead>
 				<tr>			
-					<th style=''>Description</th>
+					<th style=''>Item</th>
 					<th>SRP</th>
 					<th style='width:100px;'>Discount</th>
 					<th style='width:100px;'>Discount Amount</th>
 					<th style='width:100px;'>Good Qty</th>
 					<th style='width:100px;'>Bad Qty</th>			
 					<th style='width:120px;'>Total Amount</th>
-					<th style='width:120px;'>Rack Location</th>
 					<th style='width:70px;'>Status</th>			
 					<th style=''>Remarks</th>
 				</tr>
 			</thead>
 			<tbody>
-				<?php if(empty($service_unit_details)):?>
+				<?php if(empty($free_of_charge_details)):?>
 					<tr><td colspan='9' style='text-align:center;'><strong>No Record Found</strong></td></tr>
 				<?php else: ?>
-				<?php foreach ($service_unit_details as $wrd): 
-
-					$item_view_details = $this->spare_parts_model->get_item_view_by_id($wrd->item_id);
-
-					$complete_description = "[" . $item_view_details->model_name . " / " . $item_view_details->brand_name . "] " . $item_view_details->description;
-
-				?>
+				<?php foreach ($free_of_charge_details as $wrd): ?>
 				<tr>
-					<td><?= $complete_description; ?></td>
+					<td><?= $wrd->item_id; ?></td>
 					<td><?= $wrd->srp; ?></td>
 					<td><?= $wrd->discount; ?></td>
 					<td><?= $wrd->discount_amount; ?></td>
 					<td><?= $wrd->good_quantity; ?></td>
 					<td><?= $wrd->bad_quantity; ?></td>
 					<td><?= $wrd->total_amount; ?></td>
-					<td><?= $item_view_details->rack_location; ?></td>
 					<td><?= $wrd->status; ?></td>
 					<td><?= $wrd->remarks; ?></td>
 				</tr>	

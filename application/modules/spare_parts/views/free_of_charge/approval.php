@@ -115,7 +115,7 @@
 
 			
 
-			<td data1="<?= $t->warehouse_request_id ?>" data2="<?= $t->request_code ?>">				
+			<td data1="<?= $t->free_of_charge_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-primary view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
 				if ($t->status == 'FOR APPROVAL') {
@@ -150,15 +150,15 @@
 
 	$(".process-btn").click(function(){
 
-		var warehouse_request_id = $(this).parent().attr("data1");
-		var warehouse_request_code = $(this).parent().attr("data2");
+		var free_of_charge_id = $(this).parent().attr("data1");
+		var free_of_charge_code = $(this).parent().attr("data2");
 		var is_approved = $(this).attr("data");
 
 		b.request({
-			url: "/spare_parts/warehouse_request/for_approval_confirm",
+			url: "/spare_parts/free_of_charge/for_approval_confirm",
 			data: {
-				'warehouse_request_id' : warehouse_request_id,
-				'warehouse_request_code' : warehouse_request_code,
+				'free_of_charge_id' : free_of_charge_id,
+				'free_of_charge_code' : free_of_charge_code,
 				'is_approved' : is_approved,
 			},
 			on_success: function(data){
@@ -189,10 +189,10 @@
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/warehouse_request/for_approval_proceed',
+									url : '/spare_parts/free_of_charge/for_approval_proceed',
 									data : {				
-										'warehouse_request_id' : warehouse_request_id,
-										'warehouse_request_code' : warehouse_request_code,
+										'free_of_charge_id' : free_of_charge_id,
+										'free_of_charge_code' : free_of_charge_code,
 										'is_approved' : is_approved,
 										'remarks' : $("#txt-remarks").val(),
 									},
@@ -210,7 +210,7 @@
 												buttons: {
 													'Ok' : function() {
 														proceedApproveRequestModal.hide();
-														redirect('spare_parts/warehouse_request/approval');
+														redirect('spare_parts/free_of_charge/approval');
 													}
 												}
 											});
@@ -265,14 +265,14 @@
 	});
 	
 	$(".view-details").click(function(){
-		var warehouse_request_id = $(this).parent().attr("data1");
-		var warehouse_request_code = $(this).parent().attr("data2");
+		var free_of_charge_id = $(this).parent().attr("data1");
+		var free_of_charge_code = $(this).parent().attr("data2");
 	
 		b.request({
-			url: "/spare_parts/warehouse_request/view_details",
+			url: "/spare_parts/free_of_charge/view_details",
 			data: {
-				"warehouse_request_id" : warehouse_request_id,
-				"warehouse_request_code" : warehouse_request_code,
+				"free_of_charge_id" : free_of_charge_id,
+				"free_of_charge_code" : free_of_charge_code,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
@@ -336,7 +336,7 @@
 						$(this_button).addClass("no_clicking");
 
 						b.request({
-							url: "/spare_parts/warehouse_request/download_check",
+							url: "/spare_parts/free_of_charge/download_check",
 							data: {
 								"start_date": start_date,
 								"end_date": end_date
@@ -374,7 +374,7 @@
 												{
 													$(this_button).addClass("no_clicking")
 													b.request({
-														url: "/spare_parts/warehouse_request/download_proceed",
+														url: "/spare_parts/free_of_charge/download_proceed",
 														data: {
 															"start_date": start_date,
 															"end_date": end_date
@@ -404,7 +404,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/warehouse_request/export_xls/'+ start_date +'/' + end_date);
+																			redirect('/spare_parts/free_of_charge/export_xls/'+ start_date +'/' + end_date);
 																
 																			
 																		}

@@ -1,5 +1,5 @@
 
-<div class='alert alert-danger'><h2>For Approval<a class='btn btn-small btn-default'id="download-btn" style="float:right;" title='Download'><i class='icon-download'></i>&nbsp;Download</a></h2></div>
+<div class='alert alert-danger'><h2>Request List<a href='/spare_parts/dealer_request/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;" title='Download' disabled="disabled"><i class='icon-download'></i>&nbsp;Download Result</a></h2></div>
 
 <br>
 
@@ -9,9 +9,14 @@
 		<strong>Status:&nbsp;</strong>
 		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
 			<option value="ALL">ALL</option>
+			<option value="PENDING">PENDING</option>
 			<option value="FOR APPROVAL">FOR APPROVAL</option>
 			<option value="APPROVED">APPROVED</option>
-		</select>                 
+			<option value="DENIED">DENIED</option>
+			<option value="FORWARDED">FORWARDED</option>
+			<option value="COMPLETED">COMPLETED</option>
+			<option value="CANCELLED">CANCELLED</option>
+		</select>  
 	
 		<br/>
 
@@ -54,13 +59,12 @@
 		<tr>			
 			<th style=''>Request Code</th>
 			<th>Status</th>
-			<th style='width:100px;'>Requested By</th>
-			<th style='width:100px;'>Motor Brand/Model</th>
-			<th style='width:100px;'>Warehouse</th>
-			<th style='width:100px;'>Approved By (Warehouse)</th>			
-			<th style='width:120px;'>Remarks</th>
+			<th style='width:200px;'>Requested By</th>
+			<th style='width:100px;'>Total Amount</th>
+			<th style='width:200px;'>Agent Name</th>
+			<th style='width:200px;'>Remarks</th>
 			<th style='width:70px;'>Date Created</th>			
-			<th style=''>Action</th>
+			<th style='width:150px;'>Action</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -75,7 +79,7 @@
 			<?php
 			if ($t->status == 'PENDING') {
 				echo "<td><span class='label label-important' >{$t->status}</span></td>";
-			} else if ($t->status == 'PROCESSING') {
+			} else if ($t->status == 'FORWARDED') {
 				echo "<td><span class='label label-info' >{$t->status}</span></td>";
 			} else if ($t->status == 'FOR APPROVAL') {
 				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
@@ -84,7 +88,7 @@
 			}			
 
 			// get requestor details
-			$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);
+			$requestor_details = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
 
 			if (count($requestor_details) == 0) {
 				echo "<td>N/A</td>";
@@ -92,39 +96,47 @@
 				echo "<td>{$requestor_details->complete_name}</td>"; 
 			}			
 
-			// brand and model
-			$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($t->motorcycle_brand_model_id);				
-			if (count($motor_brand_model_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$motor_brand_model_details->brand_name}" . " - " . "{$motor_brand_model_details->model_name}</td>"; 
-			}				
+			// agent name 
+			$agent_name = "N/A";
+			$agent_details = $this->spare_parts_model->get_agent_by_id($t->agent_id);
+			if (count($agent_details) > 0) {
+				$agent_name = $agent_details->complete_name;
+			}	
 
-			// get warehouse detail			
-			$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($t->warehouse_id);
+			// total amount
+			$where = "status IN ('PENDING') AND dealer_request_id = " . $t->dealer_request_id;
+			$dealer_request_details = $this->spare_parts_model->get_dealer_request_detail($where);
 
-			if (count($warehouse_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$warehouse_details->warehouse_name}</td>"; 
+			$total_amount = 0;
+			if (count($dealer_request_details) > 0) {
+				foreach ($dealer_request_details as $sdd) {
+					$total_amount = $total_amount + $sdd->total_amount;
+				}
 			}
 			?>	
-			<td></td>
+			<td style='text-align:right'><?= number_format($total_amount, 2); ?></td>
+			<td><?= $agent_name; ?></td>
 			<td><?= $t->remarks; ?></td>
 			<td><?= $t->insert_timestamp; ?></td>
 
 			
 
-			<td data1="<?= $t->service_unit_id ?>" data2="<?= $t->request_code ?>">				
-				<a class='btn btn-small btn-primary view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
+			<td data1="<?= $t->dealer_request_id ?>" data2="<?= $t->request_code ?>">				
+				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
-				if ($t->status == 'FOR APPROVAL') {
-					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>";
+				if ($t->status == 'PENDING') {
+					echo "<a class='btn btn-small btn-warning process-btn' data='for approval' title='For Approval'><i class='icon-white icon-pencil'></i></a>
+							<a class='btn btn-small btn-danger process-btn' data='cancel' title='Cancel'><i class='icon-white icon-remove'></i></a>
+						";
 				}
 
-				if (($t->status == 'FOR APPROVAL') || ($t->status == 'APPROVED')) {
-					echo "<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>";
-				}				
+				if ($t->status == 'APPROVED') {
+					echo "<a class='btn btn-small btn-success process-btn' data='forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
+				}
+
+				if ($t->status == 'FORWARDED') {
+					echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
+				}					
 				?>
 			</td>
 		</tr>
@@ -150,16 +162,18 @@
 
 	$(".process-btn").click(function(){
 
-		var service_unit_id = $(this).parent().attr("data1");
-		var service_unit_code = $(this).parent().attr("data2");
-		var is_approved = $(this).attr("data");
+		processButtonAction($(this).parent().attr("data1"), $(this).parent().attr("data2"), $(this).attr("data"));
+	
+	});
+
+	var processButtonAction = function(dealer_request_id, dealer_request_code, listing_action) {
 
 		b.request({
-			url: "/spare_parts/service_unit/for_approval_confirm",
+			url: "/spare_parts/dealer_request/for_listing_confirm",
 			data: {
-				'service_unit_id' : service_unit_id,
-				'service_unit_code' : service_unit_code,
-				'is_approved' : is_approved,
+				'dealer_request_id' : dealer_request_id,
+				'dealer_request_code' : dealer_request_code,
+				'listing_action' : listing_action,
 			},
 			on_success: function(data){
 
@@ -177,23 +191,31 @@
 							},
 							'Proceed' : function() {
 
-								if (is_approved == 'no') {
+								if (listing_action == 'cancel') {
 									
 									if ($.trim($("#txt-remarks").val()) == "") {
 										$("#error-reasonremarks").show();
 										return;
 									}
 								}	
+								$("#error-reasonremarks").hide();
 
+								if (listing_action == 'forward to warehouse') {
+									
+									if ($.trim($("#txt-mtrnumber").val()) == "") {
+										$("#error-mtrnumber").show();
+										return;
+									}
+								}	
 								$("#error-reasonremarks").hide();
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/service_unit/for_approval_proceed',
+									url : '/spare_parts/dealer_request/for_listing_proceed',
 									data : {				
-										'service_unit_id' : service_unit_id,
-										'service_unit_code' : service_unit_code,
-										'is_approved' : is_approved,
+										'dealer_request_id' : dealer_request_id,
+										'dealer_request_code' : dealer_request_code,
+										'listing_action' : listing_action,
 										'remarks' : $("#txt-remarks").val(),
 									},
 									on_success : function(data) {
@@ -210,7 +232,7 @@
 												buttons: {
 													'Ok' : function() {
 														proceedApproveRequestModal.hide();
-														redirect('spare_parts/service_unit/approval');
+														redirect('spare_parts/dealer_request/listing');
 													}
 												}
 											});
@@ -222,14 +244,8 @@
 											approveRequestModal.hide();					
 											errorApproveRequestModal = b.modal.new({
 												title: data.data.title,
-												width:450,
-												disableClose: true,
+												width:450,	
 												html: data.data.html,
-												buttons: {						
-													'Close' : function() {
-														errorApproveRequestModal.hide();								 							
-													}
-												}
 											});
 											errorApproveRequestModal.show();	
 
@@ -261,34 +277,65 @@
 			}	
 				
 		})
-		return false;			
-	});
+		return false;
+	}
 	
 	$(".view-details").click(function(){
-		var service_unit_id = $(this).parent().attr("data1");
-		var service_unit_code = $(this).parent().attr("data2");
+		var dealer_request_id = $(this).parent().attr("data1");
+		var dealer_request_code = $(this).parent().attr("data2");
+		var listing_action = $(this).attr("data");
 	
 		b.request({
-			url: "/spare_parts/service_unit/view_details",
+			url: "/spare_parts/dealer_request/view_details",
 			data: {
-				"service_unit_id" : service_unit_id,
-				"service_unit_code" : service_unit_code,
+				"dealer_request_id" : dealer_request_id,
+				"dealer_request_code" : dealer_request_code,
+				"listing_action" : listing_action,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
 				
-					// show add form modal					
-					viewDetailsModal = b.modal.new({
-						title: data.data.title,
-						width:800,
-						disableClose: true,
-						html: data.data.html,
-						buttons: {
-							'Close' : function() {
-								viewDetailsModal.hide();								 							
-							}									
-						}
-					});
+					// show add form modal
+					if (data.data.request_status == "PENDING")	{	
+						viewDetailsModal = b.modal.new({
+							title: data.data.title,
+							width:800,
+							//disableClose: true,
+							html: data.data.html,
+							buttons: {
+								'Cancel' : function() {
+									processButtonAction(dealer_request_id, dealer_request_code, 'cancel');
+								},
+								'For Approval' : function() {
+									processButtonAction(dealer_request_id, dealer_request_code, 'for approval');
+								},
+								'Edit' : function() {
+									//processButtonAction(dealer_request_id, dealer_request_code, 'edit');
+									redirect("/spare_parts/dealer_request/edit/" + dealer_request_id);
+								}									
+							}
+						});			
+					} else if (data.data.request_status == "APPROVED") {
+						viewDetailsModal = b.modal.new({
+							title: data.data.title,
+							width:800,
+							//disableClose: true,
+							html: data.data.html,
+							buttons: {
+								'Forward To Warehouse' : function() {
+									processButtonAction(dealer_request_id, dealer_request_code, 'forward to warehouse');
+								}									
+							}
+						});
+					} else {
+						viewDetailsModal = b.modal.new({
+							title: data.data.title,
+							width:800,
+							//disableClose: true,
+							html: data.data.html,  
+						});
+					}
+
 					viewDetailsModal.show();
 				} else {
 					// show add form modal					
@@ -336,7 +383,7 @@
 						$(this_button).addClass("no_clicking");
 
 						b.request({
-							url: "/spare_parts/service_unit/download_check",
+							url: "/spare_parts/dealer_request/download_check",
 							data: {
 								"start_date": start_date,
 								"end_date": end_date
@@ -374,7 +421,7 @@
 												{
 													$(this_button).addClass("no_clicking")
 													b.request({
-														url: "/spare_parts/service_unit/download_proceed",
+														url: "/spare_parts/dealer_request/download_proceed",
 														data: {
 															"start_date": start_date,
 															"end_date": end_date
@@ -404,7 +451,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/service_unit/export_xls/'+ start_date +'/' + end_date);
+																			redirect('/spare_parts/dealer_request/export_xls/'+ start_date +'/' + end_date);
 																
 																			
 																		}

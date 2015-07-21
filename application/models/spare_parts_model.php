@@ -17,7 +17,7 @@ class Spare_parts_model extends Base_Model
 			'dealer_request' => 'is_dealer_request',
 			'dealer_request_detail' => 'is_dealer_request_detail',
 			'free_of_charge' => 'is_free_of_charge',
-			'free_of_charge_detail' => 'is_free_of_charge_detail',
+			'service_unit_detail' => 'is_service_unit_detail',
 			'service_unit' => 'is_service_unit',
 			'service_unit_detail' => 'is_service_unit_detail',
 			'warehouse_request' => 'is_warehouse_request',
@@ -33,7 +33,6 @@ class Spare_parts_model extends Base_Model
 			'item' => 'is_item',
 			'item_view' => 'is_item_view',
 			'department_module_submodule' => 'rf_department_module_submodule',
-
 		);
 
 	}
@@ -75,7 +74,7 @@ class Spare_parts_model extends Base_Model
 	
 	function get_salary_deduction_by_code($request_code) 
 	{
-		$result = $this->get_salary_deduction(array('sd_code' => $request_code));
+		$result = $this->get_salary_deduction(array('request_code' => $request_code));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];
@@ -140,7 +139,7 @@ class Spare_parts_model extends Base_Model
 
 	function get_salary_deduction_detail_by_id($salary_deduction_detail_id) 
 	{
-		$result = $this->get_salary_deduction(array('salary_deduction_detail_id' => $salary_deduction_detail_id));
+		$result = $this->get_salary_deduction_detail(array('salary_deduction_detail_id' => $salary_deduction_detail_id));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];
@@ -150,7 +149,7 @@ class Spare_parts_model extends Base_Model
 	
 	function get_salary_deduction_detail_by_salary_deduction_id($salary_deduction_id) 
 	{
-		$result = $this->get_salary_deduction(array('salary_deduction_id' => $salary_deduction_id));
+		$result = $this->get_salary_deduction_detail(array('salary_deduction_id' => $salary_deduction_id));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];
@@ -187,7 +186,7 @@ class Spare_parts_model extends Base_Model
 		$result->free_result();
 		return $row;
 	}
-
+	//===========================================================
 	// is_dealer_request
 	function get_dealer_request($where = null, $limit = null, $orderby = null, $fields = null) 
 	{
@@ -298,6 +297,16 @@ class Spare_parts_model extends Base_Model
 		return $row;
 	}
 	
+	function get_dealer_by_code($old_dealer_code) 
+	{
+		$result = $this->get_dealer(array('old_dealer_code' => $old_dealer_code));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
 	function get_dealer_count($where = null) {
 		// do a sql count instead of row count
 		$query = $this->fetch('dealer', 'count(1) as cnt', $where);
@@ -306,7 +315,72 @@ class Spare_parts_model extends Base_Model
 		return $row->cnt;
 	}	
 	// ========================================================================
+	// ========================================================================
+	// is_dealer_request_detail
+	function get_dealer_request_detail($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
 
+		$query = $this->fetch('dealer_request_detail', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_dealer_request_detail($data) 
+	{
+		return $this->insert('dealer_request_detail', $data);
+	}
+
+	function update_dealer_request_detail($data, $where) 
+	{
+		return $this->update('dealer_request_detail', $data, $where);
+	}
+
+	function delete_dealer_request_detail($where) 
+	{
+		return $this->delete('dealer_request_detail', $where);
+	}
+
+	function get_dealer_request_detail_by_id($warehouse_request_detail_id) 
+	{
+		$result = $this->get_dealer_request_detail(array('dealer_request_detail_id' => $dealer_request_detail_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_dealer_request_detail_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('dealer_request_detail', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+	
+	function search_dealer_request_detail($search, $query, $limit = null, $orderby = null, $fields = null)
+	{
+		// clear previous get request
+		$this->db->flush_cache();
+
+		$this->db->distinct();
+		$this->db->like($search,$query,'both');
+		
+		// No override function, procede with fetch
+		($fields!=null) ? $this->db->select($fields) : '';
+		($limit!=null) ? $this->db->limit($limit['rows'],$limit['offset']) : '';
+		($orderby!=null) ? $this->db->order_by($orderby) : '';
+
+		// set table to use
+		$this->db->from($this->_TABLES['dealer_request_detail']);
+		$result = $this->db->get();
+
+		$row = $result->result();
+		$result->free_result();
+		return $row;
+	}
+	// ========================================================================
 	// ========================================================================
 	// rf_agent
 	function get_agent($where = null, $limit = null, $orderby = null, $fields = null) 
@@ -350,7 +424,6 @@ class Spare_parts_model extends Base_Model
 		return $row->cnt;
 	}	
 	// ========================================================================
-
 	// ========================================================================
 	// rf_department_module
 	function get_department_module($where = null, $limit = null, $orderby = null, $fields = null) 
@@ -395,6 +468,16 @@ class Spare_parts_model extends Base_Model
 		}
 		return $row;
 	}
+
+	function get_department_module_by_segment_name($segment_name) 
+	{
+		$result = $this->get_department_module(array('segment_name' => $segment_name));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
 	
 	function get_department_module_count($where = null) {
 		// do a sql count instead of row count
@@ -415,7 +498,6 @@ class Spare_parts_model extends Base_Model
 	}
 
 	// ========================================================================
-
 	// ========================================================================
 	// is_warehouse_request
 	function get_warehouse_request($where = null, $limit = null, $orderby = null, $fields = null) 
@@ -491,8 +573,7 @@ class Spare_parts_model extends Base_Model
 		$result->free_result();
 		return $row;
 	}
-	// ===========================================================================
-
+	// ========================================================================
 	// ========================================================================
 	// is_warehouse_request_detail
 	function get_warehouse_request_detail($where = null, $limit = null, $orderby = null, $fields = null) 
@@ -521,7 +602,7 @@ class Spare_parts_model extends Base_Model
 
 	function get_warehouse_request_detail_by_id($warehouse_request_detail_id) 
 	{
-		$result = $this->get_warehouse_request(array('warehouse_request_detail_id' => $warehouse_request_detail_id));
+		$result = $this->get_warehouse_request_detail(array('warehouse_request_detail_id' => $warehouse_request_detail_id));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];
@@ -559,8 +640,7 @@ class Spare_parts_model extends Base_Model
 		return $row;
 	}
 	// ======================================================================
-
-	// ========================================================================
+	// ======================================================================
 	// is_warehouse_claim
 	function get_warehouse_claim($where = null, $limit = null, $orderby = null, $fields = null) 
 	{
@@ -635,8 +715,7 @@ class Spare_parts_model extends Base_Model
 		$result->free_result();
 		return $row;
 	}
-	// ===========================================================================
-
+	// ========================================================================
 	// ========================================================================
 	// is_warehouse_claim_detail
 	function get_warehouse_claim_detail($where = null, $limit = null, $orderby = null, $fields = null) 
@@ -712,8 +791,7 @@ class Spare_parts_model extends Base_Model
 		$result->free_result();
 		return $row;
 	}
-	// ======================================================================
-
+	// ========================================================================
 	// ========================================================================
 	// is_service_unit
 	function get_service_unit($where = null, $limit = null, $orderby = null, $fields = null) 
@@ -789,8 +867,73 @@ class Spare_parts_model extends Base_Model
 		$result->free_result();
 		return $row;
 	}
-	// ===========================================================================
+	// ========================================================================
+	// ========================================================================
+	// is_service_unit_detail
+	function get_service_unit_detail($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
 
+		$query = $this->fetch('service_unit_detail', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_service_unit_detail($data) 
+	{
+		return $this->insert('service_unit_detail', $data);
+	}
+
+	function update_service_unit_detail($data, $where) 
+	{
+		return $this->update('service_unit_detail', $data, $where);
+	}
+
+	function delete_service_unit_detail($where) 
+	{
+		return $this->delete('service_unit_detail', $where);
+	}
+
+	function get_service_unit_detail_by_id($service_unit_detail_id) 
+	{
+		$result = $this->get_warehouse_request_detail(array('service_unit_detail_id' => $service_unit_detail_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_service_unit_detail_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('service_unit_detail', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+	
+	function search_service_unit_detail($search, $query, $limit = null, $orderby = null, $fields = null)
+	{
+		// clear previous get request
+		$this->db->flush_cache();
+
+		$this->db->distinct();
+		$this->db->like($search,$query,'both');
+		
+		// No override function, procede with fetch
+		($fields!=null) ? $this->db->select($fields) : '';
+		($limit!=null) ? $this->db->limit($limit['rows'],$limit['offset']) : '';
+		($orderby!=null) ? $this->db->order_by($orderby) : '';
+
+		// set table to use
+		$this->db->from($this->_TABLES['service_unit_detail']);
+		$result = $this->db->get();
+
+		$row = $result->result();
+		$result->free_result();
+		return $row;
+	}
+	// ======================================================================
 	// ========================================================================
 	// is_free_of_charge
 	function get_free_of_charge($where = null, $limit = null, $orderby = null, $fields = null) 
@@ -866,8 +1009,73 @@ class Spare_parts_model extends Base_Model
 		$result->free_result();
 		return $row;
 	}
-	// ===========================================================================
+	// ==========================================================================
+	// ==========================================================================
+	// is_free_of_charge_detail
+	function get_free_of_charge_detail($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
 
+		$query = $this->fetch('free_of_charge_detail', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_free_of_charge_detail($data) 
+	{
+		return $this->insert('free_of_charge_detail', $data);
+	}
+
+	function update_free_of_charge_detail($data, $where) 
+	{
+		return $this->update('free_of_charge_detail', $data, $where);
+	}
+
+	function delete_free_of_charge_detail($where) 
+	{
+		return $this->delete('free_of_charge_detail', $where);
+	}
+
+	function get_free_of_charge_detail_by_id($free_of_charge_detail_id) 
+	{
+		$result = $this->get_warehouse_request_detail(array('free_of_charge_detail_id' => $free_of_charge_detail_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_free_of_charge_detail_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('free_of_charge_detail', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+	
+	function search_free_of_charge_detail($search, $query, $limit = null, $orderby = null, $fields = null)
+	{
+		// clear previous get request
+		$this->db->flush_cache();
+
+		$this->db->distinct();
+		$this->db->like($search,$query,'both');
+		
+		// No override function, procede with fetch
+		($fields!=null) ? $this->db->select($fields) : '';
+		($limit!=null) ? $this->db->limit($limit['rows'],$limit['offset']) : '';
+		($orderby!=null) ? $this->db->order_by($orderby) : '';
+
+		// set table to use
+		$this->db->from($this->_TABLES['free_of_charge_detail']);
+		$result = $this->db->get();
+
+		$row = $result->result();
+		$result->free_result();
+		return $row;
+	}
+	// ======================================================================
 	// ======================================================================
 	// rf_warehouse
 	function get_warehouse($where = null, $limit = null, $orderby = null, $fields = null) 

@@ -55,12 +55,11 @@
 			<th style=''>Request Code</th>
 			<th>Status</th>
 			<th style='width:100px;'>Requested By</th>
-			<th style='width:100px;'>Motor Brand/Model</th>
-			<th style='width:100px;'>Warehouse</th>
-			<th style='width:100px;'>Approved By (Warehouse)</th>			
+			<th style='width:100px;'>Total Amount</th>
+			<th style='width:100px;'>Agent Name</th>			
 			<th style='width:120px;'>Remarks</th>
 			<th style='width:70px;'>Date Created</th>			
-			<th style=''>Action</th>
+			<th style='width:150px;'>Action</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -84,7 +83,8 @@
 			}			
 
 			// get requestor details
-			$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);
+			//$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);
+			$requestor_details = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
 
 			if (count($requestor_details) == 0) {
 				echo "<td>N/A</td>";
@@ -92,38 +92,40 @@
 				echo "<td>{$requestor_details->complete_name}</td>"; 
 			}			
 
-			// brand and model
-			$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($t->motorcycle_brand_model_id);				
-			if (count($motor_brand_model_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$motor_brand_model_details->brand_name}" . " - " . "{$motor_brand_model_details->model_name}</td>"; 
-			}				
+			// total amount			
+			$where = "status IN ('PENDING') AND dealer_request_id = " . $t->dealer_request_id;
+			$dealer_request_details = $this->spare_parts_model->get_dealer_request_detail($where);
 
-			// get warehouse detail			
-			$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($t->warehouse_id);
-
-			if (count($warehouse_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$warehouse_details->warehouse_name}</td>"; 
+			$total_amount = 0;
+			if (count($dealer_request_details) > 0) {
+				foreach ($dealer_request_details as $sdd) {
+					$total_amount = $total_amount + $sdd->total_amount;
+				}
 			}
+
+			// agent name 
+			$agent_name = "N/A";
+			$agent_details = $this->spare_parts_model->get_agent_by_id($t->agent_id);
+			if (count($agent_details) > 0) {
+				$agent_name = $agent_details->complete_name;
+			}
+
 			?>	
-			<td></td>
+			<td style='text-align:right'><?= number_format($total_amount, 2); ?></td>
+
+			<td><?= $agent_name; ?></td>
 			<td><?= $t->remarks; ?></td>
 			<td><?= $t->insert_timestamp; ?></td>
 
 			
 
-			<td data1="<?= $t->service_unit_id ?>" data2="<?= $t->request_code ?>">				
+			<td data1="<?= $t->dealer_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-primary view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
 				if ($t->status == 'FOR APPROVAL') {
-					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>";
-				}
-
-				if (($t->status == 'FOR APPROVAL') || ($t->status == 'APPROVED')) {
-					echo "<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>";
+					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>
+						<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>
+						";
 				}				
 				?>
 			</td>
@@ -150,15 +152,15 @@
 
 	$(".process-btn").click(function(){
 
-		var service_unit_id = $(this).parent().attr("data1");
-		var service_unit_code = $(this).parent().attr("data2");
+		var dealer_id = $(this).parent().attr("data1");
+		var dealer_code = $(this).parent().attr("data2");
 		var is_approved = $(this).attr("data");
 
 		b.request({
-			url: "/spare_parts/service_unit/for_approval_confirm",
+			url: "/spare_parts/dealer/for_approval_confirm",
 			data: {
-				'service_unit_id' : service_unit_id,
-				'service_unit_code' : service_unit_code,
+				'dealer_id' : dealer_id,
+				'dealer_code' : dealer_code,
 				'is_approved' : is_approved,
 			},
 			on_success: function(data){
@@ -189,10 +191,10 @@
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/service_unit/for_approval_proceed',
+									url : '/spare_parts/dealer/for_approval_proceed',
 									data : {				
-										'service_unit_id' : service_unit_id,
-										'service_unit_code' : service_unit_code,
+										'dealer_id' : dealer_id,
+										'dealer_code' : dealer_code,
 										'is_approved' : is_approved,
 										'remarks' : $("#txt-remarks").val(),
 									},
@@ -210,7 +212,7 @@
 												buttons: {
 													'Ok' : function() {
 														proceedApproveRequestModal.hide();
-														redirect('spare_parts/service_unit/approval');
+														redirect('spare_parts/dealer/approval');
 													}
 												}
 											});
@@ -265,14 +267,14 @@
 	});
 	
 	$(".view-details").click(function(){
-		var service_unit_id = $(this).parent().attr("data1");
-		var service_unit_code = $(this).parent().attr("data2");
+		var dealer_id = $(this).parent().attr("data1");
+		var dealer_code = $(this).parent().attr("data2");
 	
 		b.request({
-			url: "/spare_parts/service_unit/view_details",
+			url: "/spare_parts/dealer/view_details",
 			data: {
-				"service_unit_id" : service_unit_id,
-				"service_unit_code" : service_unit_code,
+				"dealer_id" : dealer_id,
+				"dealer_code" : dealer_code,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
@@ -336,7 +338,7 @@
 						$(this_button).addClass("no_clicking");
 
 						b.request({
-							url: "/spare_parts/service_unit/download_check",
+							url: "/spare_parts/dealer/download_check",
 							data: {
 								"start_date": start_date,
 								"end_date": end_date
@@ -374,7 +376,7 @@
 												{
 													$(this_button).addClass("no_clicking")
 													b.request({
-														url: "/spare_parts/service_unit/download_proceed",
+														url: "/spare_parts/dealer/download_proceed",
 														data: {
 															"start_date": start_date,
 															"end_date": end_date
@@ -404,7 +406,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/service_unit/export_xls/'+ start_date +'/' + end_date);
+																			redirect('/spare_parts/dealer/export_xls/'+ start_date +'/' + end_date);
 																
 																			
 																		}

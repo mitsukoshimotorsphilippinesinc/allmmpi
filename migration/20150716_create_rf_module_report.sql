@@ -36,6 +36,15 @@ CREATE TABLE `rf_department_module_submodule` (
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `rf_department_module_submodule`(`department_module_id`, `submodule_name`, `submodule_url`, `priority_order`, `is_active`)
+VALUES (3, 'Dashboard', '/', 1, 1);
+INSERT INTO `rf_department_module_submodule`(`department_module_id`, `submodule_name`, `submodule_url`, `priority_order`, `is_active`)
+VALUES (3, 'Request List', '/listing', 2, 1);
+INSERT INTO `rf_department_module_submodule`(`department_module_id`, `submodule_name`, `submodule_url`, `priority_order`, `is_active`)
+VALUES (3, 'For Approval', '/approval', 3, 1);
+INSERT INTO `rf_department_module_submodule`(`department_module_id`, `submodule_name`, `submodule_url`, `priority_order`, `is_active`)
+VALUES (3, 'Reports', '/reports', 4, 1);
+
+INSERT INTO `rf_department_module_submodule`(`department_module_id`, `submodule_name`, `submodule_url`, `priority_order`, `is_active`)
 VALUES (4, 'Dashboard', '/', 1, 1);
 INSERT INTO `rf_department_module_submodule`(`department_module_id`, `submodule_name`, `submodule_url`, `priority_order`, `is_active`)
 VALUES (4, 'Request List', '/listing', 2, 1);

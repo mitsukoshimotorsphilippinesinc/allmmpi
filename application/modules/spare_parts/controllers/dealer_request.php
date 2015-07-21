@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Free_of_charge extends Admin_Controller {
+class Dealer_request extends Admin_Controller {
 
 	function __construct()
 	{
@@ -18,7 +18,7 @@ class Free_of_charge extends Admin_Controller {
 
 	}
 
-	public $segment_name = "free_of_charge";
+	public $segment_name = "dealer_request";
 
 	public function index()
 	{
@@ -29,7 +29,7 @@ class Free_of_charge extends Admin_Controller {
 		//$query = $db_spare_parts->select('sku, good_quantity, bad_quantity')->get('is_item');
   		//var_dump($query);			
 
-		$this->template->view('free_of_charge/dashboard');
+		$this->template->view('dealer_request/dashboard');
 	}
 
 	public function approval()
@@ -98,15 +98,15 @@ class Free_of_charge extends Admin_Controller {
 
 		// set pagination data
 		$config = array(
-				'pagination_url' => "/spare_parts/free_of_charge/approval/",
-				'total_items' => $this->spare_parts_model->get_free_of_charge_count($where),
+				'pagination_url' => "/spare_parts/dealer_request/approval/",
+				'total_items' => $this->spare_parts_model->get_dealer_request_count($where),
 				'per_page' => 10,
 				'uri_segment' => 4,
 		);
 
 		$this->pager->set_config($config);
 
-		$transfers = $this->spare_parts_model->get_free_of_charge($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
+		$transfers = $this->spare_parts_model->get_dealer_request($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
 		
 		// search vars
 		$this->template->search_status = $search_status;
@@ -115,7 +115,7 @@ class Free_of_charge extends Admin_Controller {
 		$this->template->search_url = $search_url;
 		$this->template->transfers = $transfers;
 		
-		$this->template->view('free_of_charge/approval');	
+		$this->template->view('dealer_request/approval');	
 		
 
 	}	
@@ -123,14 +123,14 @@ class Free_of_charge extends Admin_Controller {
 
 	public function for_approval_confirm()
 	{
-		$free_of_charge_id = $this->input->post("free_of_charge_id");
-		$free_of_charge_code = $this->input->post("free_of_charge_code");
+		$dealer_request_id = $this->input->post("dealer_request_id");
+		$dealer_request_code = $this->input->post("dealer_request_code");
 		$is_approved = $this->input->post("is_approved");
 
-		$free_of_charge = $this->spare_parts_model->get_free_of_charge_by_id($free_of_charge_id);
+		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);
 
-		if (empty($free_of_charge)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$free_of_charge_code}].</p>";
+		if (empty($dealer_request)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Confirm Approval";
 
 			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
@@ -139,9 +139,9 @@ class Free_of_charge extends Admin_Controller {
 
 			if ($is_approved == 'yes') {
 
-				$html = "You are about to approve the Warehouse Request with Request Code: <strong>" . $free_of_charge_code . "</strong>. Do you want to continue?";
+				$html = "You are about to approve the Warehouse Request with Request Code: <strong>" . $dealer_request_code . "</strong>. Do you want to continue?";
 			} else {
-				$html = "<p>You are about to deny the Warehouse Request with Request Code: <strong>" . $free_of_charge_code . "</strong>. <br/>
+				$html = "<p>You are about to deny the Warehouse Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;'/><br/>
@@ -151,11 +151,11 @@ class Free_of_charge extends Admin_Controller {
 							Do you want to continue?</p>";
 			}	
 
-			$title = "Confirm Approval :: " . $free_of_charge_code;
+			$title = "Confirm Approval :: " . $dealer_request_code;
 				
 			$data = array (
-				'free_of_charge_id' => $free_of_charge_id,
-				'free_of_charge_code' => $free_of_charge_code,
+				'dealer_request_id' => $dealer_request_id,
+				'dealer_request_code' => $dealer_request_code,
 				'is_approved' => $is_approved
 				);	
 
@@ -168,15 +168,15 @@ class Free_of_charge extends Admin_Controller {
 	
 	public function for_approval_proceed()
 	{
-		$free_of_charge_id = $this->input->post("free_of_charge_id");
-		$free_of_charge_code = $this->input->post("free_of_charge_code");
+		$dealer_request_id = $this->input->post("dealer_request_id");
+		$dealer_request_code = $this->input->post("dealer_request_code");
 		$is_approved = $this->input->post("is_approved");
 		$remarks =  $this->input->post("remarks");
 		
-		$free_of_charge = $this->spare_parts_model->get_free_of_charge_by_id($free_of_charge_id);		
+		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);		
 
-		if (empty($free_of_charge)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$free_of_charge_code}].</p>";
+		if (empty($dealer_request)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Proceed Approval";
 
 			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
@@ -187,7 +187,7 @@ class Free_of_charge extends Admin_Controller {
 			$current_datetime = date("Y-m-d H:i:s");
 			
 			if ($is_approved == 'no') {
-				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $free_of_charge->remarks;
+				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $dealer_request->remarks;
 
 				$data = array(
 					'status' => "DENIED",
@@ -196,10 +196,10 @@ class Free_of_charge extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$return_html = return_reserved_items($free_of_charge_code, 'DENIED', $remarks);
+				$return_html = return_reserved_items($dealer_request_code, 'DENIED', $remarks);
 
-				$html = "You have denied the Warehouse Request Code: <strong>{$free_of_charge_code}</strong>.";
-				$title = "Denied :: " . $free_of_charge_code;
+				$html = "You have denied the Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Denied :: " . $dealer_request_code;
 
 				$this->return_json("1","Denied Warehouse Request.",array("html" => $html, "title" => $title));		
 
@@ -211,12 +211,12 @@ class Free_of_charge extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully approved the Warehouse Request Code: <strong>{$free_of_charge_code}</strong>.";
-				$title = "Approved :: " . $free_of_charge_code;
+				$html = "You have successfully approved the Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Approved :: " . $dealer_request_code;
 			}
 			
-			$where = "free_of_charge_id = " . $free_of_charge_id;
-			$this->spare_parts_model->update_free_of_charge($data, $where);
+			$where = "dealer_request_id = " . $dealer_request_id;
+			$this->spare_parts_model->update_dealer_request($data, $where);
 
 			$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
 						
@@ -227,34 +227,34 @@ class Free_of_charge extends Admin_Controller {
 
 	public function view_details()
 	{
-		$free_of_charge_id = $this->input->post("free_of_charge_id");
-		$free_of_charge_code = $this->input->post("free_of_charge_code");
+		$dealer_request_id = $this->input->post("dealer_request_id");
+		$dealer_request_code = $this->input->post("dealer_request_code");
 		$listing_action = $this->input->post("listing_action");
 			
-		$free_of_charge = $this->spare_parts_model->get_free_of_charge_by_id($free_of_charge_id);		
+		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);		
 
-		if (empty($free_of_charge)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$free_of_charge_code}].</p>";
+		if (empty($dealer_request)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: View Details";
 
 			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 
-			$where = "free_of_charge_id = {$free_of_charge_id}";
-			$free_of_charge_details = $this->spare_parts_model->get_free_of_charge_detail($where);
+			$where = "dealer_request_id = {$dealer_request_id}";
+			$dealer_request_details = $this->spare_parts_model->get_dealer_request_detail($where);
 		
 			$data = array(
-				//'free_of_charge' => $free_of_charge,
-				'segment_request_summary' => $free_of_charge,
-				'segment_request_details' =>$free_of_charge_details,
+				//'dealer_request' => $dealer_request,
+				'segment_request_summary' => $dealer_request,
+				'segment_request_details' =>$dealer_request_details,
 				'listing_action' => $listing_action
 			);
 		
 			$html = $this->load->view("template_view_details",$data,true);
 			 
-			$title = "View Details :: " . $free_of_charge_code;
-			$this->return_json("1","View Details Warehouse Request", array("html" => $html, "title" => $title, "request_status" => $free_of_charge->status));
+			$title = "View Details :: " . $dealer_request_code;
+			$this->return_json("1","View Details Warehouse Request", array("html" => $html, "title" => $title, "request_status" => $dealer_request->status));
 			
 		}
 			
@@ -279,13 +279,13 @@ class Free_of_charge extends Admin_Controller {
 
 			// get all personal_information_id in pm_personal_information
 			$where = "complete_name LIKE '%" . $search_text . "%'";
-			$personal_information_details = $this->human_relations_model->get_personal_information($where, NULL, NULL, "personal_information_id, complete_name");
+			$dealer_details = $this->spare_parts_model->get_dealer($where, NULL, NULL, "old_dealer_code, complete_name");
 
-			$where_id_numbers = "";
+			/*$where_id_numbers = "";
 			$count_id_num = 0;
 			// get the id_numbers within the personal_information_id results above
-			if (count($personal_information_details) > 0) {
-				foreach ($personal_information_details as $pid) {
+			if (count($dealer_details) > 0) {
+				foreach ($dealer_details as $dd) {
 					
 					$employment_information_details = $this->human_relations_model->get_employment_information("personal_information_id = ". $pid->personal_information_id);
 					
@@ -300,7 +300,7 @@ class Free_of_charge extends Admin_Controller {
 						}
 					}
 				}	
-			}
+			}*/
 		} 
 
 		if (empty($search_status)) {
@@ -314,14 +314,14 @@ class Free_of_charge extends Admin_Controller {
 			}
 				
 			if ($where != NULL) {
-				if ($search_by == 'name')
-					$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
-				else
+				//if ($search_by == 'name')
+				//	$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
+				//else
 					$where = $where . " AND ". $search_by ." LIKE '%" . $search_text . "%'";
 			} else {
-				if ($search_by == 'name')
-					$where = $request_search_by ." IN (" . $where_id_numbers . ")";
-				else
+				//if ($search_by == 'name')
+				//	$where = $request_search_by ." IN (" . $where_id_numbers . ")";
+				//else
 					$where = $search_by ." LIKE '%" . $search_text . "%'";
 			}
 		}	
@@ -329,15 +329,15 @@ class Free_of_charge extends Admin_Controller {
 
 		// set pagination data
 		$config = array(
-				'pagination_url' => "/spare_parts/free_of_charge/listing/",
-				'total_items' => $this->spare_parts_model->get_free_of_charge_count($where),
+				'pagination_url' => "/spare_parts/dealer_request/listing/",
+				'total_items' => $this->spare_parts_model->get_dealer_request_count($where),
 				'per_page' => 10,
 				'uri_segment' => 4,
 		);
 
 		$this->pager->set_config($config);
 
-		$transfers = $this->spare_parts_model->get_free_of_charge($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
+		$transfers = $this->spare_parts_model->get_dealer_request($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
 		
 		// search vars
 		$this->template->search_status = $search_status;
@@ -346,20 +346,20 @@ class Free_of_charge extends Admin_Controller {
 		$this->template->search_url = $search_url;
 		$this->template->transfers = $transfers;
 		
-		$this->template->view('free_of_charge/listing');	
+		$this->template->view('dealer_request/listing');	
 		
 	}	
 
 	public function for_listing_confirm()
 	{
-		$free_of_charge_id = $this->input->post("free_of_charge_id");
-		$free_of_charge_code = $this->input->post("free_of_charge_code");
+		$dealer_request_id = $this->input->post("dealer_request_id");
+		$dealer_request_code = $this->input->post("dealer_request_code");
 		$listing_action = $this->input->post("listing_action");
 
-		$free_of_charge = $this->spare_parts_model->get_free_of_charge_by_id($free_of_charge_id);
+		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);
 
-		if (empty($free_of_charge)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$free_of_charge_code}].</p>";
+		if (empty($dealer_request)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Confirm";
 
 			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
@@ -367,13 +367,13 @@ class Free_of_charge extends Admin_Controller {
 		} else {
 
 			if ($listing_action == 'for approval') {
-				$title = "File For Approval :: " . $free_of_charge_code;
-				$html = "You are about forward the request for approval with Request Code: <strong>" . $free_of_charge_code . "</strong>. Do you want to continue?";
+				$title = "File For Approval :: " . $dealer_request_code;
+				$html = "You are about forward the request for approval with Request Code: <strong>" . $dealer_request_code . "</strong>. Do you want to continue?";
 			}
 
 			if ($listing_action == 'forward to warehouse') {
-				$title = "Forward To Warehouse :: " . $free_of_charge_code;
-				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $free_of_charge_code . "</strong>. <br/>
+				$title = "Forward To Warehouse :: " . $dealer_request_code;
+				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>MTR Number:</strong></span></br>
 								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='12345' /><br/>
@@ -384,8 +384,8 @@ class Free_of_charge extends Admin_Controller {
 			}
 
 			if ($listing_action == 'cancel') {
-				$title = "Cancel Request :: " . $free_of_charge_code;
-				$html = "<p>You are about to cancel the Warehouse Request with Request Code: <strong>" . $free_of_charge_code . "</strong>. <br/>
+				$title = "Cancel Request :: " . $dealer_request_code;
+				$html = "<p>You are about to cancel the Warehouse Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;' maxlength='320' placeholder='Put remarks here...' /><br/>
@@ -396,8 +396,8 @@ class Free_of_charge extends Admin_Controller {
 			}	
 	
 			$data = array (
-				'free_of_charge_id' => $free_of_charge_id,
-				'free_of_charge_code' => $free_of_charge_code,
+				'dealer_request_id' => $dealer_request_id,
+				'dealer_request_code' => $dealer_request_code,
 				'listing_action' => $listing_action
 				);	
 
@@ -410,15 +410,15 @@ class Free_of_charge extends Admin_Controller {
 
 	public function for_listing_proceed()
 	{
-		$free_of_charge_id = $this->input->post("free_of_charge_id");
-		$free_of_charge_code = $this->input->post("free_of_charge_code");
+		$dealer_request_id = $this->input->post("dealer_request_id");
+		$dealer_request_code = $this->input->post("dealer_request_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");
 		
-		$free_of_charge = $this->spare_parts_model->get_free_of_charge_by_id($free_of_charge_id);		
+		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);		
 
-		if (empty($free_of_charge)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$free_of_charge_code}].</p>";
+		if (empty($dealer_request)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Proceed";
 
 			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
@@ -429,9 +429,9 @@ class Free_of_charge extends Admin_Controller {
 			$current_datetime = date("Y-m-d H:i:s");
 			
 			if ($listing_action == 'cancel') {
-				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $free_of_charge->remarks;
+				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $dealer_request->remarks;
 
-				$return_html = return_reserved_items($free_of_charge_code, 'CANCELLED', $remarks);
+				$return_html = return_reserved_items($dealer_request_code, 'CANCELLED', $remarks);
 
 				$data = array(
 					'status' => "CANCELLED",
@@ -440,8 +440,8 @@ class Free_of_charge extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have cancelled the Warehouse Request Code: <strong>{$free_of_charge_code}</strong>.";
-				$title = "Cancelled :: " . $free_of_charge_code;	
+				$html = "You have cancelled the Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Cancelled :: " . $dealer_request_code;	
 
 			} else if ($listing_action == 'for approval') {
 
@@ -452,8 +452,8 @@ class Free_of_charge extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$free_of_charge_code}</strong>.";
-				$title = "File For Approval :: " . $free_of_charge_code;
+				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "File For Approval :: " . $dealer_request_code;
 			
 			} else if ($listing_action == 'forward to warehouse') {
 
@@ -464,8 +464,8 @@ class Free_of_charge extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$free_of_charge_code}</strong>.";
-				$title = "Forward To Warehouse :: " . $free_of_charge_code;
+				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Forward To Warehouse :: " . $dealer_request_code;
 			
 				// change tr_warehouse_reservation to PENDING
 				$data_reservation = array(
@@ -473,13 +473,13 @@ class Free_of_charge extends Admin_Controller {
 					'update_timestamp' => $current_datetime
 				);
 
-				$where = "transaction_number = '{$free_of_charge_code}'";
+				$where = "transaction_number = '{$dealer_request_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
 			}
 			
-			$where = "free_of_charge_id = " . $free_of_charge_id;
-			$this->spare_parts_model->update_free_of_charge($data, $where);
+			$where = "dealer_request_id = " . $dealer_request_id;
+			$this->spare_parts_model->update_dealer_request($data, $where);
 	
 		}	
 
@@ -539,7 +539,7 @@ class Free_of_charge extends Admin_Controller {
 		// check if query will return records to execute
 		$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
 
-		$pending_count = $this->spare_parts_model->get_free_of_charge($where);
+		$pending_count = $this->spare_parts_model->get_dealer_request($where);
 
 		if (empty($pending_count))
 		{
@@ -586,9 +586,9 @@ class Free_of_charge extends Admin_Controller {
 			$worksheet = $objPHPExcel->setActiveSheetIndex(0);
 
 			$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
-			$free_of_charge_count = $this->spare_parts_model->get_free_of_charge_count($where);
+			$dealer_request_count = $this->spare_parts_model->get_dealer_request_count($where);
 
-			$filename = "free_of_charges_" . str_replace("-", "", $start_date) . "-" . str_replace("-", "", $end_date) . ".xls";
+			$filename = "dealer_requests_" . str_replace("-", "", $start_date) . "-" . str_replace("-", "", $end_date) . ".xls";
 
 			//set width of first column
 			$worksheet->getColumnDimension('A')->setWidth(12.00);
@@ -627,11 +627,11 @@ class Free_of_charge extends Admin_Controller {
 
 			$allowed_rows = 5000;
 
-			for($prow = 0;$prow < ceil($free_of_charge_count/$allowed_rows)+1; $prow++)
+			for($prow = 0;$prow < ceil($dealer_request_count/$allowed_rows)+1; $prow++)
 			{
-				$free_of_charges = $this->spare_parts_model->get_free_of_charge($where, array('rows' => $allowed_rows, 'offset' => $prow*$allowed_rows), 'insert_timestamp ASC');
+				$dealer_requests = $this->spare_parts_model->get_dealer_request($where, array('rows' => $allowed_rows, 'offset' => $prow*$allowed_rows), 'insert_timestamp ASC');
 
-				foreach ($free_of_charges as $dr)
+				foreach ($dealer_requests as $dr)
 				{
 
 					$worksheet->setCellValue('A'. $row, $dr->request_code);
@@ -667,20 +667,20 @@ class Free_of_charge extends Admin_Controller {
 		}
 	}
 
-	public function edit($free_of_charge_id = 0)
+	public function edit($dealer_request_id = 0)
 	{
-		$this->add($free_of_charge_id);
+		$this->add($dealer_request_id);
 	}
 
-	public function add($free_of_charge_id = 0) 
+	public function add($dealer_request_id = 0) 
 	{
 
 		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
 		
-		$free_of_charge_details = $this->spare_parts_model->get_free_of_charge_by_id($free_of_charge_id);
+		$dealer_request_details = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);
 
-		if (!empty($free_of_charge_details)) {
-			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($free_of_charge_details->id_number);
+		if (!empty($dealer_request_details)) {
+			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($dealer_request_details->id_number);
 			
 			$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
 			$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
@@ -690,25 +690,25 @@ class Free_of_charge extends Admin_Controller {
 			$this->template->position_details = $position_details;
 
 			// get request items
-			$where = "status NOT IN ('CANCELLED', 'DELETED') AND free_of_charge_id = " . $free_of_charge_id;
-			$free_of_charge_detail_details = $this->spare_parts_model->get_free_of_charge_detail($where);
+			$where = "status NOT IN ('CANCELLED', 'DELETED') AND dealer_request_id = " . $dealer_request_id;
+			$dealer_request_detail_details = $this->spare_parts_model->get_dealer_request_detail($where);
 
 			$json_items = array();
-			for($k = 0;$k<count($free_of_charge_detail_details);$k++)
+			for($k = 0;$k<count($dealer_request_detail_details);$k++)
 			{
-				$free_of_charge_detail_id = $free_of_charge_detail_details[$k]->free_of_charge_detail_id;
+				$dealer_request_detail_id = $dealer_request_detail_details[$k]->dealer_request_detail_id;
 				
 				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
 				$po_items = array(
-						'free_of_charge_detail_id' => $free_of_charge_detail_id,
-						'item_id' => $free_of_charge_detail_details[$k]->item_id,
-						'srp' => $free_of_charge_detail_details[$k]->srp,
-						'discount' => $free_of_charge_detail_details[$k]->discount,
-						'discount_amount' => $free_of_charge_detail_details[$k]->discount_amount,
-						'good_quantity' => $free_of_charge_detail_details[$k]->good_quantity,
-						'bad_quantity' => $free_of_charge_detail_details[$k]->bad_quantity,
-						'total_amount' => $free_of_charge_detail_details[$k]->total_amount,
-						'remarks' => $free_of_charge_detail_details[$k]->remarks,
+						'dealer_request_detail_id' => $dealer_request_detail_id,
+						'item_id' => $dealer_request_detail_details[$k]->item_id,
+						'srp' => $dealer_request_detail_details[$k]->srp,
+						'discount' => $dealer_request_detail_details[$k]->discount,
+						'discount_amount' => $dealer_request_detail_details[$k]->discount_amount,
+						'good_quantity' => $dealer_request_detail_details[$k]->good_quantity,
+						'bad_quantity' => $dealer_request_detail_details[$k]->bad_quantity,
+						'total_amount' => $dealer_request_detail_details[$k]->total_amount,
+						'remarks' => $dealer_request_detail_details[$k]->remarks,
 
 				);
 				//creates an array of the items that will be json encoded later
@@ -737,9 +737,9 @@ class Free_of_charge extends Admin_Controller {
 		$this->template->items = $items_array;
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
-		$this->template->free_of_charge_details = $free_of_charge_details;
+		$this->template->dealer_request_details = $dealer_request_details;
 		$this->template->department_module_details = $department_module_details;
-		$this->template->view('free_of_charge/add');
+		$this->template->view('dealer_request/add');
 	}
 
 	public function get_requester()
@@ -756,67 +756,54 @@ class Free_of_charge extends Admin_Controller {
 		$keys = explode(" ", $search_key);
 		$escape_keys = array();
 		for ($i = 0; $i < count($keys); $i++)
-			array_push($escape_keys, $this->human_relations_model->escape("%".$keys[$i]."%") );
+			array_push($escape_keys, $this->spare_parts_model->escape("%".$keys[$i]."%") );
 			
 		$where_first_name = implode(' OR first_name LIKE ', $escape_keys);
 		$where_last_name = implode(' OR last_name LIKE ', $escape_keys);
 		
 		// check if its a string name or part of a name
-		$escaped_search_key1 = $this->human_relations_model->escape($search_key);
-		$escaped_search_key2 = $this->human_relations_model->escape('%'.$search_key.'%');
-		$where = "((complete_name like {$where_first_name}) ".(count($keys) > 1 ? "AND" : "OR")." (complete_name like {$where_last_name})) OR id_number like {$escaped_search_key2}";
-		$tmp_employees = $this->human_relations_model->get_employment_information_view($where, array('offset' => 0, 'rows' => 50), "id_number ASC, complete_name ASC");
+		$escaped_search_key1 = $this->spare_parts_model->escape($search_key);
+		$escaped_search_key2 = $this->spare_parts_model->escape('%'.$search_key.'%');
+		$where = "((complete_name like {$where_first_name}) ".(count($keys) > 1 ? "AND" : "OR")." (complete_name like {$where_last_name})) OR old_dealer_code like {$escaped_search_key2}";
+		$tmp_dealer = $this->spare_parts_model->get_dealer($where, array('offset' => 0, 'rows' => 50), "old_dealer_code ASC, complete_name ASC");
 		
 
-		$employees = array();
-		if (count($tmp_employees) == 0)
+		$dealers = array();
+		if (count($tmp_dealer) == 0)
 		{
 			// if these is reached then nothing are found.
-			$this->return_json("error","Not found.", array('employees' => $employees, 'keys' => $keys));
+			$this->return_json("error","Not found.", array('dealers' => $dealers, 'keys' => $keys));
 			return;
 		}
 
-		$tmp_position = $this->human_relations_model->get_position();
+		$tmp_position = $this->spare_parts_model->get_agent();
 		$positions = array();
-		foreach ($tmp_position as $item)
-			$positions[$item->position_id] = $item;
 
-		foreach ($tmp_employees as $mem)
+		foreach ($tmp_dealer as $mem)
 		{
+			$agent_name = "N/A";	
 			
-			$department_name = "N/A";	
-			$position_name = "N/A";
-			// get company and department
-			$department_details = $this->human_relations_model->get_department_by_id($mem->department_id);
-			if (!empty($department_details)) {
-				$department_name = $department_details->department_name;
+			$agent_details = $this->spare_parts_model->get_agent_by_id($mem->agent_id);
+			if (!empty($agent_details)) {
+				$agent_name = $agent_details->complete_name;
 			}
 
-			// get position
-			$position_details = $this->human_relations_model->get_position_by_id($mem->position_id);
-			if (!empty($position_details)) {
-				$position_name = $position_details->position_name;
-			}
-
-			// is_employed
-			if ($mem->is_employed == 1)
-				$is_employed = "YES";
+			if ($mem->is_active == 1)
+				$is_active = "YES";
 			else
-				$is_employed = "NO";
+				$is_active = "NO";
 
-			$employees[$mem->employment_information_id] = array(
-				"employment_information_id" => $mem->employment_information_id,
-				"id_number" => $mem->id_number,
+			$dealers[$mem->dealer_id] = array(
+				"dealer_id" => $mem->dealer_id,
+				"old_dealer_code" => $mem->old_dealer_code,
 				"complete_name" => strtoupper($mem->complete_name),
-				"company_email_address" => $mem->company_email_address,
-				"department_name" => $department_name,
-				"position" => $position_name,
-				"is_employed" => $is_employed,
+				"agent_name" => $agent_name,
+				"is_active" => $is_active,
 			);
 		}
 			
 		
-		$this->return_json("ok","Ok.", array('employees' => $employees, 'keys' => $keys));
+		$this->return_json("ok","Ok.", array('dealers' => $dealers, 'keys' => $keys));
 		return;
 		
 	}
@@ -920,10 +907,8 @@ class Free_of_charge extends Admin_Controller {
 		$good_quantity = abs($this->input->post("good_quantity"));
 		$bad_quantity = abs($this->input->post("bad_quantity"));
 		$remarks = trim($this->input->post("remarks"));
-		$engine = trim($this->input->post("engine"));
-		$chassis = trim($this->input->post("chassis"));
-		$warehouse_id = abs($this->input->post("warehouse_id"));
-		$brandmodel = trim($this->input->post("brandmodel"));
+		$remarks_requester = trim($this->input->post("remarks_requester"));
+		$remarks_requester_new = trim($this->input->post("remarks_requester_new"));
 		$requester_id = trim($this->input->post("requester_id"));
 
 		$has_error = 0;
@@ -974,47 +959,43 @@ class Free_of_charge extends Admin_Controller {
 
 		$module_code = $request_code;
 
+		$current_datetime = date('Y-m-d H:i:s');
+
+		if (strlen($remarks) > 0)
+				$remarks = "[" . $current_datetime . "] " . $remarks;
+
 		if (strlen($request_code) < 10)
 		{
+			// NEW REQUEST
+			if (strlen($remarks_requester) > 0)
+				$remarks_requester = "[" . $current_datetime . "] " . $remarks_requester;
 
-			$manager_id_number = 0;
+			$agent_id = 0;
 			// get warehouse info from warehouse db
-			$warehouse_details = $this->warehouse_model->get_warehouse_by_id($warehouse_id);
-			if (count($warehouse_details)  > 0) {
-				$manager_id_number = $warehouse_details->manager_id_number;
+			$dealer_details = $this->spare_parts_model->get_dealer_by_id($requester_id);
+			if (count($dealer_details)  > 0) {
+				$agent_id = $dealer_details->agent_id;
 			}
 
-			$motorcycle_brand_model_id = 0;
-			// get motorcycle details from warehouse db
-			$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view("CONCAT(brand_name, ' ', model_name) = '{$brandmodel}'");
-			if (count($motorcycle_brandmodel_details)  > 0) {
-				$motorcycle_brand_model_id = $motorcycle_brandmodel_details[0]->motorcycle_brand_model_id;
-			}
-
+			
 			$sql = "INSERT INTO 
-						is_free_of_charge 
+						is_dealer_request 
 						(
 							`request_series`, 
 							`request_number`, 
-							`id_number`, 
-							`warehouse_approved_by`, 
-							`warehouse_id`, 
-							`motorcycle_brand_model_id`, 
-							`engine`, 
-							`chassis`
+							`dealer_id`,
+							`agent_id`,
+							`remarks`
 						)
                     	(
                     	SELECT 
                     		'{$request_series}', 
                     		IFNULL(MAX(request_number) + 1, 1) AS request_number, 
-                    		'{$requester_id}', 
-                    		'{$manager_id_number}',
-                            '{$warehouse_id}', 
-                            '{$motorcycle_brand_model_id}', 
-                            '{$engine}', 
-                            '{$chassis}'
+                    		'{$requester_id}',
+                    		'{$agent_id}',
+                    		'{$remarks}'
                     	FROM 
-                    		is_free_of_charge
+                    		is_dealer_request
                     	WHERE 
                     		request_series = '{$request_series}' 
 	                    ORDER BY 
@@ -1024,21 +1005,19 @@ class Free_of_charge extends Admin_Controller {
 			$this->db_spare_parts->query($sql);	
 
 			// get last insert id
-			$sql = "SELECT LAST_INSERT_ID() AS last_id FROM is_free_of_charge";
+			$sql = "SELECT LAST_INSERT_ID() AS last_id FROM is_dealer_request";
 			$query = $this->db_spare_parts->query($sql);
-			$free_of_charge_id = $query->first_row();
+			$dealer_request_id = $query->first_row();
 
-			$active_free_of_charge_id = $free_of_charge_id->last_id;
-
-			//var_dump($free_of_charge_id->last_id);
+			$active_dealer_request_id = $dealer_request_id->last_id;
 
 			// generate request code
 			$sql = "SELECT 
 						CONCAT('{$module_code}', '{$request_series}', '-', LPAD(request_number, 5, 0)) AS gen_code
 					FROM
-						is_free_of_charge		
+						is_dealer_request		
                     WHERE 
-                    	free_of_charge_id = " . $active_free_of_charge_id;
+                    	dealer_request_id = " . $active_dealer_request_id;
 
             $query = $this->db_spare_parts->query($sql);
 			$request_code_details = $query->first_row();  
@@ -1049,14 +1028,14 @@ class Free_of_charge extends Admin_Controller {
 			$data_update = array(
 					'request_code' => $request_code
 				);
-			$where_update = "free_of_charge_id = " . $active_free_of_charge_id;
-			$this->spare_parts_model->update_free_of_charge($data_update, $where_update);
+			$where_update = "dealer_request_id = " . $active_dealer_request_id;
+			$this->spare_parts_model->update_dealer_request($data_update, $where_update);
 
             //get department module id
             $department_module_details = $this->spare_parts_model->get_department_module_by_code($module_code);        
             
             $data_insert = array (
-        		'branch_id' => 1,
+        		'branch_id' => 1, // hard-coded where 1 = Head Office
         		'department_id' => $department_module_details->department_id,
         		'department_module_id' => $department_module_details->department_module_id,
         		'transaction_number' => $request_code,
@@ -1066,9 +1045,17 @@ class Free_of_charge extends Admin_Controller {
          	$this->spare_parts_model->insert_warehouse_reservation($data_insert);
 
 		} else {
-			
-			$active_free_of_charge_details = $this->spare_parts_model->get_free_of_charge_by_code($request_code);
-			$active_free_of_charge_id = $active_free_of_charge_details->free_of_charge_id;
+			// EXISTING REQUEST
+
+			$active_dealer_request_details = $this->spare_parts_model->get_dealer_request_by_code($request_code);
+			$active_dealer_request_id = $active_dealer_request_details->dealer_request_id; 
+
+			if (strlen($remarks_requester_new) > 0)
+				$remarks_requester = "[" . $current_datetime . "] " . $remarks_requester_new . "\n" . $active_dealer_request_details->remarks;
+
+			// update is_dealer_request remarks
+			$this->spare_parts_model->update_dealer_request(array('remarks' => $remarks_requester), "dealer_request_id = " . $active_dealer_request_id);
+
 		}	
 
 		// total amount
@@ -1082,7 +1069,7 @@ class Free_of_charge extends Admin_Controller {
 
 		// add item to details table
 		$data_insert = array(
-				'free_of_charge_id' => $active_free_of_charge_id,
+				'dealer_request_id' => $active_dealer_request_id,
 				'item_id' => $item_id,
 				'srp' => $srp,
 				'discount' => $discount,
@@ -1093,9 +1080,9 @@ class Free_of_charge extends Admin_Controller {
 				'remarks' => $remarks
 			);
 
-		$this->spare_parts_model->insert_free_of_charge_detail($data_insert);
+		$this->spare_parts_model->insert_dealer_request_detail($data_insert);
 
-		$active_free_of_charge_detail_id = $this->spare_parts_model->insert_id();
+		$active_dealer_request_detail_id = $this->spare_parts_model->insert_id();
 
 		// deduct to warehouse
 		$sql = "UPDATE 
@@ -1111,22 +1098,22 @@ class Free_of_charge extends Admin_Controller {
 		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been added successfully!</p>";
 		$title = "Add Item :: Item Request";
 
-		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, 'active_free_of_charge_detail_id' => $active_free_of_charge_detail_id));
+		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, 'active_dealer_request_detail_id' => $active_dealer_request_detail_id));
 		return;
 	}	
 
 	public function confirm_remove_item() {
 		$request_code = $this->input->post("request_code");
 		//$item_id = $this->input->post("item_id");
-		$free_of_charge_detail_id = $this->input->post("free_of_charge_detail_id");
+		$dealer_request_detail_id = $this->input->post("dealer_request_detail_id");
 
-		// get free_of_charge_id
-		$free_of_charge_details = $this->spare_parts_model->get_free_of_charge_by_code($request_code);
+		// get dealer_request_id
+		$dealer_request_details = $this->spare_parts_model->get_dealer_request_by_code($request_code);
 
-		$free_of_charge_detail_info = $this->spare_parts_model->get_free_of_charge_detail_by_id($free_of_charge_detail_id);
+		$dealer_request_detail_info = $this->spare_parts_model->get_dealer_request_detail_by_id($dealer_request_detail_id);
 
 
-		$item_view_details = $this->spare_parts_model->get_item_view_by_id($free_of_charge_detail_info->item_id);
+		$item_view_details = $this->spare_parts_model->get_item_view_by_id($dealer_request_detail_info->item_id);
 		
 		$title = "Delete Item :: [SKU] " . $item_view_details->sku;
 		$html = "<p>You are about to delete an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
@@ -1141,25 +1128,25 @@ class Free_of_charge extends Admin_Controller {
 					<br/>
 					Do you want to continue?</p>";
 
-		$this->return_json("1","Confirm Remove Item", array("html" => $html, "title" => $title, 'free_of_charge_id' => $free_of_charge_details->free_of_charge_id));
+		$this->return_json("1","Confirm Remove Item", array("html" => $html, "title" => $title, 'dealer_request_id' => $dealer_request_details->dealer_request_id));
 		return;
 	}
 
 	public function proceed_remove_item() {
-		$free_of_charge_id = $this->input->post("free_of_charge_id");
+		$dealer_request_id = $this->input->post("dealer_request_id");
 		//$item_id = $this->input->post("item_id");
-		$free_of_charge_detail_id = $this->input->post("free_of_charge_detail_id");
+		$dealer_request_detail_id = $this->input->post("dealer_request_detail_id");
 		$remarks = $this->input->post("remarks");
 
-		//$where = "free_of_charge_id = '{$free_of_charge_id}' AND item_id = '{$item_id}'";
-		$where = "free_of_charge_detail_id = " . $free_of_charge_detail_id;
-		//$free_of_charge_detail = $this->spare_parts_model->get_free_of_charge_detail($where);
-		$free_of_charge_detail_info = $this->spare_parts_model->get_free_of_charge_detail_by_id($free_of_charge_detail_id);
+		//$where = "dealer_request_id = '{$dealer_request_id}' AND item_id = '{$item_id}'";
+		$where = "dealer_request_detail_id = " . $dealer_request_detail_id;
+		//$dealer_request_detail = $this->spare_parts_model->get_dealer_request_detail($where);
+		$dealer_request_detail_info = $this->spare_parts_model->get_dealer_request_detail_by_id($dealer_request_detail_id);
 
 
 		$current_datetime = date('Y-m-d H:i:s');
 
-		$complete_remarks = $free_of_charge_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		$complete_remarks = $dealer_request_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
 
 		// update status to DELETED
 		$data = array(
@@ -1168,7 +1155,7 @@ class Free_of_charge extends Admin_Controller {
 			'update_timestamp' => $current_datetime
 			);
 
-		$this->spare_parts_model->update_free_of_charge_detail($data, $where);
+		$this->spare_parts_model->update_dealer_request_detail($data, $where);
 
 		$html = "Item is now successfully removed from request.";
 		$title = "Delete An Item :: Item Request";
@@ -1233,7 +1220,7 @@ class Free_of_charge extends Admin_Controller {
 	      	$this->template->from_date = $from_date;
 	      	$this->template->to_date = $to_date;
 	      	$this->template->display_data = $display_data;
-	      	$this->template->view('free_of_charge/reports');
+	      	$this->template->view('dealer_request/reports');
 	    }
 	}
 
@@ -1244,16 +1231,16 @@ class Free_of_charge extends Admin_Controller {
 	    $where = $data->where;
 	    $current_date = date('Y-m-d');
     
-		$total_records = $this->spare_parts_model->get_free_of_charge_count($where);
+		$total_records = $this->spare_parts_model->get_dealer_request_count($where);
 
 		$config = array(
-			'pagination_url' => '/spare_parts/free_of_charge/generate_report',
+			'pagination_url' => '/spare_parts/dealer_request/generate_report',
 			'total_items' => $total_records,
 			'per_page' => 10,
 			'uri_segment' => 4,
 		);
 		$this->pager->set_config($config);
-		$free_of_charge_details = $this->spare_parts_model->get_free_of_charge($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");
+		$dealer_request_details = $this->spare_parts_model->get_dealer_request($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");
 
 		$html = "<table class='table table-bordered table-condensed'>
 			<thead>
@@ -1270,11 +1257,11 @@ class Free_of_charge extends Admin_Controller {
 			</thead>
 			<tbody>";
 		
-		if(empty($free_of_charge_details))
+		if(empty($dealer_request_details))
 		{
 			$html .= "<tr><td colspan='7' style='text-align:center'>No records found.</td></tr>";
 		}
-		foreach($free_of_charge_details as $wrd)
+		foreach($dealer_request_details as $wrd)
 		{
 			
 			$html .= "<tr>
@@ -1313,9 +1300,9 @@ class Free_of_charge extends Admin_Controller {
 	    $this->load->library('PHPExcel/IOFactory');
 	    $objPHPExcel = new PHPExcel();
 
-	    $free_of_charge_details = $this->spare_parts_model->get_free_of_charge($where, null, "insert_timestamp DESC");
+	    $dealer_request_details = $this->spare_parts_model->get_dealer_request($where, null, "insert_timestamp DESC");
 
-	    if (!empty($free_of_charge_details))
+	    if (!empty($dealer_request_details))
 	    {
 	      	$objPHPExcel->getProperties()->setTitle("export")->setDescription("none");
 	      	$start_column_num = 4;
@@ -1378,7 +1365,7 @@ class Free_of_charge extends Admin_Controller {
       
 	      	$row = $start_column_num + 1;
 	      	$current_item_date = 0;
-	      	foreach ($free_of_charge_details as $wrd)
+	      	foreach ($dealer_request_details as $wrd)
 	      	{
 	        	$objPHPExcel->getActiveSheet()->getStyle('A' . $row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 	        	$objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -1408,7 +1395,7 @@ class Free_of_charge extends Admin_Controller {
 	    	$filename_date = $from_date . '_to_' . $to_date;
     
 	    header('Content-Type: application/vnd.ms-excel');
-	    header('Content-Disposition: attachment;filename="free_of_charges_'.$filename_date.'.xls"');
+	    header('Content-Disposition: attachment;filename="dealer_requests_'.$filename_date.'.xls"');
 	    header('Cache-Control: max-age=0');   
 	    $objWriter = IOFactory::createWriter($objPHPExcel, 'Excel5');
 	    $objWriter->save('php://output');   
