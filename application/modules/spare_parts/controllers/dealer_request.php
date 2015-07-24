@@ -449,7 +449,7 @@ class Dealer_request extends Admin_Controller {
 				);
 
 				$html = "You have cancelled the Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
-				$title = "Cancelled :: " . $dealer_request_code;	
+				$title = "Cancelled :: " . $dealer_request_code;
 
 			} else if ($listing_action == 'for approval') {
 

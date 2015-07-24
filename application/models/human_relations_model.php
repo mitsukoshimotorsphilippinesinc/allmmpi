@@ -321,6 +321,16 @@ class Human_relations_model extends Base_Model
 		}
 		return $row;
 	}
+
+	function get_department_by_url($url) 
+	{
+		$result = $this->get_department(array('url' => $url));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
 	// ==============================================================
 
 }

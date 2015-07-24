@@ -8,21 +8,21 @@
 	.leftDiv {float:left;}
 </style>
 <div class="">
-	<fieldset>
-		
+	<fieldset>					
 		<table class='table table-condensed'>
 			<tr>					
-				<td colspan="1" align="left" class=""><h3>Merchandise Transfer Receipt</h3></td>
-				<td colspan='1' align='right' valign="bottom" ><h4>MTR No: <?= $request_summary->mtr_number; ?></h4></td>
+				<td colspan="2" align="left" class=""><h3>Merchandise Transfer Receipt - <?= $department_module_details->module_name ?></h3></td>
 			</tr>
-			<tr>					
-				<td colspan='1' align='left' valign="bottom" ><h4>Request Code: <?= $request_code; ?></h4></td>
+			<tr>
+				<td colspan='1' align='left' valign="bottom" ><h4>MTR No: <?= $request_summary->mtr_number; ?></h4></td>									
 				<td colspan="1" align='right'><h4><?= $copy ?> Copy</h4></td>					
-			</tr>						
-		</table>		
-
+			</tr>
+			<tr>
+				<td colspan='1' align='left' valign="bottom" ><h4>Request Code: <?= $request_code; ?></h4></td>
+				<td></td>			
+			</tr>				
+		</table>				
 		<hr>
-
 		<table class='table	table-condensed'>
 			<tr>
 				<td align='left'>Requester:<b> <?= $requester->complete_name; ?></b></td>

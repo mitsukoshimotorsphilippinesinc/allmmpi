@@ -75,7 +75,7 @@
 $active_group = 'default';
 $active_record = TRUE;
 $db['default']['dsn']      = '';
-$db['default']['hostname'] = 'local';
+$db['default']['hostname'] = 'localhost';
 $db['default']['username'] = 'root';
 $db['default']['password'] = '';
 $db['default']['database'] = 'mmpi';

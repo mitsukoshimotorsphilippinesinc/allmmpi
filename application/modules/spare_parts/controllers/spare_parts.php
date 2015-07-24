@@ -151,6 +151,7 @@ class Spare_parts extends Admin_Controller {
 				'total_quantity' => $total_quantity_amount->total_items,
 				'total_amount' => $total_quantity_amount->total_amount,
 				'approvals' => $approvals,
+				'department_module_details' => $department_module_details
 			);
 
 		$this->mpdf->WriteHTML($this->load->view('mtr_pdf_view',$data,TRUE));			
@@ -234,9 +235,177 @@ class Spare_parts extends Admin_Controller {
 		
 	}
 
+	public function get_requester()
+	{
+		$search_key = $this->input->get_post('search_key');
+		$search_key = trim($search_key);
 
+		if (empty($search_key)) 
+		{
+			$this->return_json("error","Search key is empty.");
+			return;
+		}
+		
+		$keys = explode(" ", $search_key);
+		$escape_keys = array();
+		for ($i = 0; $i < count($keys); $i++)
+			array_push($escape_keys, $this->human_relations_model->escape("%".$keys[$i]."%") );
+			
+		$where_first_name = implode(' OR first_name LIKE ', $escape_keys);
+		$where_last_name = implode(' OR last_name LIKE ', $escape_keys);
+		
+		// check if its a string name or part of a name
+		$escaped_search_key1 = $this->human_relations_model->escape($search_key);
+		$escaped_search_key2 = $this->human_relations_model->escape('%'.$search_key.'%');
+		$where = "is_employed = 1 AND ((complete_name like {$where_first_name}) ".(count($keys) > 1 ? "AND" : "OR")." (complete_name like {$where_last_name})) OR id_number like {$escaped_search_key2}";
+		$tmp_employees = $this->human_relations_model->get_employment_information_view($where, array('offset' => 0, 'rows' => 50), "id_number ASC, complete_name ASC");
+		
+		// 20150723 TODO!!!
+		// ================
+		//var_dump($where);
+		//return;
+		// ================
 
+		$employees = array();
+		if (count($tmp_employees) == 0)
+		{
+			// if these is reached then nothing are found.
+			$this->return_json("error","Not found.", array('employees' => $employees, 'keys' => $keys));
+			return;
+		}
 
+		$tmp_position = $this->human_relations_model->get_position();
+		$positions = array();
+		foreach ($tmp_position as $item)
+			$positions[$item->position_id] = $item;
+
+		foreach ($tmp_employees as $mem)
+		{
+			
+			$department_name = "N/A";	
+			$position_name = "N/A";
+			// get company and department
+			$department_details = $this->human_relations_model->get_department_by_id($mem->department_id);
+			if (!empty($department_details)) {
+				$department_name = $department_details->department_name;
+			}
+
+			// get position
+			$position_details = $this->human_relations_model->get_position_by_id($mem->position_id);
+			if (!empty($position_details)) {
+				$position_name = $position_details->position_name;
+			}
+
+			// is_employed
+			if ($mem->is_employed == 1)
+				$is_employed = "YES";
+			else
+				$is_employed = "NO";
+
+			$employees[$mem->employment_information_id] = array(
+				"employment_information_id" => $mem->employment_information_id,
+				"id_number" => $mem->id_number,
+				"complete_name" => strtoupper($mem->complete_name),
+				"company_email_address" => $mem->company_email_address,
+				"department_name" => $department_name,
+				"position" => $position_name,
+				"is_employed" => $is_employed,
+			);
+		}
+
+		$this->return_json("ok","Ok.", array('employees' => $employees, 'keys' => $keys));
+		return;
+		
+	}
+
+	public function search_item()
+	{
+		$search_key = $this->input->get_post('search_key');
+		$search_key = trim($search_key);
+	
+		if (empty($search_key)) 
+		{
+			$this->return_json("error","Item Name is empty.");
+			return;
+		}
+
+		$keys = explode(" ", $search_key);
+		for ($i = 0; $i < count($keys); $i++)
+		{
+			$escaped_keys[] = mysql_real_escape_string($keys[$i]);
+		}
+
+		$key_count = count($escaped_keys);  
+
+		// get possible combinations
+		$combinations = array();
+
+		$this->load->library('Math_Combinatorics');
+		$combinatorics = new Math_Combinatorics;
+		foreach( range(1, count($escaped_keys)) as $subset_size ) {
+    		foreach($combinatorics->permutations($escaped_keys, $subset_size) as $p) {
+	  			$combinations[sizeof($p)-1][] = $p;
+    		}
+		}
+
+		$combinations = array_reverse($combinations);
+
+		// exact match search
+		$has_exact = false;
+		$tmp_items = array();
+
+		foreach($combinations as $comb_group)
+		{
+			foreach($comb_group as $comb)
+			{
+				$name = strtoupper(join('', $comb));
+				$sql = "
+					SELECT * FROM `is_item_view` WHERE
+					(REPLACE(`sku`,' ','') LIKE '%{$name}%') OR (REPLACE(`model_name`,' ','') LIKE '%{$name}%') OR (REPLACE(`description`,' ','') LIKE '%{$name}%') OR (REPLACE(`sku`,' ','') LIKE '%{$name}%') ORDER BY sku, description LIMIT 50;
+				";
+				$query = $this->db_spare_parts->query($sql);
+				if(count($query->result_array()) > 0)
+				{
+					$tmp_items = $query->result_object();
+					$has_exact = true;
+					break;
+				}
+			}
+			if($has_exact)
+			{
+				break;
+			}
+		}
+		
+		$return_items = array();
+
+		if (count($tmp_items) == 0)
+		{
+			// if these is reached then nothing are found.
+			$this->return_json("error","Not found.", array('items' => $return_items, 'keys' => $keys));
+			return;
+		}
+		
+		foreach ($tmp_items as $itm)
+		{
+			$return_items[$itm->item_id] = array(
+				"item_id" => $itm->item_id,
+				"sku" => $itm->sku,
+				"brand_model" => $itm->brand_name . ' / ' . $itm->model_name,
+				"description" => strtoupper($itm->description),
+				"srp" => strtoupper($itm->srp),
+				"warehouse_name" => strtoupper($itm->warehouse_name),
+				"rack_location" => strtoupper($itm->rack_location),
+				"bad_quantity" => $itm->bad_quantity,
+				"good_quantity" => $itm->good_quantity,
+
+			);
+		}
+		
+		$this->return_json("ok","Ok.", array('items' => $return_items, 'keys' => $keys));
+		return;
+
+	}
 
 
 
