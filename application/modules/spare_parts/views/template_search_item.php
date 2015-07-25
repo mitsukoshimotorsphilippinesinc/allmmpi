@@ -1,4 +1,7 @@
-<script id='search-item-template' type='text/template'>
+
+
+<script id='search-item-template' type='text/template'>	
+		
 	<h3>Item:</h3>
 	<form id='frm_item_search' class="form-search control-group" onsubmit='return false;'>
 		<input type="text" id='txt_item_search_key' name='txt_item_search_key' class="input-xlarge search-query assign-input-search" placeholder='Description / SKU' value='' style="width:400px;">

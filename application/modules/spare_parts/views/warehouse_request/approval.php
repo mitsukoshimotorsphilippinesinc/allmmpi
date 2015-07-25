@@ -11,6 +11,10 @@
 			<option value="ALL">ALL</option>
 			<option value="FOR APPROVAL">FOR APPROVAL</option>
 			<option value="APPROVED">APPROVED</option>
+			<option value="FOR CANCELLATION">FOR CANCELLATION</option>
+			<option value="CANCELLED (COMPLETED)">CANCELLED (COMPLETED)</option>
+			<option value="DENIED">DENIED</option>
+			<option value="DENIED (COMPLETED)">DENIED (COMPLETED)</option>
 		</select>                 
 	
 		<br/>
@@ -51,16 +55,16 @@
 
 <table class='table table-striped table-bordered'>
 	<thead>
-		<tr>			
+		<tr>						
 			<th style=''>Request Code</th>
 			<th>Status</th>
 			<th style='width:100px;'>Requested By</th>
 			<th style='width:100px;'>Motor Brand/Model</th>
+			<th style='width:100px;'>Number of Items</th>
 			<th style='width:100px;'>Warehouse</th>
 			<th style='width:100px;'>Approved By (Warehouse)</th>			
-			<th style='width:120px;'>Remarks</th>
-			<th style='width:70px;'>Date Created</th>			
-			<th style='width:120px;'>Action</th>
+			<th style='width:70px;'>Date Created</th>
+			<th style='width:118px;'>Action</th>		
 		</tr>
 	</thead>
 	<tbody>
@@ -70,21 +74,23 @@
 	<?php foreach ($transfers as $t): ?>
 		<tr>
 									
-			<td><?= $t->request_code; ?></td>
+			<td style='text-align:center;'><?= $t->request_code; ?></td>
 			
 			<?php
-			if ($t->status == 'PENDING') {
+			if (($t->status == 'DENIED') || ($t->status == 'DENIED (COMPLETED)')) {
 				echo "<td><span class='label label-important' >{$t->status}</span></td>";
 			} else if ($t->status == 'PROCESSING') {
 				echo "<td><span class='label label-info' >{$t->status}</span></td>";
-			} else if ($t->status == 'FOR APPROVAL') {
+			} else if (($t->status == 'FOR APPROVAL') || ($t->status == 'FOR CANCELLATION')) {
 				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
 			} else {
 				echo "<td><span class='label label-success' >{$t->status}</span></td>";
 			}			
 
 			// get requestor details
-			$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);
+			// get requestor details
+			$id = str_pad($t->id_number, 7, '0', STR_PAD_LEFT);
+			$requestor_details = $this->human_relations_model->get_employment_information_by_id($id);			
 
 			if (count($requestor_details) == 0) {
 				echo "<td>N/A</td>";
@@ -100,6 +106,18 @@
 				echo "<td>{$motor_brand_model_details->brand_name}" . " - " . "{$motor_brand_model_details->model_name}</td>"; 
 			}				
 
+			// number of items
+			$where = "warehouse_request_id = " . $t->warehouse_request_id . " AND status IN ('PENDING', 'COMPLETED')";
+			$warehouse_request_detail_info = $this->spare_parts_model->get_warehouse_request_detail($where);
+
+			$total_items = 0;
+			foreach ($warehouse_request_detail_info as $wrdi) {
+				$total_items = $total_items + ($wrdi->good_quantity + $wrdi->bad_quantity);
+			}
+			$total_items = number_format($total_items);
+
+			echo "<td  style='text-align:right;'>{$total_items}</td>";
+
 			// get warehouse detail			
 			$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($t->warehouse_id);
 
@@ -108,9 +126,17 @@
 			} else { 
 				echo "<td>{$warehouse_details->warehouse_name}</td>"; 
 			}
+
+			if (($t->warehouse_approved_by == 0) || ($t->warehouse_approved_by == '0')) {
+				echo "<td>N/A</td>";
+			} else {
+				$id = str_pad($t->warehouse_approved_by, 7, '0', STR_PAD_LEFT);
+				$warehouse_signatory_details = $this->human_relations_model->get_employment_information_view_by_id($id);
+				echo "<td>{$warehouse_signatory_details->complete_name}</td>";
+			}
+
 			?>	
-			<td></td>
-			<td><?= $t->remarks; ?></td>
+			
 			<td><?= $t->insert_timestamp; ?></td>
 
 			
@@ -118,7 +144,7 @@
 			<td data1="<?= $t->warehouse_request_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
-				if ($t->status == 'FOR APPROVAL') {
+				if (($t->status == 'FOR APPROVAL') || ($t->status == 'FOR CANCELLATION')) {
 					echo "<a class='btn btn-small btn-success process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>
 						<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>
 						";

@@ -33,6 +33,7 @@ class Spare_parts_model extends Base_Model
 			'item' => 'is_item',
 			'item_view' => 'is_item_view',
 			'department_module_submodule' => 'rf_department_module_submodule',
+			'department' => 'rf_department',
 		);
 
 	}
@@ -1371,7 +1372,17 @@ class Spare_parts_model extends Base_Model
 
 	function get_department_module_submodule_by_id($department_module_submodule_id) 
 	{
-		$result = $this->get_item(array('department_module_submodule_id' => $department_module_submodule_id));
+		$result = $this->get_department_module_submodule(array('department_module_submodule_id' => $department_module_submodule_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_department_module_submodule_by_submodule_url($submodule_url) 
+	{
+		$result = $this->get_department_module_submodule(array('submodule_url' => '/' . $submodule_url));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];

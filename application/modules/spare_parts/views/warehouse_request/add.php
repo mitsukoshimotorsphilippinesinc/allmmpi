@@ -5,23 +5,29 @@
 
 ?>
 <style type="text/css">
-	.inventory-orders .good_qty {width:80px;}
-	.inventory-orders .bad_qty {width:80px;}
+	.inventory-orders .good_qty {width:80px;text-align:right;}
+	.inventory-orders .bad_qty {width:80px;text-align:right;}
 	.inventory-orders .unit {width:60px;}
 	.inventory-orders .item {width:200px;}
-	.inventory-orders .price {width:80px;}
+	.inventory-orders .price {width:80px;text-align:right;}
+	.inventory-orders .discount {width:50px;text-align:right;}
+	.inventory-orders .discount_price {width:100px;text-align:right;}
 	.inventory-orders .remark {width:100px;}
 
-	.inventory-order-items .qty {width:112px;}
+	.inventory-order-items .qty {width:112px;text-align:right;}
 	.inventory-order-items .unit {width:112px;}
 	.inventory-order-items .item {width:224px;}
-	.inventory-order-items .price {width:112px;}
+	.inventory-order-items .price {width:112px;text-align:right;}
+	.inventory-order-items .discount {width:50px;text-align:right;}
+	.inventory-order-items .discount_price {width:100px;text-align:right;}
 	.inventory-order-items .remark {width:284px;}
 
-	.inventory-order-items input.qty  {width:102px;}
+	.inventory-order-items input.qty  {width:102px;text-align:right;}
 	.inventory-order-items select.unit {width:112px;}
 	.inventory-order-items select.item {width:224px;}
-	.inventory-order-items input.price {width:102px;}
+	.inventory-order-items input.price {width:102px;text-align:right;}
+	.inventory-order-items input.discount {width:50px;text-align:right;}
+	.inventory-order-items input.discount_price {width:100px;text-align:right;}
 	.inventory-order-items input.remark {width:274px;}
 
 </style>
@@ -45,6 +51,11 @@ else
 }
 ?>
 
+<?php
+	$breadcrumb_container = assemble_breadcrumb();
+?>
+
+<?= $breadcrumb_container; ?>
 
 <div class='alert alert-info'><h3><?= $titlePrefix ?><?= $department_module_details->module_name ?> <a class='btn return-btn add-close' style='float:right;margin-right:-30px;' >Back to Request List</a></h3></div>
 
@@ -103,12 +114,12 @@ else
 							<label class="control-label" for="remarks"><strong>Remarks</strong></label>
 							<div class="controls">
 								<?php if(!$isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="current_remarks" readonly><?= $warehouse_request_details->remarks ?></textarea>
+								<textarea class='span8' rows="4" placeholder="" name="current_requester_remarks" readonly><?= $warehouse_request_details->remarks ?></textarea>
 								<br/><br/>
 								<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
-								<input class="span12" id="remarks" type="text" placeholder="New Remarks">
+								<input class="span12" id="requester_remarks" type="text" placeholder="New Remarks">
 								<?php elseif($isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="remarks" id="remarks" maxlength="255"><?= set_value('remarks',@$po->remarks) ?></textarea>
+								<textarea class='span8' rows="4" placeholder="" name="remarks" id="requester_remarks" maxlength="255"></textarea>
 								<p class="help-block"><?= $this->form_validation->error('remarks'); ?></p>
 								<?php endif; ?>
 							</div>
@@ -205,7 +216,7 @@ else
 		</h4></div>	
 
 		
-		<div class="row-fluid span8">
+		<div class="row-fluid">
 			<table class="table inventory-orders">
 				<thead id="items_header">
 					<tr>
@@ -264,7 +275,7 @@ else
 						<td>
 							<?php
 							$discount_options = array();
-							for ($i=0; $i<=100; $i++) {
+							for ($i=100; $i>=0; $i--) {
 								array_push($discount_options, $i);	
 							}
 							
@@ -306,6 +317,7 @@ else
 						<th class="price">SRP</th>
 						<th class="discount">Disc.(%)</th>
 						<th class="discount_price">Disc. Price</th>
+						<th class="price">Total Amount</th>
 						<th class="remark">Remarks</th>
 						<th></th>
 						<th></th>
@@ -335,6 +347,7 @@ else
 						<td class="price"><?=number_format(set_value('item_price['.$i.']',$temp[$i]['srp']),2)?></td>
 						<td class="discount"><?=number_format(set_value('discount['.$i.']',$temp[$i]['discount']))?></td>
 						<td class="discount_price"><?=number_format(set_value('discount_price['.$i.']',$temp[$i]['discount_amount']),2)?></td>
+						<td class="price"><?=number_format(set_value('item_total_amount['.$i.']',$temp[$i]['total_amount']),2)?></td>
 						<td class="remark"><?=set_value('item_remarks['.$i.']',$temp[$i]['remarks'])?></td>
 						<td id="<?= $temp[$i]['warehouse_request_detail_id'] ?>" data="<?= $temp[$i]['warehouse_request_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
 						<td class="hidden_values">
@@ -396,6 +409,7 @@ else
 		<td class="price"><%= item_price %></td>\n\
 		<td class="qty"><%= item_discount %></td>\n\
 		<td class="qty"><%= item_discount_price %></td>\n\
+		<td class="price"><%= item_total_amount %></td>\n\
 		<td class="remark"><%= item_remarks %></td>\n\
 		<td id="<%= active_warehouse_request_detail_id %>" data="<%= active_warehouse_request_detail_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
 		<td class="hidden_values">\n\
@@ -484,7 +498,7 @@ else
 		with_overlay = typeof(with_overlay) == 'undefined' ? true : with_overlay;
 		b.request({
 			'with_overlay' : with_overlay,
-			url: '/spare_parts/warehouse_request/get_requester',
+			url: '/spare_parts/get_requester',
 			data: {'search_key' : search_key},
 			on_success: function(data, status) {
 				if (_.isFunction(cb)) cb.call(this, data);
@@ -521,7 +535,7 @@ else
 		
 		$("#item_type_search").change(function(e) {
 			var search_key = $.trim($("#txt_item_search_key").val());
-			if(search_key != "") $("#btn_item_search").trigger("click");
+			if(search_key != "") $("#btn_item_search").trigger("click");		
 		})
 		
 		$("#btn_item_search").click(function(e) {
@@ -529,14 +543,16 @@ else
 			
 			var search_key = $.trim($("#txt_item_search_key").val());
 			var item_type_id = $.trim($("#item_type_search").val());
-			
+
+			var warehouse_option = $("#item_warehouse_option").val();
+
 			if (search_key.length == 0) 
 			{
 				return;
 			}
 			
 			b.request({
-				url: "/spare_parts/warehouse_request/search_item",
+				url: "/spare_parts/search_item",
 				data: {
 					"search_key": search_key,
 				},
@@ -681,6 +697,7 @@ else
 					'good_quantity' : $('input[name="add_item_good_qty"]').val(),
 					'bad_quantity' : $('input[name="add_item_bad_qty"]').val(),
 					'remarks' : $('input[name="add_item_remarks"]').val(),
+					'requester_remarks' : $("#requester_remarks").val(),
 					'engine' : $("#engine").val(),
 					'chassis' : $("#chassis").val(),
 					'warehouse_id' : $("#add_item_warehouse").val(),
@@ -712,6 +729,7 @@ else
 							item_bad_qty: numberFormat($('input[name="add_item_bad_qty"]').val(),2),
 							item_discount: numberFormat($('select[name="add_item_discount"]>option:selected').text()) + '%',
 							item_discount_price: numberFormat($('input[name="add_item_discount_price"]').val(),2),
+							item_total_amount: data.data.item_total_amount,
 							item_remarks: $('input[name="add_item_remarks"]').val(),
 							active_warehouse_request_detail_id: data.data.active_warehouse_request_detail_id,
 							hidden_item_price: $('input[name="add_item_price"]').val(),

@@ -78,7 +78,7 @@ function return_reserved_items($request_code, $reservation_status, $remarks) {
 
 	// update tr_warehouse_reservation
 	$data = array(
-			'status' => 'DENIED',
+			'status' => $reservation_status,
 			'update_timestamp' => $current_datetime
 		);
 
@@ -127,4 +127,3 @@ function get_items_total_amount($request_code) {
 
 	return $request_item_amount_total;
 }
-

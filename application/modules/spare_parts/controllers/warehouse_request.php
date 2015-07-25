@@ -13,6 +13,7 @@ class Warehouse_request extends Admin_Controller {
 		$this->load->model('warehouse_model');
 		$this->load->library('pager');		
 		$this->load->helper("spare_parts_helper");
+		$this->load->helper("breadcrumb_helper");
 
 		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);
 
@@ -74,11 +75,11 @@ class Warehouse_request extends Admin_Controller {
 		}
 
 		if (empty($search_status)) {
-			$where = "status IN ('FOR APPROVAL', 'APPROVED')";
+			$where = "status IN ('FOR APPROVAL', 'APPROVED', 'FOR CANCELLATION', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)')";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('FOR APPROVAL', 'APPROVED')";
+				$where = "status IN ('FOR APPROVAL', 'APPROVED', 'FOR CANCELLATION', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)')";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}			
@@ -113,11 +114,9 @@ class Warehouse_request extends Admin_Controller {
 		$this->template->search_by = $search_by;
 		$this->template->search_text = $search_text;
 		$this->template->search_url = $search_url;
-		$this->template->transfers = $transfers;
-		
+		$this->template->transfers = $transfers;		
 		$this->template->view('warehouse_request/approval');	
 		
-
 	}	
 
 
@@ -137,11 +136,11 @@ class Warehouse_request extends Admin_Controller {
 
 		} else {
 
-			if ($is_approved == 'yes') {
-
-				$html = "You are about to approve the Warehouse Request with Request Code: <strong>" . $warehouse_request_code . "</strong>. Do you want to continue?";
+			if ($is_approved == 'yes') {							
+				$html = "You are about to approve the <b>" . $warehouse_request->status . "</b> Warehouse Request with Request Code: <strong>" . $warehouse_request_code . "</strong>. <br/><br/>Do you want to continue?";
+				$title = "Confirm Approval :: " . $warehouse_request_code;
 			} else {
-				$html = "<p>You are about to deny the Warehouse Request with Request Code: <strong>" . $warehouse_request_code . "</strong>. <br/>
+				$html = "<p>You are about to deny the <b>" . $warehouse_request->status . "</b> Warehouse Request with Request Code: <strong>" . $warehouse_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;'/><br/>
@@ -149,9 +148,8 @@ class Warehouse_request extends Admin_Controller {
 							</div>	
 							<br/>
 							Do you want to continue?</p>";
-			}	
-
-			$title = "Confirm Approval :: " . $warehouse_request_code;
+				$title = "Confirm Disapproval :: " . $warehouse_request_code;			
+			}			
 				
 			$data = array (
 				'warehouse_request_id' => $warehouse_request_id,
@@ -189,37 +187,49 @@ class Warehouse_request extends Admin_Controller {
 			if ($is_approved == 'no') {
 				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $warehouse_request->remarks;
 
-				$data = array(
-					'status' => "DENIED",
+				$data = array(				
 					'approved_by' => $this->user->user_id,
 					'remarks' => $new_remarks,
 					'approve_timestamp' => $current_datetime
-				);
+				);			
 
-				// from spare_parts helper
-				$return_html = return_reserved_items($warehouse_request_code, 'DENIED', $remarks);
+				if ($warehouse_request->status == 'FOR APPROVAL') {
 
-				$html = "You have denied the Warehouse Request Code: <strong>{$warehouse_request_code}</strong>.";
-				$title = "Denied :: " . $warehouse_request_code;
+					// from spare_parts helper
+					$return_html = return_reserved_items($warehouse_request_code, 'DENIED', $remarks);
+					$data['status'] = "DENIED";
 
-				$this->return_json("1","Denied Warehouse Request.",array("html" => $html, "title" => $title));		
+				} else if ($warehouse_request->status == 'FOR CANCELLATION') {
+					
+					$return_html = return_reserved_items($warehouse_request_code, 'DENIED (COMPLETED)', $remarks);
+					$data['status'] = "DENIED (COMPLETED)";					
+				
+				}
+
+				$html = "You have denied the <b>" . $warehouse_request->status . "</b> Warehouse Request with Request Code: <strong>{$warehouse_request_code}</strong>.";
+				$title = "Request Denied :: " . $warehouse_request_code;			
 
 			} else {
-				// change status to APPROVED
-				$data = array(
-					'status' => "APPROVED",
+
+				$data = array(						
 					'approved_by' => $this->user->user_id,					
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully approved the Warehouse Request Code: <strong>{$warehouse_request_code}</strong>.";
-				$title = "Approved :: " . $warehouse_request_code;
+				if ($warehouse_request->status == 'FOR APPROVAL') {
+					$data['status'] = "APPROVED";
+				} else if ($warehouse_request->status == 'FOR CANCELLATION') {
+					$data['status'] = "CANCELLED (COMPLETED)";
+				}
+				
+				$html = "You have successfully approved the <b>" . $warehouse_request->status . "</b> Warehouse Request with Request Code: <strong>{$warehouse_request_code}</strong>.";
+				$title = "Request Approved :: " . $warehouse_request_code;
 			}
 			
 			$where = "warehouse_request_id = " . $warehouse_request_id;
 			$this->spare_parts_model->update_warehouse_request($data, $where);
 
-			$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
+			$this->return_json("1","Successful Approval/Disapproval of Warehouse Request.",array("html" => $html, "title" => $title));
 						
 		}	
 		return;	
@@ -305,11 +315,11 @@ class Warehouse_request extends Admin_Controller {
 		} 
 
 		if (empty($search_status)) {
-			$where = "status IN ('PENDING', 'FOR APPROVAL', 'APPROVED', 'DENIED', 'PROCESSING', 'COMPLETED', 'CANCELLED', 'FORWARDED')";
+			$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('PENDING', 'FOR APPROVAL', 'APPROVED', 'DENIED', 'PROCESSING', 'COMPLETED', 'CANCELLED', 'FORWARDED')";
+				$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}
@@ -369,7 +379,7 @@ class Warehouse_request extends Admin_Controller {
 
 			if ($listing_action == 'for approval') {
 				$title = "File For Approval :: " . $warehouse_request_code;
-				$html = "You are about forward the request for approval with Request Code: <strong>" . $warehouse_request_code . "</strong>. Do you want to continue?";
+				$html = "You are about to forward the request for approval with Request Code: <strong>" . $warehouse_request_code . "</strong>. Do you want to continue?";
 			}
 
 			if ($listing_action == 'forward to warehouse') {
@@ -383,7 +393,7 @@ class Warehouse_request extends Admin_Controller {
 				$title = "Assign MTR Number :: " . $warehouse_request_code;
 				$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $warehouse_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
-								<span><strong>P.O. Number:</strong></span></br>
+								<span><strong>MTR Number:</strong></span></br>
 								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
 								<span id='error-mtrnumber' style='color:red;display:none'>P.O. Number is required.</span>
 							</div>	
@@ -401,6 +411,11 @@ class Warehouse_request extends Admin_Controller {
 							</div>	
 							<br/>
 							Do you want to continue?</p>";
+			}
+
+			if ($listing_action == 'cancel completed') {
+				$title = "For Approval - Cancel Completed Request :: " . $warehouse_request_code;
+				$html = "You are about to request the approval of <b>Cancellation of a Completed Request</b> with Request Code: <strong>" . $warehouse_request_code . "</strong>.<br/><br/>Do you want to continue?";
 			}	
 	
 			$data = array (
@@ -498,6 +513,17 @@ class Warehouse_request extends Admin_Controller {
 				$html = "You have successfully assigned a MTR Number to the request with Request Code: <strong>{$warehouse_request_code}</strong>.";
 				$title = "Assign MTR Number :: " . $warehouse_request_code;
 			
+			}
+
+			if ($listing_action == 'cancel completed') {
+				$data = array(
+					'status' => "FOR CANCELLATION",
+					'approved_by' => $this->user->user_id,					
+					'approve_timestamp' => $current_datetime
+				);
+
+				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$warehouse_request_code}</strong>.";
+				$title = "For Approval - Cancel Completed Request :: " . $warehouse_request_code;
 			}
 			
 			$where = "warehouse_request_id = " . $warehouse_request_id;
@@ -711,7 +737,7 @@ class Warehouse_request extends Admin_Controller {
 			$this->template->department_details = $department_details;
 			$this->template->position_details = $position_details;
 
-			$request_item_amount_total = get_items_total_amount($warehouse_request_details->request_code);
+			$request_item_amount_total = get_items_total_amount($warehouse_request_details->request_code);		
 			$this->template->request_item_amount_total = $request_item_amount_total;
 
 			// get request items
@@ -767,7 +793,7 @@ class Warehouse_request extends Admin_Controller {
 		$this->template->view('warehouse_request/add');
 	}
 
-	public function get_requester()
+	/*public function get_requester()
 	{
 		$search_key = $this->input->get_post('search_key');
 		$search_key = trim($search_key);
@@ -789,9 +815,14 @@ class Warehouse_request extends Admin_Controller {
 		// check if its a string name or part of a name
 		$escaped_search_key1 = $this->human_relations_model->escape($search_key);
 		$escaped_search_key2 = $this->human_relations_model->escape('%'.$search_key.'%');
-		$where = "((complete_name like {$where_first_name}) ".(count($keys) > 1 ? "AND" : "OR")." (complete_name like {$where_last_name})) OR id_number like {$escaped_search_key2}";
+		$where = "is_employed = 1 AND ((complete_name like {$where_first_name}) ".(count($keys) > 1 ? "AND" : "OR")." (complete_name like {$where_last_name})) OR id_number like {$escaped_search_key2}";
 		$tmp_employees = $this->human_relations_model->get_employment_information_view($where, array('offset' => 0, 'rows' => 50), "id_number ASC, complete_name ASC");
 		
+		// 20150723 TODO!!!
+		// ================
+		var_dump($where);
+		return;
+		// ================
 
 		$employees = array();
 		if (count($tmp_employees) == 0)
@@ -933,7 +964,7 @@ class Warehouse_request extends Admin_Controller {
 		$this->return_json("ok","Ok.", array('items' => $return_items, 'keys' => $keys));
 		return;
 
-	}
+	}*/
 
 	public function create_request()
 	{
@@ -945,10 +976,11 @@ class Warehouse_request extends Admin_Controller {
 		$good_quantity = abs($this->input->post("good_quantity"));
 		$bad_quantity = abs($this->input->post("bad_quantity"));
 		$remarks = trim($this->input->post("remarks"));
+		$requester_remarks = trim($this->input->post("requester_remarks"));
 		$engine = trim($this->input->post("engine"));
 		$chassis = trim($this->input->post("chassis"));
 		$warehouse_id = abs($this->input->post("warehouse_id"));
-		$brandmodel = trim($this->input->post("brandmodel"));
+		$brandmodel_id = trim($this->input->post("brandmodel"));
 		$requester_id = trim($this->input->post("requester_id"));
 
 		$has_error = 0;
@@ -1009,13 +1041,6 @@ class Warehouse_request extends Admin_Controller {
 				$manager_id_number = $warehouse_details->manager_id_number;
 			}
 
-			$motorcycle_brand_model_id = 0;
-			// get motorcycle details from warehouse db
-			$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view("CONCAT(brand_name, ' ', model_name) = '{$brandmodel}'");
-			if (count($motorcycle_brandmodel_details)  > 0) {
-				$motorcycle_brand_model_id = $motorcycle_brandmodel_details[0]->motorcycle_brand_model_id;
-			}
-
 			$sql = "INSERT INTO 
 						is_warehouse_request 
 						(
@@ -1026,7 +1051,8 @@ class Warehouse_request extends Admin_Controller {
 							`warehouse_id`, 
 							`motorcycle_brand_model_id`, 
 							`engine`, 
-							`chassis`
+							`chassis`,
+							`remarks`
 						)
                     	(
                     	SELECT 
@@ -1035,9 +1061,10 @@ class Warehouse_request extends Admin_Controller {
                     		'{$requester_id}', 
                     		'{$manager_id_number}',
                             '{$warehouse_id}', 
-                            '{$motorcycle_brand_model_id}', 
+                            '{$brandmodel_id}', 
                             '{$engine}', 
-                            '{$chassis}'
+                            '{$chassis}',
+                            '{$requester_remarks}'
                     	FROM 
                     		is_warehouse_request
                     	WHERE 
@@ -1054,8 +1081,6 @@ class Warehouse_request extends Admin_Controller {
 			$warehouse_request_id = $query->first_row();
 
 			$active_warehouse_request_id = $warehouse_request_id->last_id;
-
-			//var_dump($warehouse_request_id->last_id);
 
 			// generate request code
 			$sql = "SELECT 
@@ -1105,6 +1130,8 @@ class Warehouse_request extends Admin_Controller {
 			$total_amount = $total_amount + ($bad_quantity * $discount_amount);
 		}
 
+		$formatted_total_amount = number_format($total_amount, 2);
+
 		// add item to details table
 		$data_insert = array(
 				'warehouse_request_id' => $active_warehouse_request_id,
@@ -1129,7 +1156,7 @@ class Warehouse_request extends Admin_Controller {
 					good_quantity = good_quantity - {$good_quantity}, 
 					bad_quantity = bad_quantity - {$bad_quantity} 
 				WHERE 
-					item_id = item_id";
+					item_id = " . $item_id;
 
 		$this->db_spare_parts->query($sql);
 
@@ -1138,7 +1165,7 @@ class Warehouse_request extends Admin_Controller {
 		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been added successfully!</p>";
 		$title = "Add Item :: Item Request";
 
-		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id));
+		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id, 'item_total_amount' => $formatted_total_amount));
 		return;
 	}	
 
@@ -1151,7 +1178,6 @@ class Warehouse_request extends Admin_Controller {
 		$warehouse_request_details = $this->spare_parts_model->get_warehouse_request_by_code($request_code);
 
 		$warehouse_request_detail_info = $this->spare_parts_model->get_warehouse_request_detail_by_id($warehouse_request_detail_id);
-
 
 		$item_view_details = $this->spare_parts_model->get_item_view_by_id($warehouse_request_detail_info->item_id);
 		

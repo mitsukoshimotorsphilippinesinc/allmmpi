@@ -126,13 +126,13 @@
 				?>
 				<tr>
 					<td><?= $complete_description; ?></td>
-					<td><?= $srd->srp; ?></td>
-					<td><?= $srd->discount; ?></td>
-					<td><?= $srd->discount_amount; ?></td>
-					<td><?= $srd->good_quantity; ?></td>
-					<td><?= $srd->bad_quantity; ?></td>
-					<td><?= $srd->total_amount; ?></td>
-					<td><?= $item_view_details->rack_location; ?></td>
+					<td style="text-align:right;"><?= $srd->srp; ?></td>
+					<td style="text-align:right;"><?= $srd->discount; ?></td>
+					<td style="text-align:right;"><?= number_format($srd->discount_amount); ?></td>
+					<td style="text-align:right;"><?= number_format($srd->good_quantity); ?></td>
+					<td style="text-align:right;"><?= number_format($srd->bad_quantity); ?></td>
+					<td style="text-align:right;"><?= number_format($srd->total_amount); ?></td>
+					<td style="text-align:right;"><?= $item_view_details->rack_location; ?></td>
 					<td><?= $srd->status; ?></td>
 					<td><?= $srd->remarks; ?></td>
 				</tr>	
