@@ -34,6 +34,7 @@ class Spare_parts_model extends Base_Model
 			'item_view' => 'is_item_view',
 			'department_module_submodule' => 'rf_department_module_submodule',
 			'department' => 'rf_department',
+			'reprocessed_item' => 'is_reprocessed_item',
 		);
 
 	}
@@ -1396,6 +1397,81 @@ class Spare_parts_model extends Base_Model
 		$row = $query->first_row();
 		$query->free_result();
 		return $row->cnt;
+	}
+	// ===========================================================================
+	// ===========================================================================
+    // is_reprocessed_item
+	function get_reprocessed_item($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('reprocessed_item', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_reprocessed_item($data) 
+	{
+		return $this->insert('reprocessed_item', $data);
+	}
+
+	function update_reprocessed_item($data, $where) 
+	{
+		return $this->update('reprocessed_item', $data, $where);
+	}
+
+	function delete_reprocessed_item($where) 
+	{
+		return $this->delete('reprocessed_item', $where);
+	}
+
+	function get_reprocessed_item_by_id($reprocessed_item_id) 
+	{
+		$result = $this->get_reprocessed_item(array('reprocessed_item_id' => $reprocessed_item_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_reprocessed_item_by_code($request_code) 
+	{
+		$result = $this->get_reprocessed_item(array('request_code' => $request_code));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_reprocessed_item_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('reprocessed_item', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+	
+	function search_reprocessed_item($search, $query, $limit = null, $orderby = null, $fields = null)
+	{
+		// clear previous get request
+		$this->db->flush_cache();
+
+		$this->db->distinct();
+		$this->db->like($search,$query,'both');
+		
+		// No override function, procede with fetch
+		($fields!=null) ? $this->db->select($fields) : '';
+		($limit!=null) ? $this->db->limit($limit['rows'],$limit['offset']) : '';
+		($orderby!=null) ? $this->db->order_by($orderby) : '';
+
+		// set table to use
+		$this->db->from($this->_TABLES['reprocessed_item']);
+		$result = $this->db->get();
+
+		$row = $result->result();
+		$result->free_result();
+		return $row;
 	}
 	// ===========================================================================
 

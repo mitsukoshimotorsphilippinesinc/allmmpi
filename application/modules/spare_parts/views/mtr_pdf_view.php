@@ -33,11 +33,11 @@
 				<td align='right'>Approved By:<b> <?= $requester->complete_name; ?></b></td>
 			</tr>
 			<tr>
-				<td align='left'>Total Amount:<b> Php <?= $total_amount; ?></b></td>
+				<td align='left'>Total Amount:<b> Php <?= number_format($total_amount, 2); ?></b></td>
 				<td align='right'>Engine:<b> <?=(empty($request_summary->engine)) ? "N/A" : $request_summary->engine ?></b></td>				
 			</tr>
 			<tr>
-				<td align='left'>Total Items:<b><?= $total_quantity; ?></b></td>
+				<td align='left'>Total Items:<b><?= number_format($total_quantity, 2); ?></b></td>
 				<td align='right'>Chassis:<b> <?=(empty($request_summary->chassis)) ? "N/A" : $request_summary->chassis ?></b></td>				
 			</tr>		
 		</table>
@@ -62,8 +62,8 @@
 							?>
 							<td>[<?=$item_details->model_name?> / <?=$item_details->brand_name?>] <?=$item_details->description?></td>
 							<td><?=$item_details->unit?></td>
-							<td><?=$rd->good_quantity?></td>
-							<td><?=$rd->bad_quantity?></td>							
+							<td><?=number_format($rd->good_quantity, 2)?></td>
+							<td><?=number_format($rd->bad_quantity, 2)?></td>							
 							<td ><?=number_format($rd->total_amount, 2)?></td>
 						</tr>
 					<?php endforeach;?>

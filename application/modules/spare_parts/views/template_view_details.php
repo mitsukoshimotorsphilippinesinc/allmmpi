@@ -33,7 +33,11 @@
 				</tr>
 				<tr>
 					<td><strong>Status:</strong></td>
-					<td><?= $segment_request_summary->status; ?></td>
+					<?php
+					$status_class = strtolower(trim($segment_request_summary->status));
+					$status_class = str_replace(" ", "-", $status_class);					
+					?>
+					<td><span class='label label-<?= $status_class ?>'><?= $segment_request_summary->status; ?></span></td>					
 					<td><strong>Brand/Model:</strong></td>					
 					<?php
 					if ($module_code == 'DL') { 
@@ -88,7 +92,7 @@
 					<td><strong>Remarks:</strong></td>
 					<?php
 						if (strlen(trim($segment_request_summary->remarks)) > 0)
-							echo "<td><a href='' id='view-full-remarks'><u>View Remarks</u></a></td>";
+							echo "<td><a href='#' id='view-full-remarks' data='{$segment_request_summary_remarks}'><u>View Remarks</u></a></td>";
 						else
 							echo "<td><strong></strong></td>";
 					?>
@@ -123,18 +127,39 @@
 
 					$complete_description = "[" . $item_view_details->model_name . " / " . $item_view_details->brand_name . "] " . $item_view_details->description;
 
+					$status_class = strtolower(trim($srd->status));			
+					$status_class = str_replace(" ", "-", $status_class);		
 				?>
 				<tr>
 					<td><?= $complete_description; ?></td>
 					<td style="text-align:right;"><?= $srd->srp; ?></td>
 					<td style="text-align:right;"><?= $srd->discount; ?></td>
-					<td style="text-align:right;"><?= number_format($srd->discount_amount); ?></td>
-					<td style="text-align:right;"><?= number_format($srd->good_quantity); ?></td>
-					<td style="text-align:right;"><?= number_format($srd->bad_quantity); ?></td>
-					<td style="text-align:right;"><?= number_format($srd->total_amount); ?></td>
+					<td style="text-align:right;"><?= number_format($srd->discount_amount, 2); ?></td>
+					<td style="text-align:right;"><?= number_format($srd->good_quantity, 2); ?></td>
+					<td style="text-align:right;"><?= number_format($srd->bad_quantity, 2); ?></td>
+					<td style="text-align:right;"><?= number_format($srd->total_amount, 2); ?></td>
 					<td style="text-align:right;"><?= $item_view_details->rack_location; ?></td>
-					<td><?= $srd->status; ?></td>
-					<td><?= $srd->remarks; ?></td>
+					<td><span class='label label-<?= $status_class ?>' ><?= $srd->status; ?></span></td>	
+				
+					<td class="items_row" style="width:20%;">
+						<div class="items_list">
+							<ul id="" class="unstyled">
+						<?php
+						$item_remarks = json_decode($srd->remarks);
+
+						$html = "";
+						if (count($item_remarks) > 0) {
+						?>
+							<li><p><strong><?= $item_remarks[0]->datetime ?></strong> - <?= $item_remarks[0]->message ?></li>							
+						<?php 
+						} 
+						?>
+						</ul>
+						<?php if(count($item_remarks) >  1): ?>
+							<a class="more_items">More...</a>	
+							<?php endif ?>
+						</div>
+					</td>
 				</tr>	
 				<?php endforeach; ?>
 				<?php endif; ?>
@@ -143,3 +168,70 @@
 	</div>
 													
 </fieldset>
+
+<script style="text/javascript">
+	
+	$("#view-full-remarks").click(function(e){
+		//alert($(this).attr("data"));
+
+		var request_code = '<?= $segment_request_summary->request_code ?>';
+
+		b.request({
+			url : '/spare_parts/display_request_remarks',
+			data : {				
+				'remarks' : $(this).attr("data"),
+				'request_code' : request_code,
+			},
+			on_success : function(data) {
+				
+				if (data.status == "1")	{
+
+					// show add form modal					
+					proceedApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:600,
+						//disableClose: true,
+						html: data.data.html,						
+					});
+					proceedApproveRequestModal.show();
+
+				} else {
+					// show add form modal
+					approveRequestModal.hide();					
+					errorApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:450,	
+						html: data.data.html,
+					});
+					errorApproveRequestModal.show();	
+
+				}
+			}
+
+		})	
+
+	});
+
+	$(document).on('click', '.more_items', function(e) {
+		e.preventDefault();
+		var item = $(this);
+		//change 'More' to 'Less'
+		item.parent().children('.more_items').html('Less...');
+		item.parent().children('.more_items').attr('class', 'less_items');
+		//display the rest of the items
+		item.parent().attr('style', 'height:auto; overflow:auto');
+	});
+
+	/*
+	$(document).on('click', '.less_items', function(e) {
+		e.preventDefault();
+		var item = $(this);
+		//change 'Less' to 'More'
+		item.parent().children('.less_items').html('More...');
+		item.parent().children('.less_items').attr('class', 'more_items');
+		//display only first two items
+		item.parent().attr('style', 'height:35px; overflow:hidden');
+	});
+	*/
+
+</script>

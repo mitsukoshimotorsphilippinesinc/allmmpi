@@ -25,20 +25,20 @@
 
 		<table class='table	table-condensed'>
 			<tr>
-				<td align='left'>Requester:<b> <?= $requester->complete_name; ?></b></td>
-				<td align='right'>Warehouse:<b> <?= $warehouse->warehouse_name; ?> </b></td>
+				<td align='left'>Requester: <b><?= $requester->complete_name; ?></b></td>
+				<td align='right'>Warehouse: <b><?= $warehouse->warehouse_name; ?> </b></td>
 			</tr>
 			<tr>
-				<td align='left'>ID Number:<b> <?= $requester->id_number; ?></b></td>				
-				<td align='right'>Approved By:<b> <?= $requester->complete_name; ?></b></td>
+				<td align='left'>ID Number: <b><?= $requester->id_number; ?></b></td>				
+				<td align='right'>Approved By: <b><?= $requester->complete_name; ?></b></td>
+			</tr>
+			<tr>				
+				<td align='left'>Total Amount: <b>Php <?= number_format($total_amount, 2); ?></b></td>
+				<td align='right'>Engine: <b><?=(empty($request_summary->engine)) ? "N/A" : $request_summary->engine ?></b></td>				
 			</tr>
 			<tr>
-				<td align='left'>Total Amount:<b> Php <?= $total_amount; ?></b></td>
-				<td align='right'>Engine:<b> <?=(empty($request_summary->engine)) ? "N/A" : $request_summary->engine ?></b></td>				
-			</tr>
-			<tr>
-				<td align='left'>Total Items:<b><?= $total_quantity; ?></b></td>
-				<td align='right'>Chassis:<b> <?=(empty($request_summary->chassis)) ? "N/A" : $request_summary->chassis ?></b></td>				
+				<td align='left'>Total Items: <b><?= number_format($total_quantity, 2); ?></b></td>
+				<td align='right'>Chassis: <b><?=(empty($request_summary->chassis)) ? "N/A" : $request_summary->chassis ?></b></td>				
 			</tr>		
 		</table>
 
