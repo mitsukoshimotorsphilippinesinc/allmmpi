@@ -93,9 +93,9 @@ $db['default']['stricton'] = FALSE;
 $db['default']['failover'] = array();
 
 //$db['spare_parts']['dsn']      = '';
-$db['spare_parts']['hostname'] = '195.100.100.7';
-$db['spare_parts']['username'] = 'devteam';
-$db['spare_parts']['password'] = 'D3vteam';
+$db['spare_parts']['hostname'] = 'localhost';
+$db['spare_parts']['username'] = 'root';
+$db['spare_parts']['password'] = '';
 $db['spare_parts']['database'] = 'spare_parts';
 $db['spare_parts']['dbdriver'] = 'mysql';
 $db['spare_parts']['dbprefix'] = '';
@@ -111,9 +111,9 @@ $db['spare_parts']['stricton'] = FALSE;
 $db['spare_parts']['failover'] = array();
 
 //$db['WHCarmona']['dsn']      = '';
-$db['WHCarmona']['hostname'] = '195.100.100.7';
-$db['WHCarmona']['username'] = 'devteam';
-$db['WHCarmona']['password'] = 'D3vteam';
+$db['WHCarmona']['hostname'] = 'localhost';
+$db['WHCarmona']['username'] = 'root';
+$db['WHCarmona']['password'] = '';
 $db['WHCarmona']['database'] = 'WHCarmona';
 $db['WHCarmona']['dbdriver'] = 'mysql';
 $db['WHCarmona']['dbprefix'] = '';
