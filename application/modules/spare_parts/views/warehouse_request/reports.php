@@ -1,3 +1,8 @@
+<?php
+	$breadcrumb_container = assemble_breadcrumb();
+?>
+
+<?= $breadcrumb_container; ?>
 <div class='alert alert-danger'><h2>Reports</h2></div>
 <div>
 	<form id='frm_filter' class='form-horizontal' method='get' action ='/spare_parts/warehouse_request/generate_report'>

@@ -5,13 +5,14 @@
 
 ?>
 <style type="text/css">
-	.inventory-orders .good_qty {width:80px;text-align:right;}
-	.inventory-orders .bad_qty {width:80px;text-align:right;}
+	.inventory-orders .good_qty {width:70px;text-align:right;}
+	.inventory-orders .bad_qty {width:70px;text-align:right;}
 	.inventory-orders .unit {width:60px;}
-	.inventory-orders .item {width:200px;}
+	.inventory-orders .item {width:190px;}
 	.inventory-orders .price {width:80px;text-align:right;}
-	.inventory-orders .discount {width:50px;text-align:right;}
-	.inventory-orders .discount_price {width:100px;text-align:right;}
+	.inventory-orders .action {width:80px;}
+	.inventory-orders .discount {width:45px;text-align:right;}
+	.inventory-orders .discount_price {width:60px;text-align:right;}
 	.inventory-orders .remark {width:100px;}
 
 	.inventory-order-items .qty {width:112px;text-align:right;}
@@ -19,7 +20,7 @@
 	.inventory-order-items .item {width:224px;}
 	.inventory-order-items .price {width:112px;text-align:right;}
 	.inventory-order-items .discount {width:50px;text-align:right;}
-	.inventory-order-items .discount_price {width:100px;text-align:right;}
+	.inventory-order-items .discount_price {width:60;text-align:right;}
 	.inventory-order-items .remark {width:284px;}
 
 	.inventory-order-items input.qty  {width:102px;text-align:right;}
@@ -27,28 +28,17 @@
 	.inventory-order-items select.item {width:224px;}
 	.inventory-order-items input.price {width:102px;text-align:right;}
 	.inventory-order-items input.discount {width:50px;text-align:right;}
-	.inventory-order-items input.discount_price {width:100px;text-align:right;}
+	.inventory-order-items input.discount_price {width:60;text-align:right;}
 	.inventory-order-items input.remark {width:274px;}
 
 </style>
 <?php
+$isAdd = false;
+$titlePrefix = "Reprocess Items - &nbsp;";
+$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/reporcess/" . $warehouse_request_details->warehouse_request_id;
+$_id = $warehouse_request_details->warehouse_request_id;
+$show_approval = false;
 
-if (is_object($warehouse_request_details))
-{
-	$isAdd = false;
-	$titlePrefix = "Edit&nbsp;";
-	$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/edit/" . $warehouse_request_details->warehouse_request_id;
-	$_id = $warehouse_request_details->warehouse_request_id;
-	$show_approval = false;
-}
-else
-{
-	$isAdd = true;
-	$titlePrefix = "Create New&nbsp;";
-	$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/add";
-	$_id = 0;
-	$show_approval = true;
-}
 ?>
 
 <?php
@@ -77,26 +67,17 @@ else
 				<br/>
 				<?php if(!$isAdd): ?>
 				<small class="customer-assign-btn">
-					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly" value="<?= $warehouse_request_details->id_number ?>">
+					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly" value="<?= $warehouse_request_details->id_number ?>" disabled="disabled;">
 				</small>
-				<?php elseif($isAdd): ?>
-					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly">
-					<a id="clear_requester" class="btn btn-small btn-primary">Clear</a>
-				<?php endif; ?>
-
+				
 				<div class="control-group">
 					<label class="control-label" for="requester_details"><strong>Details</strong ></label>					
 					<div class="controls">
-						<?php if(!$isAdd): 
-						
-						$details_content = get_requester_details($warehouse_request_details->id_number, "employee");
-
+						<?php						
+							$details_content = get_requester_details($warehouse_request_details->id_number, "employee");
 						?>
 						<textarea class='span10' rows="7" placeholder="" name="requester_details" id="requester_details" readonly><?= $details_content ?>
-						</textarea>
-						<?php elseif($isAdd): ?>
-						<textarea class='span10' rows="7" placeholder="" name="requester_details" id="requester_details" readonly><?= set_value('requester_details') ?></textarea>
-						<?php endif; ?>
+						</textarea>						
 					</div>
 				</div>
 				
@@ -104,16 +85,11 @@ else
 					<div class="span11">
 						<div class="control-group <?= $this->form_validation->error_class('remarks') ?>">
 							<label class="control-label" for="remarks"><strong>Remarks</strong></label>
-							<div class="controls">
-								<?php if(!$isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="current_requester_remarks" readonly><?= $warehouse_request_details->remarks ?></textarea>
-								<br/><br/>
-								<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
-								<input class="span12" id="requester_remarks" type="text" placeholder="New Remarks">
-								<?php elseif($isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="remarks" id="requester_remarks" maxlength="255"></textarea>
-								<p class="help-block"><?= $this->form_validation->error('remarks'); ?></p>
-								<?php endif; ?>
+							<div class="controls">						
+							<textarea class='span8' rows="4" placeholder="" name="current_requester_remarks" readonly><?= $warehouse_request_details->remarks ?></textarea>
+							<br/><br/>
+							<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
+							<input class="span12" id="requester_remarks" type="text" placeholder="New Remarks">	
 							</div>
 						</div>
 					</div>
@@ -123,7 +99,7 @@ else
 			<div class="span5">
 				<label><strong>From Warehouse:</strong></label>
 				<br/>
-				<?php if(!$isAdd):
+				<?php
 
 					$warehouse_options = array();
 					if ($warehouse_request_details->warehouse_id == 0)
@@ -134,23 +110,15 @@ else
 					}
 
 				?>
-				<?= form_dropdown('add_item_warehouse',$warehouse_options, set_value('add_item_warehouse',$warehouse_request_details->warehouse_id),'id="add_item_warehouse"') ?>
-				<?php elseif($isAdd): 
-					$warehouse_options = array();
-					$warehouse_options = array('0' => 'Select a Warehouse...');
-					foreach ($warehouse_details as $wd) {
-					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
-					}
-				?>
-					
-				<?= form_dropdown('add_item_warehouse',$warehouse_options, NULL,'id="add_item_warehouse"') ?>
+				<?= form_dropdown('add_item_warehouse',$warehouse_options, set_value('add_item_warehouse',$warehouse_request_details->warehouse_id),'id="add_item_warehouse" disabled="disabled"') ?>
+
 				<?php endif; ?>
 
 				<br/>
 				<br/>
 				<label><strong>Motorcycle Brand/Model:</strong></label>
 				<br/>
-				<?php if(!$isAdd):
+				<?php
 
 					$brand_model_options = array();
 					if ($warehouse_request_details->motorcycle_brand_model_id == 0)
@@ -161,40 +129,19 @@ else
 					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
 					}
 					
-					echo form_dropdown('add_item_brandmodel',$brand_model_options, set_value('add_item_brandmodel',$warehouse_request_details->motorcycle_brand_model_id),'id="add_item_brandmodel"');
-				?>
-				<?php elseif($isAdd):
-					$brand_model_options = array();
-					$brand_model_options = array('0' => 'Select a Brand/Model...');
-					foreach ($motorcycle_brandmodel_details as $mbd) {
-						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
-					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
-					}
-				?>
-				<?= form_dropdown('add_item_brandmodel',$brand_model_options, NULL,'id="add_item_brandmodel"') ?>
-				<?php endif; ?>
+					echo form_dropdown('add_item_brandmodel',$brand_model_options, set_value('add_item_brandmodel',$warehouse_request_details->motorcycle_brand_model_id),'id="add_item_brandmodel"  disabled="disabled"');
+				?>				
 				<br/>
 				<br/>
 				<label><strong>Engine:</strong></label>
 				<br/>
-
-				<?php if(!$isAdd): ?>
-				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." value="<?= $warehouse_request_details->engine ?>" />
-				<?php elseif($isAdd): ?>
-				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." />
-				<?php endif; ?>
-
+				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." value="<?= $warehouse_request_details->engine ?>"  disabled="disabled" />
 				<br/>
 				<br/>
 				<label><strong>Chassis:</strong></label>
 				<br/>
-
-				<?php if(!$isAdd): ?>
-				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." value="<?= $warehouse_request_details->chassis ?>" />
-				<?php elseif($isAdd): ?>
-				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." />
-				<?php endif; ?>
-
+				
+				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." value="<?= $warehouse_request_details->chassis ?>" disabled="disabled"/>				
 			</div>	
 		</div>
 		
@@ -212,11 +159,11 @@ else
 			<table class="table inventory-orders">
 				<thead id="items_header">
 					<tr>
-						<th class="item">Item</th>
-						<th class="unit">Unit</th>
+						<th class="item">Item</th>						
 						<th class="good_qty">Good Quantity</th>
 						<th class="bad_qty">Bad Quantity</th>
 						<th class="unit_price">Unit Price</th>
+						<th class="discount_percentage">Action</th>
 						<th class="discount_percentage">Discount</th>
 						<th class="discount_price">Discount Price</th>
 						<th class="remark">Remarks</th>
@@ -225,40 +172,25 @@ else
 					</tr>
 				</thead>
 				<tbody id="inputs">
-					<tr>						
-						<td>
-							<div class="control-group <?= $this->form_validation->error_class('add_item_name') ?>">
-								<div class="controls">
-									<?= form_input('search_item',NULL,'id="search_item" class="item" placeholder="Item" readonly');?>
-									<input type="hidden" name="add_item_name" id="add_item_name" class="add_item_name" readonly>
-									<?php if(false): ?>
-									<select class="item" name="add_item_name">
-										<option selected="selected" value="">Select Item</option>
-										<option value="new">Create New Item</option>
-										<?php foreach($items as $item):?>
-										<option value="<?=$item->item_id?>" data="<?=$item->item_name?>"><?=$item->item_name?></option>
-										<?php endforeach;?>
-										<?php
-										$new_items = set_value('list_new_item_names');
-										if(!empty($new_items)):?>
-											<?php foreach(array_filter(explode('|',$new_items)) as $new_item):?>
-										<option value="add[]" data="<?=$new_item?>">*New* <?=$new_item?></option>
-											<?php endforeach; ?>
-										<?php endif;?>
-									</select>
-									<?php endif; ?>
-								</div>
-							</div>
-							<?=form_hidden('list_new_item_names',implode('|',array_unique(explode('|',set_value('list_new_item_names')))));?>
-							<?=form_hidden('new_item_name');?>
-						</td>
+					<tr>												
 						<td>
 							<?php
-							$unit_options = array('1' => 'Pcs');
+								$request_items = json_decode($json_items);
 
-							echo form_dropdown('add_item_unit',$unit_options,NULL,'class="unit" disabled="disabled"');
-							?>
-						</td>
+								$item_detail_options = array('0' => 'Please select an item...');
+								foreach ($request_items as $ri) {
+																		
+									// get item_name based on item_id
+									$item_view_details = $this->spare_parts_model->get_item_view_by_id($ri->item_id);
+
+									$item_detail_options[$ri->warehouse_request_detail_id] = $item_view_details->sku . ' - ' . $item_view_details->description;
+									
+								}
+
+								echo form_dropdown('list_item_options', $item_detail_options, NULL, 'id="select_item" class="item"');
+
+							?>						
+						</td>						
 						<td><?= form_input('add_item_good_qty',NULL,'class="good_qty" placeholder=" Good Qty"');?></td>
 						<td><?= form_input('add_item_bad_qty',NULL,'class="bad_qty" placeholder="Bad Qty"');?></td>
 						<td>
@@ -266,22 +198,32 @@ else
 						</td>
 						<td>
 							<?php
-							$discount_options = array();
-							for ($i=100; $i>=0; $i--) {
-								array_push($discount_options, $i);	
-							}
-							
-							echo form_dropdown('add_item_discount',$discount_options, NULL,'id="add_item_discount" class="unit"');
+							$action_options = array(
+												'return' => 'RETURN', 
+												'charge' => 'CHARGE'
+											);
+
+							echo form_dropdown('add_item_action', $action_options, NULL, 'id="action_option" class="action"');
 							?>
 						</td>
 						<td>
-							<?= form_input('add_item_discount_price',NULL,'class="price" placeholder="Disc. Price"');?>
+							<?php
+							$discount_options = array();
+							for ($i=100; $i>=0; $i--) {
+								$discount_options[$i] = $i;	
+							}
+							
+							echo form_dropdown('add_item_discount',$discount_options, NULL,'id="add_item_discount" class="unit" disabled="disabled"');
+							?>
+						</td>
+						<td>
+							<?= form_input('add_item_discount_price',NULL,'id="add_item_discount_price" class="price" placeholder="Disc. Price" disabled="disabled"');?>
 						</td>							
 						<td>
 							<?= form_input('add_item_remarks',NULL,'class="remark" placeholder="Remarks"');?>
 						</td>
 						<td>
-							<a id="add_wr_item" class="btn btn-primary">Add to List</a>
+							<a id="add_wr_item" class="btn btn-primary"><span id="add_wr_item_caption">Return Item/s</span></a>
 						</td>
 						<td></td>
 					</tr>
@@ -309,7 +251,7 @@ else
 						<th class="price">SRP</th>
 						<th class="discount">Disc.(%)</th>
 						<th class="discount_price">Disc. Price</th>
-						<th class="price">Total Amount</th>
+						<th class="price">Total Amount</th>						
 						<th class="remark">Remarks</th>
 						<th></th>
 						<th></th>
@@ -319,10 +261,7 @@ else
 					<?php
 					$temp = NULL;
 			
-					if (!$isAdd) {
-						//$temp = array($warehouse_request_detail_details);
-						$temp = json_decode($json_items, true);
-					}
+					$temp = json_decode($json_items, true);
 
 					for($i=0;$i<count($temp);$i++):?>
 						<!--?php if(set_value('item_qty['.$i.']') != '' || !$isAdd):?-->
@@ -516,6 +455,82 @@ else
 		$('#search_requester').val('');
 	});
 
+	$(document).on("change",'#action_option',function(e) {
+		e.preventDefault();		
+		if ($(this).val() == "return") {
+			$("#add_wr_item_caption").text("Return Item/s");
+			document.getElementById("add_item_discount").disabled = true;
+			document.getElementById("add_item_discount_price").disabled = true;		
+		} else {
+			$("#add_wr_item_caption").text("Charge Item/s");
+			document.getElementById("add_item_discount").disabled = false;
+			document.getElementById("add_item_discount_price").disabled = false;			
+		}
+
+	});
+
+
+	$(document).on("change",'#select_item',function(e) {
+		e.preventDefault();		
+		select_item();
+
+	});
+
+	var select_item = function() {
+
+		b.request({
+			url: "/spare_parts/get_item_details",
+			data: {
+				"request_detail_id": $("#select_item").val(),
+				"segment_name" : '<?= $department_module_details->segment_name ?>',
+			},
+			on_success: function(data) {
+
+				
+				document.getElementsByName('add_item_good_qty')[0].placeholder= data.data.item_details['good_quantity'];
+				document.getElementsByName('add_item_bad_qty')[0].placeholder= data.data.item_details['bad_quantity'];
+				$("#add_item_price").val(data.data.item_view_details['srp']);				
+				document.getElementById('add_item_discount').value= data.data.discount;				
+				document.getElementsByName('add_item_discount_price')[0].placeholder= data.data.item_details['discount_amount'];
+				
+				return;
+
+				$("#item-listing").html(_.template($("#item-list-template").html(),{"items": items}));
+				
+				$("#item-listing .btn-select-item").click(function(e) {
+					e.preventDefault();
+					var item_id = $(this).data("id");
+					var item = items_array[item_id];
+
+					$("#search_item").val($(this).data("description"));
+					$("#add_item_name").val(item_id);
+					$("#add_item_price").val($(this).data("srp"));
+					
+					// always 1 since there is only 1 unit type (pieces)
+					$('select[name="add_item_unit"]').val(1);
+					document.getElementsByName('add_item_good_qty')[0].placeholder= $(this).data("good_quantity");
+					document.getElementsByName('add_item_bad_qty')[0].placeholder= $(this).data("bad_quantity");
+
+					document.search_item_modal.hide();
+					document.search_item_modal = null;
+				});
+				
+			} 
+		});
+		
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 	$(document).on("click",'#search_item',function(e) {
 	//$("#search_item").focus(function() {
 		e.preventDefault();
@@ -594,21 +609,7 @@ else
 
 	$("#add_wr_item").click(function(){
 
-		if ($("#requester_details").text() == '') {
-			input_errors = "Assign a Requester first. ";
-			var item_error_modal = b.modal.create({
-				title: "Error :: Requester Not Set",
-				width: 450,
-				html: "<p>There was an error in your request.</p><p>"+input_errors+"</p>"
-			});
-			item_error_modal.show();
-			return;				
-		}
-
-		if ((($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) ||
-			$('select[name="add_item_unit"]').val() == '' ||
-			$('input[name="add_item_name"]').val() == '' ||
-			$('input[name="add_item_price"]').val() == '')
+		if (($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == ''))
 		{
 			var input_errors = "";
 
@@ -627,30 +628,14 @@ else
 
 
 			if($('select[name="add_item_unit"]').val() == '') input_errors += "The Unit field is required. ";
-			if($('input[name="add_item_name"]').val() == '' || $('input[name="add_item_name"]').val() == 'new') input_errors += "The Item field is required. ";
-			if($('input[name="add_item_price"]').val() == '')
-			{
-				input_errors += "The Unit Price field is required. ";
-			}
-			else if(!(_.isNumber($('input[name="add_item_price"]').val() * 1)) || _.isNaN($('input[name="add_item_price"]').val() * 1))
-			{
-				input_errors += "The Unit Price field must contain a number. "
-			}
+			if($('input[name="add_item_name"]').val() == '' || $('input[name="add_item_name"]').val() == 'new') input_errors += "The Item field is required. ";			
 
 			$('#input_errors').html('<p>'+input_errors+'</p>');
 		}
 		else
 		{
+			var request_detail_id = $("#select_item").val();
 
-			var item_name = "";
-			if($('#search_item').val() == 'add[]')
-			{
-				item_name = $('input[name="new_item_name"]').val();
-			}
-			else
-			{
-				item_name = $('#search_item').val();
-			}
 			$('#input_errors').html('');
 
 			var good_qty = $('input[name="add_item_good_qty"]').val();
@@ -689,22 +674,19 @@ else
 
 			// ajax request
 			b.request({
-				url : '/spare_parts/warehouse_request/create_request',
+				url : '/spare_parts/warehouse_request/reprocess_item',
 				data : {				
 					'request_code' : $("#requester-request-code-label").text(),
-					'item_id' : $('input[name="add_item_name"]').val(),
+					'request_detail_id' : request_detail_id,
 					'srp' : $('input[name="add_item_price"]').val(),
-					'discount' : $('select[name="add_item_discount"]>option:selected').text(),
-					'discount_amount' : $('input[name="add_item_discount_price"]').val(),
+					'charge_discount' : $('select[name="add_item_discount"]>option:selected').text(),
+					'charge_amount' : $('input[name="add_item_discount_price"]').val(),
 					'good_quantity' : $('input[name="add_item_good_qty"]').val(),
 					'bad_quantity' : $('input[name="add_item_bad_qty"]').val(),
 					'remarks' : $('input[name="add_item_remarks"]').val(),
-					'requester_remarks' : $("#requester_remarks").val(),
-					'engine' : $("#engine").val(),
-					'chassis' : $("#chassis").val(),
-					'warehouse_id' : $("#add_item_warehouse").val(),
-					'brandmodel' : $("#add_item_brandmodel").val(),
-					'requester_id' : $("#search_requester").val(),
+					'action_option' : $('#action_option').val(),
+
+					// DITO!!!
 				},
 				on_success : function(data) {
 

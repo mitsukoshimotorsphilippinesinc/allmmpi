@@ -84,8 +84,13 @@
 									
 			<td><?= $t->request_code; ?></td>
 			
-			<?php
-			if ($t->status == 'PENDING') {
+			<?php			
+			$status_class = strtolower(trim($t->status));			
+			$status_class = str_replace(" ", "-", $status_class);
+		
+			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
+
+			/*if ($t->status == 'PENDING') {
 				echo "<td><span class='label label-important' >{$t->status}</span></td>";
 			} else if ($t->status == 'FORWARDED') {
 				echo "<td><span class='label label-info' >{$t->status}</span></td>";
@@ -93,7 +98,7 @@
 				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
 			} else {
 				echo "<td><span class='label label-success' >{$t->status}</span></td>";
-			}			
+			}*/			
 
 			// get requestor details
 			$id = str_pad($t->id_number, 7, '0', STR_PAD_LEFT);
@@ -349,12 +354,23 @@
 					} else if (data.data.request_status == "APPROVED") {
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,
-							width:800,
-							//disableClose: true,
+							width:800,							
 							html: data.data.html,
 							buttons: {
 								'Forward To Warehouse' : function() {
 									processButtonAction(warehouse_request_id, warehouse_request_code, 'forward to warehouse');
+								}									
+							}
+						});
+					} else if (data.data.request_status == "COMPLETED") {
+						alert("here");
+						viewDetailsModal = b.modal.new({
+							title: data.data.title,
+							width:800,							
+							html: data.data.html,
+							buttons: {
+								'Return Items' : function() {
+									redirect("/spare_parts/warehouse_request/reprocess_items/" + warehouse_request_id);
 								}									
 							}
 						});
@@ -394,6 +410,10 @@
 		var years = "";
 		var months = "";
 		var days = "";
+
+		var _search_status = '<?= $search_status ?>';
+		var _search_by = '<?= $search_by ?>';
+		var _search_text = '<?= $search_text ?>';
 
 		download_modal.init({
 
@@ -455,7 +475,7 @@
 														url: "/spare_parts/warehouse_request/download_proceed",
 														data: {
 															"start_date": start_date,
-															"end_date": end_date
+															"end_date": end_date,															
 														},
 														on_success: function(data){
 															var download_xls_modal = b.modal.new({});
@@ -482,7 +502,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/warehouse_request/export_xls/'+ start_date +'/' + end_date);
+																			redirect('/spare_parts/warehouse_request/export_xls/'+ start_date +'/' + end_date +'/' + _search_status +'/' + _search_by +'/' + _search_text);
 																
 																			
 																		}

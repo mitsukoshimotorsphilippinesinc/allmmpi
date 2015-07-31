@@ -127,3 +127,28 @@ function get_items_total_amount($request_code) {
 
 	return $request_item_amount_total;
 }
+
+function get_requester_details($id_number, $requester_type)
+	{
+		$ci = ci();		
+		$ci->load->model('human_relations_model');
+
+		if ($requester_type == 'employee') {
+			$requester_details = $ci->human_relations_model->get_employment_information_view_by_id($id_number);
+
+			$is_employed = ($requester_details->is_employed == 1) ? 'Yes' : 'No';
+			$email_address = ($requester_details->company_email_address == NULL) ? $requester_details->personal_email_address : $requester_details->company_email_address;
+			$contact_number = ($requester_details->mobile_number == NULL) ? $requester_details->phone_number : $requester_details->mobile_number;
+
+			$position_details = $ci->human_relations_model->get_position_by_id($requester_details->position_id);
+
+			$department_name = "N/A";
+			if (!empty($department_details)) {
+				$department_name = $department_details->department_name;
+			}
+
+			$requester_details = "NAME: {$requester_details->complete_name}\nID NUMBER: {$id_number}\nDEPARTMENT: {$department_name}\nPOSITION: {$position_details->position_name}\nIS EMPLOYED: {$is_employed}\nEMAIL: {$email_address}\nCONTACT NUMBER: {$contact_number}\n";
+		}	
+
+		return $requester_details;	
+	}

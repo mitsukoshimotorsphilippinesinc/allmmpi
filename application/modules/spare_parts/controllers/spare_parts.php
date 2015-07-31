@@ -8,6 +8,7 @@ class Spare_parts extends Admin_Controller {
 	
 		$this->load->model('spare_parts_model');
 		$this->load->model('human_relations_model');	
+		$this->load->helper('spare_parts_helper');
 
 		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);	
 	}
@@ -407,6 +408,72 @@ class Spare_parts extends Admin_Controller {
 
 	}
 
+	function get_requester_details()
+	{
+		$id_number = $this->input->post("id_number");
+		$requester_type = $this->input->post("requester_type");
+
+		$details_content = get_requester_details($id_number, $requester_type);
+	
+		$this->return_json("ok","Get Requester Details", array('html' => $details_content));
+		return;	
+	}
+
+	function display_request_remarks()
+	{
+		$request_code = $this->input->post("request_code");
+		$remarks = $this->input->post("remarks");
+
+		$remarks = json_decode($remarks);
+
+		$row = "<table class='table table-condensed table-bordered'>
+				<thead>
+					<th>Datetime</th>
+					<th>Message</th>
+				</thead>
+				<tbody>";
+		if(!empty($remarks))
+		{				
+
+			foreach($remarks as $r)
+			{	
+				$row .= "<tr><td>{$r->datetime}</td><td>{$r->message}</td></tr>";
+			}				
+		} else {
+			$title = "Error View Remarks :: " . $request_code;
+			$html = "<p>The is something wrong with the remarks field format.</p";
+			$this->return_json("0","Invalid Remarks format", array('html' => $html, 'title' => $title));
+		return;
+		}
+
+		$row .= "</tbody></table>";
+		
+		$title = "View Remarks :: " . $request_code;
+
+		$this->return_json("1","Remarks successfully displayed.", array('html' => $row, 'title' => $title));
+		return;
+	}
+
+
+	function get_item_details()
+	{
+		$request_detail_id = $this->input->post("request_detail_id");
+		$segment_name = $this->input->post("segment_name");
+
+		$item_details_sql = "SELECT * FROM is_" . $segment_name . "_detail WHERE " . $segment_name . "_detail_id = " . $request_detail_id;
+		
+		$item_details = $this->db_spare_parts->query($item_details_sql);
+		$item_details = $item_details->result();		
+		$item_details = $item_details[0];			
+
+		$discount = abs($item_details->discount);
+
+		$item_view_details = $this->spare_parts_model->get_item_view_by_id($item_details->item_id);			
+		
+		$this->return_json("1","Item Details.", array('item_details' => $item_details, 'item_view_details' => $item_view_details, 'discount' => $discount));
+		return;
+
+	}
 
 
 

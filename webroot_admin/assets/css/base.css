@@ -3288,6 +3288,42 @@ a.thumbnail:hover {
 .label-info {
   background-color: #3a87ad;
 }
+.label-pending {
+  background-color: #AEAEAE;
+}
+.label-for-approval {
+  background-color: #329ACF;
+}
+.label-approved {
+  background-color: #997EE5;
+}
+.label-denied {
+  background-color: #9804F0;
+}
+.label-cancelled {
+  background-color: #CC0001;
+}
+.label-forwarded {
+  background-color: #00F303;
+}
+.label-processing {
+  background-color: #9BFB9A;
+}
+.label-completed {
+  background-color: #4CAF50;
+}
+.label-for-cancellation {
+  background-color: #329ACF;
+}
+.label-cancelled-completed {
+  background-color: #DF8040;
+}
+.label-denied-completed {
+  background-color: #CC0001;
+}
+.label-info {
+  background-color: #3a87ad;
+}
 @-webkit-keyframes progress-bar-stripes {
   from {
     background-position: 0 0;

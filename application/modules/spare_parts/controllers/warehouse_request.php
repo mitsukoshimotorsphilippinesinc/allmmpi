@@ -75,11 +75,11 @@ class Warehouse_request extends Admin_Controller {
 		}
 
 		if (empty($search_status)) {
-			$where = "status IN ('FOR APPROVAL', 'APPROVED', 'FOR CANCELLATION', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)')";
+			$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', 'FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('FOR APPROVAL', 'APPROVED', 'FOR CANCELLATION', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)')";
+				$where = "status IN ('PENDING', 'FOR APPROVAL', 'APPROVED', 'FORWARDED', 'FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}			
@@ -259,7 +259,8 @@ class Warehouse_request extends Admin_Controller {
 				//'warehouse_request' => $warehouse_request,
 				'segment_request_summary' => $warehouse_request,
 				'segment_request_details' =>$warehouse_request_details,
-				'listing_action' => $listing_action
+				'listing_action' => $listing_action,
+				'segment_request_summary_remarks' => $warehouse_request->remarks,
 			);
 
 			$html = $this->load->view("template_view_details",$data,true);
@@ -606,7 +607,7 @@ class Warehouse_request extends Admin_Controller {
 	{
 		$start_date = trim($this->input->post("start_date"));
 		$end_date = trim($this->input->post("end_date"));
-		
+
 		$current_timestamp = date('Y-m-d H:i:s');
 
 		$return_html = "<span>Request Completed.<br/><br/>You may now download the generated spreadsheet file.</span>";
@@ -616,7 +617,7 @@ class Warehouse_request extends Admin_Controller {
 
 	}
 
-	function export_xls($start_date,$end_date)
+	function export_xls($start_date,$end_date, $search_status = NULL, $search_by = NULL, $search_text = NULL)
 	{
 		$this->load->library('PHPExcel');
         $this->load->library('PHPExcel/IOFactory');
@@ -633,7 +634,62 @@ class Warehouse_request extends Admin_Controller {
 
 			$worksheet = $objPHPExcel->setActiveSheetIndex(0);
 
-			$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
+			//$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
+
+			if ($search_by == 'name') {
+				$request_search_by = "id_number";
+
+				// get all personal_information_id in pm_personal_information
+				$where = "complete_name LIKE '%" . $search_text . "%'";
+				$personal_information_details = $this->human_relations_model->get_personal_information($where, NULL, NULL, "personal_information_id, complete_name");
+
+				$where_id_numbers = "";
+				$count_id_num = 0;
+				// get the id_numbers within the personal_information_id results above
+				if (count($personal_information_details) > 0) {
+					foreach ($personal_information_details as $pid) {
+						
+						$employment_information_details = $this->human_relations_model->get_employment_information("personal_information_id = ". $pid->personal_information_id);
+						
+						if (count($employment_information_details) > 0) {
+							foreach ($employment_information_details as $eid) {
+								if ($count_id_num == 0)
+									$where_id_numbers = "'" . $eid->id_number . "'";
+								else 		
+									$where_id_numbers = $where_id_numbers . ", '" . $eid->id_number . "'";
+
+								$count_id_num++;
+							}
+						}
+					}	
+				}
+			}
+
+			if (empty($search_status)) {
+				$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+			} else {
+
+				if ($search_status == 'ALL') {
+					$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				} else {
+					$where = "status = '". $search_status ."'";
+				}			
+			
+				if ($where != NULL) {
+					if ($search_by == 'name')
+						$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
+					else
+						$where = $where . " AND ". $search_by ." LIKE '%" . $search_text . "%'";
+				} else {
+					if ($search_by == 'name')
+						$where = $request_search_by ." IN (" . $where_id_numbers . ")";
+					else
+						$where = $search_by ." LIKE '%" . $search_text . "%'";
+				} 	
+			}	
+
+			$where .= " AND insert_timestamp BETWEEN '{$start_date}' AND '{$end_date}'";
+
 			$warehouse_request_count = $this->spare_parts_model->get_warehouse_request_count($where);
 
 			$filename = "warehouse_requests_" . str_replace("-", "", $start_date) . "-" . str_replace("-", "", $end_date) . ".xls";
@@ -650,6 +706,7 @@ class Warehouse_request extends Admin_Controller {
 			$worksheet->getStyle('E' . $start_column_num)->getFont()->setBold(true);
 			$worksheet->getStyle('F' . $start_column_num)->getFont()->setBold(true);
 			$worksheet->getStyle('G' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('H' . $start_column_num)->getFont()->setBold(true);
 
 			//center column names
 			$worksheet->getStyle('A' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -658,17 +715,19 @@ class Warehouse_request extends Admin_Controller {
 			$worksheet->getStyle('D' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			$worksheet->getStyle('E' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			$worksheet->getStyle('F' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-			$worksheet->getStyle('G' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);			
+			$worksheet->getStyle('G' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('H' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			
 			//set column names
 			$worksheet->setCellValue('A1', "Dealer Requests from {$start_date} to {$end_date}");
 			$worksheet->setCellValue('A' . $start_column_num, 'Request Code');
 			$worksheet->setCellValue('B' . $start_column_num, 'Status');
-			$worksheet->setCellValue('C' . $start_column_num, 'Dealer ID');
-			$worksheet->setCellValue('D' . $start_column_num, 'Agent ID');
-			$worksheet->setCellValue('E' . $start_column_num, 'PO Number');
-			$worksheet->setCellValue('F' . $start_column_num, 'Remarks');
-			$worksheet->setCellValue('G' . $start_column_num, 'Date Created');
+			$worksheet->setCellValue('C' . $start_column_num, 'Requested By');
+			$worksheet->setCellValue('D' . $start_column_num, 'Motor Brand/Model');
+			$worksheet->setCellValue('E' . $start_column_num, 'Number of Items');
+			$worksheet->setCellValue('F' . $start_column_num, 'Warehouse');
+			$worksheet->setCellValue('G' . $start_column_num, 'Warehouse Approved By');
+			$worksheet->setCellValue('H' . $start_column_num, 'Date Created');
 			
 
 			$row = 4;
@@ -683,12 +742,13 @@ class Warehouse_request extends Admin_Controller {
 				{
 
 					$worksheet->setCellValue('A'. $row, $dr->request_code);
-					$worksheet->setCellValue('A'. $row, $dr->status);
-					$worksheet->setCellValue('C'. $row, $dr->dealer_id);
-					$worksheet->setCellValue('D'. $row, $dr->agent_id);
-					$worksheet->setCellValue('E'. $row, $dr->purchase_order_number);
-					$worksheet->setCellValue('F'. $row, $dr->remarks);
-					$worksheet->setCellValue('G'. $row, $dr->insert_timestamp);
+					$worksheet->setCellValue('B'. $row, $dr->status);
+					$worksheet->setCellValue('C'. $row, $dr->id_number);
+					$worksheet->setCellValue('D'. $row, $dr->motorcycle_brand_model_id);
+					$worksheet->setCellValue('E'. $row, $dr->mtr_number);
+					$worksheet->setCellValue('F'. $row, $dr->warehouse_id);
+					$worksheet->setCellValue('G'. $row, $dr->id_number);
+					$worksheet->setCellValue('H'. $row, $dr->insert_timestamp);
 					
 					// auto resize columns
 					$worksheet->getColumnDimension('A')->setAutoSize(false);
@@ -698,6 +758,7 @@ class Warehouse_request extends Admin_Controller {
 					$worksheet->getColumnDimension('E')->setAutoSize(true);
 					$worksheet->getColumnDimension('F')->setAutoSize(true);
 					$worksheet->getColumnDimension('G')->setAutoSize(true);
+					$worksheet->getColumnDimension('H')->setAutoSize(true);
 					$row++;
 				}
 			}
@@ -1041,6 +1102,8 @@ class Warehouse_request extends Admin_Controller {
 				$manager_id_number = $warehouse_details->manager_id_number;
 			}
 
+			$current_datetime = date('Y-m-d H:i:s');						
+
 			$sql = "INSERT INTO 
 						is_warehouse_request 
 						(
@@ -1051,8 +1114,7 @@ class Warehouse_request extends Admin_Controller {
 							`warehouse_id`, 
 							`motorcycle_brand_model_id`, 
 							`engine`, 
-							`chassis`,
-							`remarks`
+							`chassis`
 						)
                     	(
                     	SELECT 
@@ -1063,8 +1125,7 @@ class Warehouse_request extends Admin_Controller {
                             '{$warehouse_id}', 
                             '{$brandmodel_id}', 
                             '{$engine}', 
-                            '{$chassis}',
-                            '{$requester_remarks}'
+                            '{$chassis}'                            
                     	FROM 
                     		is_warehouse_request
                     	WHERE 
@@ -1099,6 +1160,17 @@ class Warehouse_request extends Admin_Controller {
 			$data_update = array(
 					'request_code' => $request_code
 				);
+
+			if (strlen(trim($requester_remarks)) > 0) {
+				$data[] =array(
+						'datetime' => $current_datetime,
+						'message' => $requester_remarks
+					);
+
+				$requester_remarks_encoded = json_encode($data);
+				$data_update['remarks'] = $requester_remarks_encoded;
+			}
+
 			$where_update = "warehouse_request_id = " . $active_warehouse_request_id;
 			$this->spare_parts_model->update_warehouse_request($data_update, $where_update);
 
@@ -1141,9 +1213,19 @@ class Warehouse_request extends Admin_Controller {
 				'discount_amount' => $discount_amount,
 				'good_quantity' => $good_quantity,
 				'bad_quantity' => $bad_quantity,
-				'total_amount' => $total_amount,
-				'remarks' => $remarks
+				'total_amount' => $total_amount
 			);
+
+		if (strlen(trim($remarks)) > 0) {
+			$current_datetime = date('Y-m-d H:i:s');
+			$data[] =array(
+					'datetime' => $current_datetime,
+					'message' => $remarks
+				);
+
+			$item_remarks_encoded = json_encode($data);
+			$data_insert['remarks'] = $item_remarks_encoded;
+		}
 
 		$this->spare_parts_model->insert_warehouse_request_detail($data_insert);
 
@@ -1168,6 +1250,106 @@ class Warehouse_request extends Admin_Controller {
 		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id, 'item_total_amount' => $formatted_total_amount));
 		return;
 	}	
+
+
+	public function reprocess_item()
+	{
+		$request_code = trim($this->input->post("request_code"));
+		$request_detail_id = abs($this->input->post("request_detail_id"));
+		$srp = abs($this->input->post("srp"));
+		$charge_discount = abs($this->input->post("charge_discount"));
+		$charge_amount = abs($this->input->post("charge_amount"));
+		$good_quantity = abs($this->input->post("good_quantity"));
+		$bad_quantity = abs($this->input->post("bad_quantity"));
+		$remarks = trim($this->input->post("remarks"));		
+		$action_option = trim($this->input->post("action_option"));
+
+		$has_error = 0;
+		$good_error_message = "";
+		$bad_error_message = "";
+
+		if ($good_quantity == '')
+			$good_quantity = 0;
+
+		if ($bad_quantity == '')
+			$bad_quantity = 0;
+
+		if ($charge_amount == '')
+			$charge_amount = 0.00;
+
+		$id_number = NULL;
+		$status = strtoupper($action_option);
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+
+		$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail_by_id($request_detail_id);
+
+		if ($warehouse_request_detail_details->good_quantity < $good_quantity) {
+			$has_error = 1;
+			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $warehouse_request_detail_details->good_quantity . "</strong> good quantities available.</p><br/>";
+		}
+
+		if ($warehouse_request_detail_details->bad_quantity < $bad_quantity) {
+			$has_error = 1;
+			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $warehouse_request_detail_details->bad_quantity . "</strong> bad quantities available.</p><br/>";
+		}
+
+		if ($has_error == 1) {
+			$html = $good_error_message . $bad_error_message;
+			$title = "Error :: Not Enough Inventory";
+
+			$this->return_json("0","Not Enough Inventory", array("html" => $html, "title" => $title));
+			return;
+		}
+	
+		// compute the total charge amount		
+		if ($charge_amount == 0) {
+			$total_amount = $good_quantity * ($srp - ($srp * ($charge_discount / 100)));
+			$total_amount = $total_amount + ($bad_quantity  * ($srp - ($srp * ($charge_discount / 100))));
+		} else {
+			$total_amount = $good_quantity * $charge_amount;
+			$total_amount = $total_amount + ($bad_quantity * $charge_amount);
+		}
+
+		$formatted_charge_amount = number_format($charge_amount, 2);
+
+		$item_remarks_encoded  = "";
+		if (strlen(trim($remarks)) > 0) {
+			$current_datetime = date('Y-m-d H:i:s');
+			$data[] =array(
+					'datetime' => $current_datetime,
+					'message' => $remarks
+				);
+
+			$item_remarks_encoded = json_encode($data);
+			$data_insert['remarks'] = $item_remarks_encoded;
+		}
+
+		// insert to is_reprocessed_item table
+		$data_insert = array(
+				"department_module_id" => $department_module_details->department_module_id,
+				"request_id" => $warehouse_request_detail_details->warehouse_request_id,
+				"request_detail_id" => $request_detail_id,
+				"id_number" => $id_number,
+				"charge_discount" => $charge_discount,
+				"charge_amount" => $charge_amount,
+				"good_quantity" => $good_quantity,
+				"bad_quantity" => $bad_quantity,
+				"status" => $status,
+				"remarks" => $item_remarks_encoded
+			);
+
+		$this->spare_parts_model->insert_reprocessed_item($data_insert);
+
+
+		$html = "<p>Item with SKU <strong>" . $warehouse_request_detail_details->item_id . "</strong> has been reprocessed successfully!</p>";
+		$title = $status . " Item :: Item Request";
+
+		//$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id, 'item_total_amount' => $formatted_total_amount));
+		$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title));
+		return;
+	}	
+
 
 	public function confirm_remove_item() {
 		$request_code = $this->input->post("request_code");
@@ -1230,6 +1412,127 @@ class Warehouse_request extends Admin_Controller {
 		return;
 
 	}
+	
+	public function reprocess_items($warehouse_request_id = 0)
+	{
+
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+		
+		$warehouse_request_details = $this->spare_parts_model->get_warehouse_request_by_id($warehouse_request_id);
+
+		if (!empty($warehouse_request_details)) {
+			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($warehouse_request_details->id_number);
+			
+			$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
+			$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
+
+			$this->template->requester_details = $requester_details;
+			$this->template->department_details = $department_details;
+			$this->template->position_details = $position_details;
+
+			$request_item_amount_total = get_items_total_amount($warehouse_request_details->request_code);		
+			$this->template->request_item_amount_total = $request_item_amount_total;
+
+			// get request items
+			$where = "status NOT IN ('CANCELLED', 'DELETED') AND warehouse_request_id = " . $warehouse_request_id;
+			$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail($where);
+
+			$json_items = array();
+			for($k = 0;$k<count($warehouse_request_detail_details);$k++)
+			{
+				$warehouse_request_detail_id = $warehouse_request_detail_details[$k]->warehouse_request_detail_id;
+				
+				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
+				$po_items = array(
+						'warehouse_request_detail_id' => $warehouse_request_detail_id,
+						'item_id' => $warehouse_request_detail_details[$k]->item_id,
+						'srp' => $warehouse_request_detail_details[$k]->srp,
+						'discount' => $warehouse_request_detail_details[$k]->discount,
+						'discount_amount' => $warehouse_request_detail_details[$k]->discount_amount,
+						'good_quantity' => $warehouse_request_detail_details[$k]->good_quantity,
+						'bad_quantity' => $warehouse_request_detail_details[$k]->bad_quantity,
+						'total_amount' => $warehouse_request_detail_details[$k]->total_amount,
+						'remarks' => $warehouse_request_detail_details[$k]->remarks,
+
+				);
+				//creates an array of the items that will be json encoded later
+				array_push($json_items, $po_items);
+
+			}
+
+			/*// get reprocessed items if any
+			$where = "warehouse_request_id = " . $warehouse_request_id;
+			$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail($where);			
+
+
+			for($l = 0;$l<count($warehouse_request_detail_details);$l++)
+			{
+				$warehouse_request_detail_id = $warehouse_request_detail_details[$k]->warehouse_request_detail_id;
+				
+				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
+				$po_items = array(
+						'warehouse_request_detail_id' => $warehouse_request_detail_id,
+						'item_id' => $warehouse_request_detail_details[$k]->item_id,
+						'srp' => $warehouse_request_detail_details[$k]->srp,
+						'discount' => $warehouse_request_detail_details[$k]->discount,
+						'discount_amount' => $warehouse_request_detail_details[$k]->discount_amount,
+						'good_quantity' => $warehouse_request_detail_details[$k]->good_quantity,
+						'bad_quantity' => $warehouse_request_detail_details[$k]->bad_quantity,
+						'total_amount' => $warehouse_request_detail_details[$k]->total_amount,
+						'remarks' => $warehouse_request_detail_details[$k]->remarks,
+
+				);
+				//creates an array of the items that will be json encoded later
+				array_push($json_items, $po_items);
+
+			}*/
+
+
+
+			$this->template->json_items = json_encode($json_items);
+
+		}
+
+
+		$items = $this->spare_parts_model->get_item(null,null,"sku ASC");
+		$items_array = array();
+		
+		foreach($items as $i)
+		{
+			$items_array[$i->item_id] = $i;
+		}
+
+		$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view('','', 'brand_name', 'motorcycle_brand_model_id, brand_name, model_name');
+		
+		$warehouse_details = $this->warehouse_model->get_warehouse("is_active = 1", '', '', 'warehouse_id, warehouse_name, description, manager_id_number, encoder_id_number');	
+
+		//$this->template->return_url = $return_url;
+		$this->template->items = $items_array;
+		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
+		$this->template->warehouse_details = $warehouse_details;
+		$this->template->warehouse_request_details = $warehouse_request_details;
+		$this->template->department_module_details = $department_module_details;				
+		$this->template->view("warehouse_request/reprocess_items");
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	public function reports()
