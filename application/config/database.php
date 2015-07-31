@@ -178,7 +178,7 @@ $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
 */
 
-$db['spare_parts']['hostname'] = '127.0.0.1';
+$db['spare_parts']['hostname'] = 'localhost';
 $db['spare_parts']['username'] = 'root';
 $db['spare_parts']['password'] = '';
 $db['spare_parts']['database'] = 'spare_parts';
@@ -195,7 +195,7 @@ $db['spare_parts']['autoinit'] = TRUE;
 $db['spare_parts']['stricton'] = FALSE;
 $db['spare_parts']['failover'] = array();
 
-$db['hrdatabase']['hostname'] = '127.0.0.1';
+$db['hrdatabase']['hostname'] = 'localhost';
 $db['hrdatabase']['username'] = 'root';
 $db['hrdatabase']['password'] = '';
 $db['hrdatabase']['database'] = 'HRDataBase';
@@ -212,7 +212,7 @@ $db['hrdatabase']['autoinit'] = TRUE;
 $db['hrdatabase']['stricton'] = FALSE;
 $db['hrdatabase']['failover'] = array();
 
-$db['human_relations']['hostname'] = '127.0.0.1';
+$db['human_relations']['hostname'] = 'localhost';
 $db['human_relations']['username'] = 'root';
 $db['human_relations']['password'] = '';
 $db['human_relations']['database'] = 'human_relations';
@@ -229,7 +229,7 @@ $db['human_relations']['autoinit'] = TRUE;
 $db['human_relations']['stricton'] = FALSE;
 $db['human_relations']['failover'] = array();
 
-$db['warehouse']['hostname'] = '127.0.0.1';
+$db['warehouse']['hostname'] = 'localhost';
 $db['warehouse']['username'] = 'root';
 $db['warehouse']['password'] = '';
 $db['warehouse']['database'] = 'warehouse';
@@ -246,7 +246,7 @@ $db['warehouse']['autoinit'] = TRUE;
 $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
 
-$db['warehouse']['hostname'] = '127.0.0.1';
+$db['warehouse']['hostname'] = 'localhost';
 $db['warehouse']['username'] = 'root';
 $db['warehouse']['password'] = '';
 $db['warehouse']['database'] = 'warehouse';
