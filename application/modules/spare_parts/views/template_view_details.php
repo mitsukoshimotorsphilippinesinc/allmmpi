@@ -100,10 +100,13 @@
 			<tbody>
 		</table>	
 	</div>
-
+	
 	<div>
 		<table  class='table table-striped table-bordered'>
 			<thead>
+				<tr>
+					<th colspan="10" style="color:blue;font-size:16px">Requested Items</th>
+				</tr>
 				<tr>			
 					<th style=''>Description</th>
 					<th>SRP</th>
@@ -166,6 +169,15 @@
 			<tbody>
 		</table>	
 	</div>
+
+	<div>
+		<?php		
+		if (count($reprocessed_item_details) > 0) {			
+			$data = array('reprocessed_item_details' => $reprocessed_item_details);
+			$this->load->view("template_reprocessed_item" , $data);
+		}
+		?>
+	</div>	
 													
 </fieldset>
 
@@ -175,12 +187,14 @@
 		//alert($(this).attr("data"));
 
 		var request_code = '<?= $segment_request_summary->request_code ?>';
+		var segment_name = '<?= $segment_name ?>';
 
 		b.request({
 			url : '/spare_parts/display_request_remarks',
 			data : {				
 				'remarks' : $(this).attr("data"),
 				'request_code' : request_code,
+				'segment_name' : segment_name,
 			},
 			on_success : function(data) {
 				

@@ -241,7 +241,7 @@ class Warehouse_request extends Admin_Controller {
 		$warehouse_request_id = $this->input->post("warehouse_request_id");
 		$warehouse_request_code = $this->input->post("warehouse_request_code");
 		$listing_action = $this->input->post("listing_action");
-			
+		
 		$warehouse_request = $this->spare_parts_model->get_warehouse_request_by_id($warehouse_request_id);		
 
 		if (empty($warehouse_request)) {		
@@ -254,13 +254,22 @@ class Warehouse_request extends Admin_Controller {
 
 			$where = "warehouse_request_id = {$warehouse_request_id}";
 			$warehouse_request_details = $this->spare_parts_model->get_warehouse_request_detail($where);
-		
+			
+			$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);	
+
+			// check if has items for return
+			$where = "department_module_id = ". $department_module_details->department_module_id ." AND request_id = ". $warehouse_request_id ." AND status NOT IN ('CANCELLED')";		
+			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);
+
 			$data = array(
 				//'warehouse_request' => $warehouse_request,
 				'segment_request_summary' => $warehouse_request,
 				'segment_request_details' =>$warehouse_request_details,
 				'listing_action' => $listing_action,
 				'segment_request_summary_remarks' => $warehouse_request->remarks,
+				'segment_name' => $this->segment_name,
+				'reprocessed_item_details' => $reprocessed_item_details,
+				'department_module_details' => $department_module_details,
 			);
 
 			$html = $this->load->view("template_view_details",$data,true);
@@ -1252,17 +1261,18 @@ class Warehouse_request extends Admin_Controller {
 	}	
 
 
-	public function reprocess_item()
+	public function proceed_reprocess_item()
 	{
 		$request_code = trim($this->input->post("request_code"));
 		$request_detail_id = abs($this->input->post("request_detail_id"));
 		$srp = abs($this->input->post("srp"));
 		$charge_discount = abs($this->input->post("charge_discount"));
-		$charge_amount = abs($this->input->post("charge_amount"));
+		$charge_discount_amount = abs($this->input->post("charge_discount_amount"));
 		$good_quantity = abs($this->input->post("good_quantity"));
 		$bad_quantity = abs($this->input->post("bad_quantity"));
 		$remarks = trim($this->input->post("remarks"));		
 		$action_option = trim($this->input->post("action_option"));
+		$id_number = $this->input->post("id_number");
 
 		$has_error = 0;
 		$good_error_message = "";
@@ -1274,11 +1284,14 @@ class Warehouse_request extends Admin_Controller {
 		if ($bad_quantity == '')
 			$bad_quantity = 0;
 
-		if ($charge_amount == '')
-			$charge_amount = 0.00;
+		if ($charge_discount_amount == '')
+			$charge_discount_amount = 0.00;
 
-		$id_number = NULL;
-		$status = strtoupper($action_option);
+		if ($action_option == "return") {
+			$id_number = NULL;
+		}	
+
+		$action = strtoupper($action_option);
 
 		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
 
@@ -1303,15 +1316,15 @@ class Warehouse_request extends Admin_Controller {
 		}
 	
 		// compute the total charge amount		
-		if ($charge_amount == 0) {
+		if ($charge_discount_amount == 0) {
 			$total_amount = $good_quantity * ($srp - ($srp * ($charge_discount / 100)));
 			$total_amount = $total_amount + ($bad_quantity  * ($srp - ($srp * ($charge_discount / 100))));
 		} else {
-			$total_amount = $good_quantity * $charge_amount;
-			$total_amount = $total_amount + ($bad_quantity * $charge_amount);
+			$total_amount = $good_quantity * $charge_discount_amount;
+			$total_amount = $total_amount + ($bad_quantity * $charge_discount_amount);
 		}
 
-		$formatted_charge_amount = number_format($charge_amount, 2);
+		$formatted_total_amount = number_format($total_amount, 2);
 
 		$item_remarks_encoded  = "";
 		if (strlen(trim($remarks)) > 0) {
@@ -1332,21 +1345,24 @@ class Warehouse_request extends Admin_Controller {
 				"request_detail_id" => $request_detail_id,
 				"id_number" => $id_number,
 				"charge_discount" => $charge_discount,
-				"charge_amount" => $charge_amount,
+				"charge_discount_amount" => $charge_discount_amount,
+				"total_amount" => $total_amount,
 				"good_quantity" => $good_quantity,
 				"bad_quantity" => $bad_quantity,
-				"status" => $status,
-				"remarks" => $item_remarks_encoded
+				"action" => $action,
+				"remarks" => $item_remarks_encoded,				
 			);
-
+		
 		$this->spare_parts_model->insert_reprocessed_item($data_insert);
 
+		// get item details 
+		$item_details = $this->spare_parts_model->get_item_view_by_id($warehouse_request_detail_details->item_id);
 
-		$html = "<p>Item with SKU <strong>" . $warehouse_request_detail_details->item_id . "</strong> has been reprocessed successfully!</p>";
-		$title = $status . " Item :: Item Request";
+		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been reprocessed successfully!</p>";
+		$title = $action . " Item :: Item Request";
 
-		//$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id, 'item_total_amount' => $formatted_total_amount));
-		$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title));
+		//$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id);
+		$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "item_details" => $item_details, 'item_total_amount' => $formatted_total_amount));		
 		return;
 	}	
 
@@ -1461,37 +1477,47 @@ class Warehouse_request extends Admin_Controller {
 
 			}
 
-			/*// get reprocessed items if any
-			$where = "warehouse_request_id = " . $warehouse_request_id;
-			$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail($where);			
-
-
-			for($l = 0;$l<count($warehouse_request_detail_details);$l++)
-			{
-				$warehouse_request_detail_id = $warehouse_request_detail_details[$k]->warehouse_request_detail_id;
-				
-				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
-				$po_items = array(
-						'warehouse_request_detail_id' => $warehouse_request_detail_id,
-						'item_id' => $warehouse_request_detail_details[$k]->item_id,
-						'srp' => $warehouse_request_detail_details[$k]->srp,
-						'discount' => $warehouse_request_detail_details[$k]->discount,
-						'discount_amount' => $warehouse_request_detail_details[$k]->discount_amount,
-						'good_quantity' => $warehouse_request_detail_details[$k]->good_quantity,
-						'bad_quantity' => $warehouse_request_detail_details[$k]->bad_quantity,
-						'total_amount' => $warehouse_request_detail_details[$k]->total_amount,
-						'remarks' => $warehouse_request_detail_details[$k]->remarks,
-
-				);
-				//creates an array of the items that will be json encoded later
-				array_push($json_items, $po_items);
-
-			}*/
-
-
-
 			$this->template->json_items = json_encode($json_items);
 
+			$json_reprocessed_items = array();			
+			$where = "action IN ('RETURN', 'CHARGE') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $warehouse_request_id;
+			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);			
+
+			for($l = 0;$l<count($reprocessed_item_details);$l++)
+			{				
+
+				$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail_by_id($reprocessed_item_details[$l]->request_detail_id);
+
+				$ri_items = array(
+						'warehouse_request_detail_id' => $reprocessed_item_details[$l]->request_detail_id,
+						'item_id' => $warehouse_request_detail_details->item_id,
+						'srp' => $warehouse_request_detail_details->srp,
+						'id_number' => $reprocessed_item_details[$l]->id_number,
+						'discount' => $reprocessed_item_details[$l]->charge_discount,
+						'discount_amount' => $reprocessed_item_details[$l]->charge_discount_amount,
+						'good_quantity' => $reprocessed_item_details[$l]->good_quantity,
+						'bad_quantity' => $reprocessed_item_details[$l]->bad_quantity,
+						'total_amount' => $reprocessed_item_details[$l]->total_amount,
+						'status' => $reprocessed_item_details[$l]->status,
+						'action' => $reprocessed_item_details[$l]->action,
+						'remarks' => $reprocessed_item_details[$l]->remarks,
+				);
+
+				//creates an array of the items that will be json encoded later
+				array_push($json_reprocessed_items, $ri_items);
+
+			}
+			
+			$this->template->json_reprocessed_items = json_encode($json_reprocessed_items);
+
+		}
+
+		$where = "status IN ('FORWARDED') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $warehouse_request_id;
+		$forwarded_to_wh = $this->spare_parts_model->get_reprocessed_item($where);			
+
+		$is_forwarded = 0;
+		if (count($forwarded_to_wh) > 0) {
+			$is_forwarded = 1;
 		}
 
 
@@ -1509,6 +1535,7 @@ class Warehouse_request extends Admin_Controller {
 
 		//$this->template->return_url = $return_url;
 		$this->template->items = $items_array;
+		$this->template->is_forwarded = $is_forwarded;
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
 		$this->template->warehouse_request_details = $warehouse_request_details;

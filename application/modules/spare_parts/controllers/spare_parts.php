@@ -423,8 +423,17 @@ class Spare_parts extends Admin_Controller {
 	{
 		$request_code = $this->input->post("request_code");
 		$remarks = $this->input->post("remarks");
+		$segment_name = $this->input->post("segment_name");
 
-		$remarks = json_decode($remarks);
+		$request_summary_sql = "SELECT * FROM is_" . $segment_name . " WHERE request_code = '" . $request_code . "'";
+
+		$request_summary = $this->db_spare_parts->query($request_summary_sql);
+		$request_summary = $request_summary->result();		
+		$request_summary = $request_summary[0];		
+
+		$remarks = json_decode($request_summary->remarks);
+
+		//$remarks = (object) $remarks;
 
 		$row = "<table class='table table-condensed table-bordered'>
 				<thead>
@@ -474,6 +483,160 @@ class Spare_parts extends Admin_Controller {
 		return;
 
 	}
+
+	function add_new_requester_remarks()
+	{
+		$request_code = $this->input->post("request_code");
+		$remarks = trim($this->input->post("remarks"));
+		$segment_name = $this->input->post("segment_name");
+
+		$request_summary_sql = "SELECT * FROM is_" . $segment_name . " WHERE request_code = '" . $request_code . "'";
+
+		$request_summary = $this->db_spare_parts->query($request_summary_sql);
+		$request_summary = $request_summary->result();		
+		$request_summary = $request_summary[0];		
+
+		$data = json_decode($request_summary->remarks, true);
+
+		$current_datetime = date("Y-m-d H:i:s");		
+		array_push($data, array('datetime' => $current_datetime, 'message' => $remarks));
+
+		$remarks = json_encode($data);
+
+		// update table
+		$request_update_sql = "UPDATE is_" . $segment_name . " SET remarks = '" . $remarks . "' WHERE request_code = '" . $request_code . "'";
+		$this->db_spare_parts->query($request_update_sql);
+
+		$title = "Update Remarks :: " . $request_code;
+		$html = "Remarks successfully updated for Request Code : <strong>" . $request_code . "</strong>.";		
+
+		$this->return_json("1","Remarks successfully updated.", array('html' => $html, 'title' => $title));
+		return;
+	}
+
+	function forward_to_warehouse()
+	{
+		$request_code = $this->input->post("request_code");		
+		$segment_name = $this->input->post("segment_name");
+		$is_forwarded = $this->input->post("is_forwarded");
+
+		$request_summary_sql = "SELECT a." . $segment_name . "_id as request_id, a.* FROM is_" . $segment_name . " a WHERE a.request_code = '" . $request_code . "'";
+
+		$request_summary = $this->db_spare_parts->query($request_summary_sql);
+		$request_summary = $request_summary->result();		
+		$request_summary = $request_summary[0];		
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($segment_name);
+
+		if ($is_forwarded == 0) {
+			// update all PENDING items under is_reprocessed_item
+			$update_iri_sql = "UPDATE 
+									is_reprocessed_item 
+								SET 
+									status = 'FORWARDED' 
+								WHERE 
+									department_module_id = " . $department_module_details->department_module_id . "
+								AND 
+									request_id = " . $request_summary->request_id;
+
+			$this->db_spare_parts->query($update_iri_sql);
+
+			// update status in tr_warehouse_return
+			$data = array(
+					"return_status" => 'PENDING',
+					"update_timestamp" => now()
+				);
+
+			// 20150731 HERE HERE HERE!!!
+			$where = "status IN ('PREPARING') AND department_module_id = ". $department_module_details->department_module_id ." AND reprocessed_item_id = 1";
+			$this->spare_parts_model->update_warehouse_return($data, $where);
+
+
+			$is_forwarded = 1;
+
+			$title = "Forward To Warehouse :: " . $request_code;
+			$html = "You have successfully forwarded the request to warehouse with Request Code : <strong>" . $request_code . "</strong>.";		
+			
+		} else {
+			// update all PENDING items under is_reprocessed_item
+			$update_iri_sql = "UPDATE 
+									is_reprocessed_item 
+								SET 
+									status = 'PENDING',
+									update_timestamp = now() 
+								WHERE 
+									department_module_id = " . $department_module_details->department_module_id . "
+								AND 
+									request_id = " . $request_summary->request_id;
+
+			$this->db_spare_parts->query($update_iri_sql);
+
+			$is_forwarded = 0;
+
+			$title = "Cancel Forward To Warehouse :: " . $request_code;
+			$html = "You have cancelled the forwarded request to warehouse with Request Code : <strong>" . $request_code . "</strong>.";		
+
+		}	
+
+		$this->return_json("1", "Successfully " . $title, array('html' => $html, 'title' => $title, 'is_forwarded' => $is_forwarded));
+		return;
+	}
+
+	public function display_returnslip($request_code) 
+	{
+		$this->load->library('mpdf60/mpdf');
+		
+		$module_code = substr($request_code, 0, 2);
+
+		// get department_module_details
+		$department_module_details = $this->spare_parts_model->get_department_module_by_code($module_code);
+
+		// request_summary
+		$request_summary_sql = "SELECT a." . $department_module_details->segment_name . "_id as id, a.* FROM
+								is_" . $department_module_details->segment_name . " a
+							WHERE
+							a.request_code = '" . $request_code . "'";
+
+		$request_summary = $this->db_spare_parts->query($request_summary_sql);
+		$request_summary = $request_summary->result();		
+		$request_summary = $request_summary[0];				
+		
+		$where = "action = 'RETURN' AND status IN ('PREPARING', 'PENDING') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $request_summary->id;
+		$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);
+
+		// get total amount and total quantity
+		$total_quantity_amount_sql = "SELECT 
+											(SUM(good_quantity) + SUM(bad_quantity)) AS total_items, (SUM(total_amount)) AS total_amount
+										FROM 
+											is_reprocessed_item 
+										WHERE department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $request_summary->id  . " AND action = 'RETURN' AND status IN ('PREPARING', 'PENDING')";
+
+		$total_quantity_amount = $this->db_spare_parts->query($total_quantity_amount_sql);
+		$total_quantity_amount = $total_quantity_amount->result();						
+		$total_quantity_amount = $total_quantity_amount[0];
+
+		// get requester details
+		$requester = $this->human_relations_model->get_employment_information_view_by_id($request_summary->id_number);
+
+		$warehouse = $this->spare_parts_model->get_warehouse_by_id($request_summary->warehouse_id);
+
+		$data = array(				
+				'request_code' => $request_code,
+				'requester' => $requester,
+				'request_summary' => $request_summary,
+				'warehouse' => $warehouse,
+				'reprocessed_item_details' => $reprocessed_item_details,
+				'department_module_details' => $department_module_details,
+				'total_quantity_amount' => $total_quantity_amount,
+			);
+
+		$this->mpdf->WriteHTML($this->load->view('returnslip_pdf_view',$data,TRUE));
+		$this->mpdf->Output($request_code, 'I');
+		
+	}
+
+
+
 
 
 

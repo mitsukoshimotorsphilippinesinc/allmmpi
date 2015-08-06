@@ -35,7 +35,7 @@
 <?php
 $isAdd = false;
 $titlePrefix = "Reprocess Items - &nbsp;";
-$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/reporcess/" . $warehouse_request_details->warehouse_request_id;
+$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/reprocess/" . $warehouse_request_details->warehouse_request_id;
 $_id = $warehouse_request_details->warehouse_request_id;
 $show_approval = false;
 
@@ -43,106 +43,78 @@ $show_approval = false;
 
 <?php
 	$breadcrumb_container = assemble_breadcrumb();
+					
+	$details_content = get_requester_details($warehouse_request_details->id_number, "employee", 1);
+
 ?>
 
 <?= $breadcrumb_container; ?>
 
 <div class='alert alert-info'><h3><?= $titlePrefix ?><?= $department_module_details->module_name ?> <a class='btn return-btn add-close' style='float:right;margin-right:-30px;' >Back to Request List</a></h3></div>
 
-<form id="submit_form" action='<?= $submitURL ?>' method='post' class='form-inline'>
-	<fieldset >
-		<div class="row-fluid">						
-			<div class='alert alert-success'><h4>Requester Details
-			<?php if(!$isAdd && !empty($warehouse_request_details)):?>
-				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $warehouse_request_details->request_code ?></label>
-			<?php elseif($isAdd): ?>
-				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $department_module_details->module_code ?></label>
-			<?php endif; ?>
-			</h4></div>
-		</div>
-		
-		<div class="row-fluid">
-			<div class="span6">
-				<label><strong>Requester:</strong></label>
-				<br/>
-				<?php if(!$isAdd): ?>
-				<small class="customer-assign-btn">
-					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly" value="<?= $warehouse_request_details->id_number ?>" disabled="disabled;">
-				</small>
-				
-				<div class="control-group">
-					<label class="control-label" for="requester_details"><strong>Details</strong ></label>					
-					<div class="controls">
-						<?php						
-							$details_content = get_requester_details($warehouse_request_details->id_number, "employee");
-						?>
-						<textarea class='span10' rows="7" placeholder="" name="requester_details" id="requester_details" readonly><?= $details_content ?>
-						</textarea>						
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div class="span11">
-						<div class="control-group <?= $this->form_validation->error_class('remarks') ?>">
-							<label class="control-label" for="remarks"><strong>Remarks</strong></label>
-							<div class="controls">						
-							<textarea class='span8' rows="4" placeholder="" name="current_requester_remarks" readonly><?= $warehouse_request_details->remarks ?></textarea>
-							<br/><br/>
-							<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
-							<input class="span12" id="requester_remarks" type="text" placeholder="New Remarks">	
-							</div>
-						</div>
-					</div>
-				</div>
-				
-			</div>
-			<div class="span5">
-				<label><strong>From Warehouse:</strong></label>
-				<br/>
+
+
+<div>
+	<table  class='table table-bordered'>
+		<thead>				
+		</thead>
+		<tbody>
+			<tr>
+				<td style="width:130px"><strong>NAME:</strong></td>
+				<td><?= $details_content->complete_name ?></td>
+				<td style="width:130px"><strong>WAREHOUSE:</strong></td>
+				<td></td>
+			</tr>	
+			<tr>
+				<td><strong>ID NUMBER:</strong></td>
+				<td><?= $details_content->id_number ?></td>
+				<td><strong>MOTOR BRAND/MODEL:</strong></td>
+				<td></td>
+			</tr>	
+			<tr>
+				<td><strong>DEPARTMENT:</strong></td>
+				<td><?= $details_content->department_name ?></td>
+				<td><strong>ENGINE:</strong></td>
+				<td></td>
+			</tr>	
+			<tr>
+				<td><strong>POSITION:</strong></td>
+				<td><?= $details_content->position_name ?></td>
+				<td><strong>CHASSIS:</strong></td>
+				<td></td>
+			</tr>	
+			<tr>
+				<td><strong>EMAIL:</strong></td>
+				<td><?= $details_content->email_address ?></td>
+				<td><strong>STATUS:</strong></td>
+				<td></td>
+			</tr>	
+			<tr>
+				<td><strong>CONTACT NUMBER:</strong></td>
+				<td><?= $details_content->contact_number ?></td>
+				<td><strong>REMARKS:</strong></td>
 				<?php
-
-					$warehouse_options = array();
-					if ($warehouse_request_details->warehouse_id == 0)
-						$warehouse_options = array('0' => 'Select a Warehouse...');
-					
-					foreach ($warehouse_details as $wd) {
-					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
-					}
-
-				?>
-				<?= form_dropdown('add_item_warehouse',$warehouse_options, set_value('add_item_warehouse',$warehouse_request_details->warehouse_id),'id="add_item_warehouse" disabled="disabled"') ?>
-
-				<?php endif; ?>
-
-				<br/>
-				<br/>
-				<label><strong>Motorcycle Brand/Model:</strong></label>
-				<br/>
-				<?php
-
-					$brand_model_options = array();
-					if ($warehouse_request_details->motorcycle_brand_model_id == 0)
-						$brand_model_options = array('0' => 'Select a Brand/Model...');
-
-					foreach ($motorcycle_brandmodel_details as $mbd) {
-						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
-					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
-					}
-					
-					echo form_dropdown('add_item_brandmodel',$brand_model_options, set_value('add_item_brandmodel',$warehouse_request_details->motorcycle_brand_model_id),'id="add_item_brandmodel"  disabled="disabled"');
+					if (strlen(trim($warehouse_request_details->remarks)) > 0)
+						echo "<td><a href='#' id='view-full-remarks' data='{$warehouse_request_details->remarks}'><u>View Remarks</u></a></td>";
+					else
+						echo "<td><strong>N/A</strong></td>";
 				?>				
-				<br/>
-				<br/>
-				<label><strong>Engine:</strong></label>
-				<br/>
-				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." value="<?= $warehouse_request_details->engine ?>"  disabled="disabled" />
-				<br/>
-				<br/>
-				<label><strong>Chassis:</strong></label>
-				<br/>
-				
-				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." value="<?= $warehouse_request_details->chassis ?>" disabled="disabled"/>				
-			</div>	
+			</tr>								
+		<tbody>
+	</table>	
+</div>		
+
+
+<form id="submit_form" action='<?= $submitURL ?>' method='post' class='form-inline'>
+	<fieldset >		
+		<div class="row-fluid">
+			<div class="span8">													
+				<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
+				<input style="450px;" id="requester_remarks" type="text" placeholder="New Remarks">	
+				<a id="add_new_requester_remarks" class="btn btn-primary">Add</a>			
+				</div>							
+			</div>
+			
 		</div>
 		
 		<br/>
@@ -156,23 +128,33 @@ $show_approval = false;
 
 		
 		<div class="row-fluid">
-			<table class="table inventory-orders">
+			<table id="test_table" class="table inventory-orders">
 				<thead id="items_header">
 					<tr>
+						<th class="discount_percentage">Action</th>	
 						<th class="item">Item</th>						
 						<th class="good_qty">Good Quantity</th>
 						<th class="bad_qty">Bad Quantity</th>
-						<th class="unit_price">Unit Price</th>
-						<th class="discount_percentage">Action</th>
+						<th class="unit_price">Unit Price</th>						
 						<th class="discount_percentage">Discount</th>
 						<th class="discount_price">Discount Price</th>
 						<th class="remark">Remarks</th>
 						<th></th>
 						<th></th>
-					</tr>
+					</tr>					
 				</thead>
 				<tbody id="inputs">
-					<tr>												
+					<tr>
+						<td>
+							<?php
+							$action_options = array(
+												'return' => 'RETURN', 
+												'charge' => 'CHARGE'
+											);
+
+							echo form_dropdown('add_item_action', $action_options, NULL, 'id="action_option" class="action"');
+							?>
+						</td>
 						<td>
 							<?php
 								$request_items = json_decode($json_items);
@@ -187,7 +169,7 @@ $show_approval = false;
 									
 								}
 
-								echo form_dropdown('list_item_options', $item_detail_options, NULL, 'id="select_item" class="item"');
+								echo form_dropdown('select_item', $item_detail_options, NULL, 'id="select_item" class="item"');
 
 							?>						
 						</td>						
@@ -195,17 +177,7 @@ $show_approval = false;
 						<td><?= form_input('add_item_bad_qty',NULL,'class="bad_qty" placeholder="Bad Qty"');?></td>
 						<td>
 							<?= form_input('add_item_price',NULL,'id="add_item_price" class="price" placeholder="Unit Price" readonly');?>
-						</td>
-						<td>
-							<?php
-							$action_options = array(
-												'return' => 'RETURN', 
-												'charge' => 'CHARGE'
-											);
-
-							echo form_dropdown('add_item_action', $action_options, NULL, 'id="action_option" class="action"');
-							?>
-						</td>
+						</td>						
 						<td>
 							<?php
 							$discount_options = array();
@@ -227,6 +199,11 @@ $show_approval = false;
 						</td>
 						<td></td>
 					</tr>
+					<tr id="charge_recipient" hidden="hidden">
+						<td><h5 style="margin-top:5px;">Charge To:</h5></td>							
+						<td><input id="search_recipient" style="width:170px;" class="item" type="text" placeholder="Search Requester Here..." readonly="readonly"></td>
+						<td colspan="6"><?= form_input('add_recipient_name',NULL,'id="add_recipient_name" style="width:500px;" placeholder=" Juan dela Cruz" readonly');?></td>
+					</tr>	
 
 				</tbody>
 			</table>
@@ -243,16 +220,17 @@ $show_approval = false;
 			<h4 style="margin-bottom:5px;margin-left:10px;">List of Items</h4>
 			<table class="table inventory-order-items table-bordered table-striped">
 				<thead id="items_header">					
-					<tr>						
-						<th class="item">Item</th>
-						<th class="unit">Unit</th>
-						<th class="qty">Good Qty</th>
-						<th class="qty">Bad Qty</th>
-						<th class="price">SRP</th>
-						<th class="discount">Disc.(%)</th>
-						<th class="discount_price">Disc. Price</th>
-						<th class="price">Total Amount</th>						
-						<th class="remark">Remarks</th>
+					<tr>
+						<th class="">Action</th>						
+						<th class="">Item</th>						
+						<th class="">Good Qty</th>
+						<th class="">Bad Qty</th>
+						<th class="">SRP</th>
+						<th class="">Recipient</th>
+						<th class="">Charge Discount</th>
+						<th class="">Charge Price</th>
+						<th class="">Total Amount</th>
+						<th class="">Remarks</th>
 						<th></th>
 						<th></th>
 					</tr>
@@ -261,31 +239,49 @@ $show_approval = false;
 					<?php
 					$temp = NULL;
 			
-					$temp = json_decode($json_items, true);
+					$temp = json_decode($json_reprocessed_items, true);
 
-					for($i=0;$i<count($temp);$i++):?>
-						<!--?php if(set_value('item_qty['.$i.']') != '' || !$isAdd):?-->
+					for($i=0;$i<count($temp);$i++):?>						
+					
 					<tr class="item_row">
-								<?php
-								
-								$itemInfo = $this->spare_parts_model->get_item_view_by_id($temp[$i]['item_id']);
-								
-								?>
+						<?php								
+						$itemInfo = $this->spare_parts_model->get_item_view_by_id($temp[$i]['item_id']);
+
+						$requester_name = "";
+
+						if (!(($temp[$i]['id_number']) == NULL)) {
+							$requesterInfo = $this->human_relations_model->get_employment_information_view_by_id($temp[$i]['id_number']);
+							$requester_name = $requesterInfo->complete_name;
+						}
+
+						$remarks = json_decode($temp[$i]['remarks']);
+
+						$row = "";
+						
+						if(!empty($remarks))
+						{				
+							foreach($remarks as $r)
+							{	
+								$row .= "{$r->datetime} - {$r->message}\n";
+							}				
+						} 
+
+						?>
+						<td class="unit"><?=set_value('item_action['.$i.']',$temp[$i]['action'])?></td>						
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->description)?></td>
-						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->unit)?></td>
 						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']))?></td>
 						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']))?></td>
 						<td class="price"><?=number_format(set_value('item_price['.$i.']',$temp[$i]['srp']),2)?></td>
+						<td class="item"><?=set_value('item_recipient['.$i.']',$requester_name)?></td>
 						<td class="discount"><?=number_format(set_value('discount['.$i.']',$temp[$i]['discount']))?></td>
 						<td class="discount_price"><?=number_format(set_value('discount_price['.$i.']',$temp[$i]['discount_amount']),2)?></td>
 						<td class="price"><?=number_format(set_value('item_total_amount['.$i.']',$temp[$i]['total_amount']),2)?></td>
-						<td class="remark"><?=set_value('item_remarks['.$i.']',$temp[$i]['remarks'])?></td>
-						<td id="<?= $temp[$i]['warehouse_request_detail_id'] ?>" data="<?= $temp[$i]['warehouse_request_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
+						<td class="remark"><?=set_value('item_remarks['.$i.']',$row)?></td>						
+						<td class ="remove_item" id="<?= $temp[$i]['warehouse_request_detail_id'] ?>" data="<?= $temp[$i]['warehouse_request_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>						
 						<td class="hidden_values">
 							<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<?=set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity'])?>">
 							<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<?=set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])?>">
 							<input type="hidden" name="unit_name[]" id="unit_name[]" value="<?=set_value('unit_name['.$i.']',$itemInfo->description)?>">
-							<input type="hidden" name="item_unit[]" id="item_unit[]" value="<?=set_value('item_unit['.$i.']',$itemInfo->unit)?>">
 							<input type="hidden" name="item_name[]" id="item_name[]" value="<?=set_value('item_name['.$i.']',$temp[$i]['item_id'])?>">
 							<input type="hidden" name="temp_item[]" id="temp_item[]" value="<?=set_value('temp_item['.$i.']',$itemInfo->description)?>">
 							<input type="hidden" name="item_price[]" id="item_price[]" value="<?=set_value('item_price['.$i.']',$temp[$i]['srp'])?>">
@@ -308,33 +304,46 @@ $show_approval = false;
 		</div>
 		<hr/>
 		<div class="controls" align="right">
-			<!--a id='submit_order' class="btn btn-primary">Save Warehouse Request</a-->
+			<a href='/spare_parts/display_returnslip/<?= $warehouse_request_details->request_code ?>' target = '_blank' id='print_return_slip' class="btn btn-primary"><span id="prs_caption">Print Return Slip Form</span></a>			
+			<a id='forward_to_warehouse' class="btn btn-primary" data="<?= $is_forwarded ?>"><span id="ftw_caption"></span></a>
 			<a class="btn return-btn add-close">Close</a>
 		</div>
 		
 	</fieldset>
 </form>
 <?php
-
-	$this->load->view('template_search_requester');
-	$this->load->view('template_search_item');
-
-
+	$this->load->view('template_search_requester');	
 ?>
+
 <script type="text/javascript">
 
+	var _is_forwarded = <?= $is_forwarded ?>;
 	
 	$(document).ready(function(){
 
 
+		$("#forward_to_warehouse").attr("data");
+		
+		if (_is_forwarded == 1) {
+			$("#ftw_caption").text("Cancel Forward To WH");
+			document.getElementById('add_wr_item').setAttribute("disabled","disabled");
+			$("#test_table *").attr("disabled", "disabled").off('click');
+			document.getElementById("forward_to_warehouse").className = "btn btn-danger";
+			$(".remove_item").hide();
+		} else {
+			$("#ftw_caption").text("Forward To WH");
+			$("#test_table *").removeAttr("disabled", "disabled").off('click');
+			document.getElementById("forward_to_warehouse").className = "btn btn-primary";
+			$(".remove_item").show();						
+		}
+
 	});
 
-	var saving_timeout;
 	var items_array = <?= json_encode($items); ?>;
 
 	var item_entry_row = _.template('\
-		<td class="item"><%= item_name %></td>\n\
-		<td class="unit"><%= item_unit_name %></td>\n\
+		<td class="unit"><%= item_action %></td>\n\
+		<td class="item"><%= select_item %></td>\n\
 		<td class="qty"><%= item_good_qty %></td>\n\
 		<td class="qty"><%= item_bad_qty %></td>\n\
 		<td class="price"><%= item_price %></td>\n\
@@ -346,10 +355,6 @@ $show_approval = false;
 		<td class="hidden_values">\n\
 			<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<%= hidden_item_good_qty %>">\n\
 			<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<%= hidden_item_bad_qty %>">\n\
-			<input type="hidden" name="unit_name[]" id="unit_name[]" value="<%= item_unit_name %>">\n\
-			<input type="hidden" name="item_unit[]" id="item_unit[]" value="<%= item_unit_id%>">\n\
-			<input type="hidden" name="item_name[]" id="item_name[]" value="<%= item_id%>">\n\
-			<input type="hidden" name="temp_item[]" id="temp_item[]" value="<%= item_name %>">\n\
 			<input type="hidden" name="item_price[]" id="item_price[]" value="<%= hidden_item_price %>">\n\
 			<input type="hidden" name="item_discount[]" id="item_discount[]" value="<%= hidden_item_discount %>">\n\
 			<input type="hidden" name="item_discount_price[]" id="item_discount_price[]" value="<%= hidden_item_discount_price %>">\n\
@@ -460,11 +465,13 @@ $show_approval = false;
 		if ($(this).val() == "return") {
 			$("#add_wr_item_caption").text("Return Item/s");
 			document.getElementById("add_item_discount").disabled = true;
-			document.getElementById("add_item_discount_price").disabled = true;		
+			document.getElementById("add_item_discount_price").disabled = true;
+			$("#charge_recipient").hide();
 		} else {
 			$("#add_wr_item_caption").text("Charge Item/s");
 			document.getElementById("add_item_discount").disabled = false;
-			document.getElementById("add_item_discount_price").disabled = false;			
+			document.getElementById("add_item_discount_price").disabled = false;
+			$("#charge_recipient").show();
 		}
 
 	});
@@ -520,98 +527,17 @@ $show_approval = false;
 		
 	}
 
+	//$("#add_wr_item").click(function(){
+	$("#add_wr_item").live('click',function(){
 
+		var input_errors = "";
 
-
-
-
-
-
-
-
-
-
-	$(document).on("click",'#search_item',function(e) {
-	//$("#search_item").focus(function() {
-		e.preventDefault();
-		//if(_.isObject(document.search_item_modal)) return;
-		search_item();
-
-	});
-
-	document.search_item_modal = null;
-
-	var search_item = function() {
-		document.search_item_modal = b.modal.create({
-			title: "Search Item",
-			width: 700,
-			html: _.template($("#search-item-template").html(),{}),
-		});
-		
-		document.search_item_modal.show();
-		
-		$("#item_type_search").change(function(e) {
-			var search_key = $.trim($("#txt_item_search_key").val());
-			if(search_key != "") $("#btn_item_search").trigger("click");		
-		})
-		
-		$("#btn_item_search").click(function(e) {
-			e.preventDefault();
-			
-			var search_key = $.trim($("#txt_item_search_key").val());
-			var item_type_id = $.trim($("#item_type_search").val());
-
-			var warehouse_option = $("#item_warehouse_option").val();
-
-			if (search_key.length == 0) 
-			{
-				return;
-			}
-			
-			b.request({
-				url: "/spare_parts/search_item",
-				data: {
-					"search_key": search_key,
-				},
-				on_success: function(data) {
-
-					var items = data.data.items;
-
-					$("#item-listing").html(_.template($("#item-list-template").html(),{"items": items}));
-					
-					$("#item-listing .btn-select-item").click(function(e) {
-						e.preventDefault();
-						var item_id = $(this).data("id");
-						var item = items_array[item_id];
-
-						$("#search_item").val($(this).data("description"));
-						$("#add_item_name").val(item_id);
-						$("#add_item_price").val($(this).data("srp"));
-						// always 1 since there is only 1 unit type (pieces)
-						$('select[name="add_item_unit"]').val(1);
-						document.getElementsByName('add_item_good_qty')[0].placeholder= $(this).data("good_quantity");
-						document.getElementsByName('add_item_bad_qty')[0].placeholder= $(this).data("bad_quantity");
-
-						document.search_item_modal.hide();
-						document.search_item_modal = null;
-					});
-					
-				} 
-			});
-		});
-	}
-
-	$("#remarks").bind("keyup keydown",function(){
-		if($(this).val().length > 255){
-			$(this).val($(this).val().slice(0, 255));
+		if ($("#select_item").val() == 0) {
+			input_errors += "The Item field is required. ";
 		}
-	});
-
-	$("#add_wr_item").click(function(){
 
 		if (($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == ''))
-		{
-			var input_errors = "";
+		{			
 
 			if (($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == ''))
 			{
@@ -624,6 +550,11 @@ $show_approval = false;
 			else if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1))
 			{
 				input_errors += "The Bad Quantity field must contain an integer. "
+			}
+
+			if ($("#action_option").val() == "charge") {
+				if ($("#search_recipient").val() == "") 
+					input_errors += " Recipient is required.";	
 			}
 
 
@@ -674,19 +605,19 @@ $show_approval = false;
 
 			// ajax request
 			b.request({
-				url : '/spare_parts/warehouse_request/reprocess_item',
+				url : '/spare_parts/warehouse_request/proceed_reprocess_item',
 				data : {				
 					'request_code' : $("#requester-request-code-label").text(),
 					'request_detail_id' : request_detail_id,
 					'srp' : $('input[name="add_item_price"]').val(),
 					'charge_discount' : $('select[name="add_item_discount"]>option:selected').text(),
-					'charge_amount' : $('input[name="add_item_discount_price"]').val(),
+					'charge_discount_amount' : $('input[name="add_item_discount_price"]').val(),
 					'good_quantity' : $('input[name="add_item_good_qty"]').val(),
 					'bad_quantity' : $('input[name="add_item_bad_qty"]').val(),
 					'remarks' : $('input[name="add_item_remarks"]').val(),
 					'action_option' : $('#action_option').val(),
+					'id_number' : $('#search_recipient').val(),
 
-					// DITO!!!
 				},
 				on_success : function(data) {
 
@@ -701,13 +632,16 @@ $show_approval = false;
 
 						$("#requester-request-code-label").text(data.data.request_code);
 						$("#item-request-code-label").text(data.data.request_code);
-						$("#total-amount").text(data.data.overall_total_amount);
+						//$("#total-amount").text(data.data.overall_total_amount);
+
+
 
 						$("#wr_items").append('<tr class="item_row">'+
-							item_entry_row({item_id: $('input[name="add_item_name"]').val(),
-							item_name: item_name,
+							//item_entry_row({item_id: $('input[name="add_item_name"]').val(),
+							item_entry_row({item_id: $('input[name="select_item"]').val(),								
+							item_action: $('select[name="add_item_action"]>option:selected').text(),							
+							select_item: data.data.item_details['description'],
 							item_unit_name: $('select[name="add_item_unit"]>option:selected').text(),
-							item_unit_id: $('select[name="add_item_unit"]').val(),
 							item_price: numberFormat($('input[name="add_item_price"]').val(),2),
 							item_good_qty: numberFormat($('input[name="add_item_good_qty"]').val(),2),
 							item_bad_qty: numberFormat($('input[name="add_item_bad_qty"]').val(),2),
@@ -721,14 +655,12 @@ $show_approval = false;
 							hidden_item_discount_price: $('input[name="add_item_discount_price"]').val(),
 							hidden_item_bad_qty: $('input[name="add_item_bad_qty"]').val(),
 							hidden_item_good_qty: $('input[name="add_item_good_qty"]').val()})
-							+'</tr>');
-						
+							+'</tr>');				
 
 						$('input[name="add_item_good_qty"]').val('');
-						$('input[name="add_item_bad_qty"]').val('');
-						$('select[name="add_item_unit"]').val('');
+						$('input[name="add_item_bad_qty"]').val('');						
 						$('#search_item').val('');
-						$('input[name="add_item_name"]').val("")
+						$('#select_item').val("Please select an item...");
 						$('input[name="add_item_price"]').val('');
 						$('input[name="add_item_discount"]>option:selected').text('0');
 						$('input[name="add_item_discount_price"]').val('');
@@ -740,8 +672,7 @@ $show_approval = false;
 
 						errorCreateRequestModal = b.modal.new({
 							title: data.data.title,
-							width:450,
-							//disableClose: true,
+							width:450,							
 							html: data.data.html,
 						});
 						errorCreateRequestModal.show();	
@@ -860,8 +791,232 @@ $show_approval = false;
 	});
 
 	$(".add-close").live('click',function(){
+
 		window.location.href = '/spare_parts/warehouse_request/listing';
 		return false;
 	})
+
+	$("#view-full-remarks").click(function(e){
+
+		var request_code = '<?= $warehouse_request_details->request_code ?>';
+		var segment_name = '<?= $department_module_details->segment_name ?>';	
+
+		b.request({
+			url : '/spare_parts/display_request_remarks',
+			data : {				
+				'remarks' : $(this).attr("data"),
+				'request_code' : request_code,
+				'segment_name' : segment_name,
+			},
+			on_success : function(data) {
+				
+				if (data.status == "1")	{
+
+					// show add form modal					
+					proceedApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:600,
+						//disableClose: true,
+						html: data.data.html,						
+					});
+					proceedApproveRequestModal.show();
+
+				} else {
+					// show add form modal
+					approveRequestModal.hide();					
+					errorApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:450,	
+						html: data.data.html,
+					});
+					errorApproveRequestModal.show();	
+
+				}
+			}
+
+		})	
+
+	});
+
+	$("#add_new_requester_remarks").click(function(e){
+
+		var request_code = '<?= $warehouse_request_details->request_code ?>';
+		var segment_name = '<?= $department_module_details->segment_name ?>';
+
+		b.request({
+			url : '/spare_parts/add_new_requester_remarks',
+			data : {				
+				'segment_name' : segment_name,
+				'remarks' : $("#requester_remarks").val(),
+				'request_code' : request_code,
+			},
+			on_success : function(data) {
+				
+				if (data.status == "1")	{
+
+					// show add form modal					
+					addNewRemarksModal = b.modal.new({
+						title: data.data.title,
+						width:600,
+						//disableClose: true,
+						html: data.data.html,						
+					});
+					addNewRemarksModal.show();
+
+				} else {
+					// show add form modal
+					addNewRemarksModal.hide();					
+					errorAddNewRemarksModal = b.modal.new({
+						title: data.data.title,
+						width:450,	
+						html: data.data.html,
+					});
+					errorAddNewRemarksModal.show();	
+
+				}
+			}
+		})	
+	});
+	
+	$("#forward_to_warehouse").live('click',function(){
+
+		var request_code = '<?= $warehouse_request_details->request_code ?>';
+		var segment_name = '<?= $department_module_details->segment_name ?>';
+		var request_id   = <?= $warehouse_request_details->warehouse_request_id ?>;
+		var is_forwarded_val = $(this).attr("data");
+
+		alert(is_forwarded_val);
+
+		b.request({
+			url : '/spare_parts/forward_to_warehouse',
+			data : {								
+				'request_code' : request_code,
+				'segment_name' : segment_name,
+				'is_forwarded' : is_forwarded_val,
+			},
+			on_success : function(data) {							
+
+				if (data.status == "1")	{
+
+					//alert(data.data.is_forwarded);
+
+					// show add form modal					
+					proceedApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:600,
+						html: data.data.html,						
+					});
+					proceedApproveRequestModal.show();	
+
+					if (data.data.is_forwarded == 1) {
+						$("#ftw_caption").text("Cancel Forward To WH");						
+						$("#test_table *").attr("disabled", "disabled").off('click');
+						$(".remove_item").hide();
+						document.getElementById("forward_to_warehouse").className = "btn btn-danger";
+					} else {
+
+						$("#ftw_caption").text("Forward To WH");
+						$("#test_table *").removeAttr("disabled", "disabled").off('click');
+						document.getElementById("forward_to_warehouse").className = "btn btn-primary";
+						$(".remove_item").show();
+					}		
+
+					$("#forward_to_warehouse").attr('data', data.data.is_forwarded);
+				
+				} else {
+					// show add form modal
+					approveRequestModal.hide();					
+					errorApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:450,	
+						html: data.data.html,
+					});
+					errorApproveRequestModal.show();	
+
+				}
+			}
+
+		})
+
+	});
+
+	$("#search_recipient").focus(function() {
+		assignRecipient();		
+	});
+	
+	var assignRecipient = function() {
+
+	// show add form modal					
+		assignRequesterModal = b.modal.new({
+			title: "Assign Requester",
+			html: _.template($('#search-requester-template').html(), {}),
+			width: 800,
+		});
+		assignRequesterModal.show();
+
+
+		$(document).on("click",'#btn_requester_search',function(e) {
+			e.preventDefault();
+			$('#frm_assign_search').removeClass('error');
+			$('#txt_requester_search_key_help').html('');
+			
+			var search_key = $.trim($('#txt_requester_search_key').val());
+			
+			if (search_key.length == 0) {
+				$('#frm_assign_search').addClass('error');
+				$('#txt_requester_search_key_help').html('Search key cannot be empty.');
+				$('#txt_requester_search_key_help').show();
+				return;
+			}
+			
+			searchPersonnel(search_key, function(data) {
+				
+				if (data.status == 'ok') {
+				
+					var employees = data.data.employees;
+					$('#assign-requester-listing').html(_.template($('#assign-requester-item-template').html(), {'employees' : employees}));
+					//$.each(data.data.keys, function(index, key_item) {
+					//});
+					
+					// apply click event on select buttons
+					$('#assign-requester-listing .btn-select-member').click(function(e) {
+						var id_number = $(this).data('idnumber');
+						var full_name = $(this).data('fullname');
+						var department_name = $(this).data('departmentname');
+						var position_name = $(this).data('positionname');
+						
+						var fullDetails = full_name + ' / ' + department_name + ' / ' + position_name;
+
+						//alert(id_number);
+						$("#search_recipient").val(id_number);
+						$("#add_recipient_name").val(fullDetails);
+
+						assignRequesterModal.hide();
+						
+					});
+					
+				} else {
+					$('#assign-requester-listing').html('<tr><td colspan="3">'+data.msg+'</td></tr>');
+				}
+				
+			});
+			
+		});
+		
+	};
+	
+	var searchPersonnel = function(search_key, cb, with_overlay) {
+		with_overlay = typeof(with_overlay) == 'undefined' ? true : with_overlay;
+		b.request({
+			'with_overlay' : with_overlay,
+			url: '/spare_parts/get_requester',
+			data: {'search_key' : search_key},
+			on_success: function(data, status) {
+				if (_.isFunction(cb)) cb.call(this, data);
+			}
+		});
+		
+	};
+	
 	
 </script>

@@ -128,27 +128,89 @@ function get_items_total_amount($request_code) {
 	return $request_item_amount_total;
 }
 
-function get_requester_details($id_number, $requester_type)
-	{
-		$ci = ci();		
-		$ci->load->model('human_relations_model');
+function get_reprocessed_item_total_amount($request_code) {
+	
+	// 20150728
+	// TODO : STILL UNDER DEVELOPMENT
 
-		if ($requester_type == 'employee') {
-			$requester_details = $ci->human_relations_model->get_employment_information_view_by_id($id_number);
+	$ci = ci();
 
-			$is_employed = ($requester_details->is_employed == 1) ? 'Yes' : 'No';
-			$email_address = ($requester_details->company_email_address == NULL) ? $requester_details->personal_email_address : $requester_details->company_email_address;
-			$contact_number = ($requester_details->mobile_number == NULL) ? $requester_details->phone_number : $requester_details->mobile_number;
+	$ci->load->model('spare_parts_model');
+	
+	$ci->db_spare_parts = $ci->load->database('spare_parts', TRUE);
 
-			$position_details = $ci->human_relations_model->get_position_by_id($requester_details->position_id);
+	// identify which module
+	$module_code = substr($request_code, 0, 2);
+	$department_module_details = $ci->spare_parts_model->get_department_module_by_code($module_code);
 
-			$department_name = "N/A";
-			if (!empty($department_details)) {
-				$department_name = $department_details->department_name;
-			}
+	// request_summary
+	$request_summary_sql = "SELECT a." . $department_module_details->segment_name . "_id as id, a.* FROM
+							is_" . $department_module_details->segment_name . " a
+						WHERE
+						a.request_code = '" . $request_code . "'";
 
+	$request_summary = $ci->db_spare_parts->query($request_summary_sql);
+	$request_summary = $request_summary->result();		
+	$request_summary = $request_summary[0];		
+
+	$request_item_amount_total_sql = "SELECT 
+								a." . $department_module_details->segment_name . "_id as id, 
+								(SUM(a.good_quantity) + SUM(a.bad_quantity)) AS total_items, 
+								(SUM(a.total_amount)) AS total_amount 
+							FROM
+								is_reprocessed_item a
+							WHERE
+								a.department_module_id = '" . $request_summary->id . "' 
+							AND 
+								a.request_id = '" . $request_summary->id . "' 
+							AND
+								a.action IN ('RETURN', 'CHARGE')
+							AND
+								a.status NOT IN ('CANCELLED', 'DENIED')";
+
+	$request_item_amount_total = $ci->db_spare_parts->query($request_item_amount_total_sql);
+	$request_item_amount_total = $request_item_amount_total->result();						
+	$request_item_amount_total = $request_item_amount_total[0];
+
+	return $request_item_amount_total;
+}
+
+
+function get_requester_details($id_number, $requester_type, $is_object = 0)
+{
+	$ci = ci();		
+	$ci->load->model('human_relations_model');
+
+	if ($requester_type == 'employee') {
+		$requester_details = $ci->human_relations_model->get_employment_information_view_by_id($id_number);
+
+		$is_employed = ($requester_details->is_employed == 1) ? 'Yes' : 'No';
+		$email_address = ($requester_details->company_email_address == NULL) ? $requester_details->personal_email_address : $requester_details->company_email_address;
+		$contact_number = ($requester_details->mobile_number == NULL) ? $requester_details->phone_number : $requester_details->mobile_number;
+
+		$position_details = $ci->human_relations_model->get_position_by_id($requester_details->position_id);
+
+		$department_name = "N/A";
+		if (!empty($department_details)) {
+			$department_name = $department_details->department_name;
+		}
+
+		if ($is_object == 0) {
 			$requester_details = "NAME: {$requester_details->complete_name}\nID NUMBER: {$id_number}\nDEPARTMENT: {$department_name}\nPOSITION: {$position_details->position_name}\nIS EMPLOYED: {$is_employed}\nEMAIL: {$email_address}\nCONTACT NUMBER: {$contact_number}\n";
-		}	
+		} else {
+			$requester_details = array(
+					'complete_name' => $requester_details->complete_name,
+					'id_number' => $id_number,
+					'department_name' => $department_name,
+					'position_name' => $position_details->position_name,
+					'is_employed' => $is_employed,
+					'email_address' => $email_address,
+					'contact_number' => $contact_number,
+				);
 
-		return $requester_details;	
-	}
+			$requester_details = (object) ($requester_details);
+		}
+	}	
+
+	return $requester_details;	
+}

@@ -35,6 +35,7 @@ class Spare_parts_model extends Base_Model
 			'department_module_submodule' => 'rf_department_module_submodule',
 			'department' => 'rf_department',
 			'reprocessed_item' => 'is_reprocessed_item',
+			'warehouse_return' => 'tr_warehouse_return',
 		);
 
 	}
@@ -1473,6 +1474,50 @@ class Spare_parts_model extends Base_Model
 		$result->free_result();
 		return $row;
 	}
+	// ===========================================================================
+	// ===========================================================================
+    // tr_warehouse_return
+	function get_warehouse_return($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('warehouse_return', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_warehouse_return($data) 
+	{
+		return $this->insert('warehouse_return', $data);
+	}
+
+	function update_warehouse_return($data, $where) 
+	{
+		return $this->update('warehouse_return', $data, $where);
+	}
+
+	function delete_warehouse_return($where) 
+	{
+		return $this->delete('warehouse_return', $where);
+	}
+
+	function get_warehouse_return_by_id($warehouse_return_id) 
+	{
+		$result = $this->get_reprocessed_item(array('warehouse_return_id' => $warehouse_return_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_warehouse_return_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('warehouse_return', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+		
 	// ===========================================================================
 
 }

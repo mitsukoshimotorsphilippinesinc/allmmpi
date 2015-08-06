@@ -13,13 +13,13 @@ RedirectMatch 403 ^/(\.git|\.hg).*$
 
 <FilesMatch "\.(ttf|otf|eot|woff|font.css)$">
   <IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
+    #Header set Access-Control-Allow-Origin "*"
   </IfModule>
 </FilesMatch>
 
 
 <filesMatch "\.(jpg|jpeg|png|gif|swf|js|css|pdf|ico)$">
-        Header set Cache-Control "max-age=604800, public, no-transform"
+        #Header set Cache-Control "max-age=604800, public, no-transform"
 </filesMatch>
 
 #AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript application/json

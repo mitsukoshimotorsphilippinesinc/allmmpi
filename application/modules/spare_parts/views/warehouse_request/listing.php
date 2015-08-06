@@ -326,7 +326,7 @@
 			data: {
 				"warehouse_request_id" : warehouse_request_id,
 				"warehouse_request_code" : warehouse_request_code,
-				"listing_action" : listing_action,
+				"listing_action" : listing_action,				
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
@@ -362,14 +362,13 @@
 								}									
 							}
 						});
-					} else if (data.data.request_status == "COMPLETED") {
-						alert("here");
+					} else if (data.data.request_status == "COMPLETED") {						
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,
 							width:800,							
 							html: data.data.html,
 							buttons: {
-								'Return Items' : function() {
+								'Reprocess Items' : function() {
 									redirect("/spare_parts/warehouse_request/reprocess_items/" + warehouse_request_id);
 								}									
 							}

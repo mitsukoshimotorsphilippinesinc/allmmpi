@@ -39,7 +39,7 @@
 				<td style="width: 110px;"><%= item.department_name  %></td>
 				<td style="width: 110px;"><%= item.position  %></td>
 				<td style="width: 40px;"><%= item.is_employed  %></td>
-				<td class='action'><button class='btn btn-small btn-info btn-select-member' data-id='<%= item.employment_information_id %>' data-idnumber='<%= item.id_number %>' data-fullname='<%= item.complete_name%>' data-details='<%= item.details%>'>Select</button></td>
+				<td class='action'><button class='btn btn-small btn-info btn-select-member' data-id='<%= item.employment_information_id %>' data-idnumber='<%= item.id_number %>' data-fullname='<%= item.complete_name%>' data-details='<%= item.details%>' data-positionname='<%= item.position%>' data-departmentname='<%= item.department_name%>'>Select</button></td>
 			</tr>
 	<%	}); %>
 </script>
