@@ -1,4 +1,8 @@
+<?php
+	$breadcrumb_container = assemble_breadcrumb();
+?>
 
+<?= $breadcrumb_container; ?>
 <div class='alert alert-danger'><h2>Request List<a href='/spare_parts/salary_deduction/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;" title='Download' disabled="disabled"><i class='icon-download'></i>&nbsp;Download Result</a></h2></div>
 
 <br>
@@ -8,14 +12,17 @@
 
 		<strong>Status:&nbsp;</strong>
 		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
-			<option value="ALL">ALL</option>
-			<option value="PENDING">PENDING</option>
-			<option value="FOR APPROVAL">FOR APPROVAL</option>
+			<option value="ALL">ALL</option>						
 			<option value="APPROVED">APPROVED</option>
-			<option value="DENIED">DENIED</option>
-			<option value="FORWARDED">FORWARDED</option>
-			<option value="COMPLETED">COMPLETED</option>
 			<option value="CANCELLED">CANCELLED</option>
+			<option value="CANCELLED (COMPLETED">CANCELLED (COMPLETED)</option>
+			<option value="COMPLETED">COMPLETED</option>
+			<option value="DENIED">DENIED</option>
+			<option value="DENIED (COMPLETED)">DENIED (COMPLETED)</option>			
+			<option value="FORWARDED">FORWARDED</option>
+			<option value="FOR APPROVAL">FOR APPROVAL</option>
+			<option value="PENDING">PENDING</option>
+			<option value="PROCESSING">PROCESSING</option>			
 		</select>  
 	
 		<br/>
@@ -60,6 +67,7 @@
 			<th style=''>Request Code</th>
 			<th>Status</th>
 			<th style='width:200px;'>Requested By</th>
+			<th style='width:50px;'>Number of Items</th>
 			<th style='width:100px;'>Total Amount</th>
 			<th style='width:200px;'>Remarks</th>
 			<th style='width:70px;'>Date Created</th>			
@@ -75,8 +83,13 @@
 									
 			<td><?= $t->request_code; ?></td>
 			
-			<?php
-			if ($t->status == 'PENDING') {
+			<?php			
+			$status_class = strtolower(trim($t->status));			
+			$status_class = str_replace(" ", "-", $status_class);
+		
+			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
+
+			/*if ($t->status == 'PENDING') {
 				echo "<td><span class='label label-important' >{$t->status}</span></td>";
 			} else if ($t->status == 'FORWARDED') {
 				echo "<td><span class='label label-info' >{$t->status}</span></td>";
@@ -84,7 +97,7 @@
 				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
 			} else {
 				echo "<td><span class='label label-success' >{$t->status}</span></td>";
-			}			
+			}*/			
 
 			// get requestor details
 			$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);
@@ -94,6 +107,18 @@
 			} else { 
 				echo "<td>{$requestor_details->complete_name}</td>"; 
 			}			
+
+			// get number of items
+			$where = "salary_deduction_id = " . $t->salary_deduction_id . " AND status IN ('PENDING', 'COMPLETED')";
+			$salary_deduction_detail_info = $this->spare_parts_model->get_salary_deduction_detail($where);
+
+			$total_items = 0;
+			foreach ($salary_deduction_detail_info as $wrdi) {
+				$total_items = $total_items + ($wrdi->good_quantity + $wrdi->bad_quantity);
+			}
+			$total_items = number_format($total_items);
+
+			echo "<td  style='text-align:right;'>{$total_items}</td>";
 
 			// total amount
 			$where = "status IN ('PENDING') AND salary_deduction_id = " . $t->salary_deduction_id;
@@ -110,8 +135,6 @@
 			<td><?= $t->remarks; ?></td>
 			<td><?= $t->insert_timestamp; ?></td>
 
-			
-
 			<td data1="<?= $t->salary_deduction_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
@@ -127,10 +150,14 @@
 
 				if ($t->status == 'COMPLETED') {
 					if (($t->mtr_number == 0) || ($t->mtr_number == NULL)) {
-						echo "<a class='btn btn-small btn-primary process-btn' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>";
+						echo "<a class='btn btn-small btn-primary process-btn' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>
+								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
 					} else {
-						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
+						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>
+								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
 					}	
+
+
 				}					
 				?>
 			</td>
@@ -315,7 +342,6 @@
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,
 							width:800,
-							//disableClose: true,
 							html: data.data.html,
 							buttons: {
 								'Forward To Warehouse' : function() {
@@ -323,6 +349,17 @@
 								}									
 							}
 						});
+					} else if (data.data.request_status == "COMPLETED") {						
+						viewDetailsModal = b.modal.new({
+							title: data.data.title,
+							width:800,							
+							html: data.data.html,
+							buttons: {
+								'Reprocess Items' : function() {
+									redirect("/spare_parts/salary_deduction/reprocess_items/" + salary_deduction_id);
+								}									
+							}
+						});	
 					} else {
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,

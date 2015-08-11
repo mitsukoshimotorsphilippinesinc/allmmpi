@@ -46,7 +46,7 @@ body > .container > #content {
 	<?php echo js('libs/base_plugins.min.js'); ?>
 	<?php echo js('libs/jquery.hotkeys.js'); ?>
 	<?php echo js('apps/core.js'); ?>
-	<?php echo js('apps/site.js'); ?>
+	<!--?php echo js('apps/site.js'); ?-->
 
 	<script type='text/javascript'>
 		var base_url = "<?=$this->config->item('base_url');?>";

@@ -12,7 +12,8 @@ class Dealer_request extends Admin_Controller {
 		$this->load->model('human_relations_model');
 		$this->load->model('warehouse_model');
 		$this->load->library('pager');	
-		$this->load->helper("spare_parts_helper");	
+		$this->load->helper("spare_parts_helper");
+		$this->load->helper("breadcrumb_helper");	
 
 		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);
 
@@ -133,15 +134,15 @@ class Dealer_request extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Confirm Approval";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
+			$this->return_json("0","Dealer Request Code not found in DB", array("html" => $html, "title" => $title));			
 
 		} else {
 
 			if ($is_approved == 'yes') {
 
-				$html = "You are about to approve the Warehouse Request with Request Code: <strong>" . $dealer_request_code . "</strong>. Do you want to continue?";
+				$html = "You are about to approve the Dealer Request with Request Code: <strong>" . $dealer_request_code . "</strong>. Do you want to continue?";
 			} else {
-				$html = "<p>You are about to deny the Warehouse Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
+				$html = "<p>You are about to deny the Dealer Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;'/><br/>
@@ -159,7 +160,7 @@ class Dealer_request extends Admin_Controller {
 				'is_approved' => $is_approved
 				);	
 
-			$this->return_json("1","Confirm Approval of Warehouse Request.",array("html" => $html, "title" => $title, "data" => $data));
+			$this->return_json("1","Confirm Approval of Dealer Request.",array("html" => $html, "title" => $title, "data" => $data));
 		
 		}
 		
@@ -179,7 +180,7 @@ class Dealer_request extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Proceed Approval";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Dealer Request Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 	
@@ -189,36 +190,51 @@ class Dealer_request extends Admin_Controller {
 			if ($is_approved == 'no') {
 				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $dealer_request->remarks;
 
-				$data = array(
-					'status' => "DENIED",
+				$data = array(					
 					'approved_by' => $this->user->user_id,
 					'remarks' => $new_remarks,
 					'approve_timestamp' => $current_datetime
 				);
 
-				$return_html = return_reserved_items($dealer_request_code, 'DENIED', $remarks);
+				if ($dealer_request->status == 'FOR APPROVAL') {
 
-				$html = "You have denied the Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
-				$title = "Denied :: " . $dealer_request_code;
+					// from spare_parts helper
+					$return_html = return_reserved_items($dealer_request_code, 'DENIED', $remarks);
+					$data['status'] = "DENIED";
 
-				$this->return_json("1","Denied Warehouse Request.",array("html" => $html, "title" => $title));		
+				} else if ($dealer_request->status == 'FOR CANCELLATION') {
+					
+					$return_html = return_reserved_items($dealer_request_code, 'DENIED (COMPLETED)', $remarks);
+					$data['status'] = "DENIED (COMPLETED)";					
+				
+				}
+
+				$html = "You have denied the <b>" . $dealer_request->status . "</b> Warehouse Request with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Request Denied :: " . $dealer_request_code;			
+				
+				$this->return_json("1","Denied Dealer Request.",array("html" => $html, "title" => $title));		
 
 			} else {
 				// change status to APPROVED
-				$data = array(
-					'status' => "APPROVED",
+				$data = array(					
 					'approved_by' => $this->user->user_id,					
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully approved the Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
-				$title = "Approved :: " . $dealer_request_code;
+				if ($dealer_request->status == 'FOR APPROVAL') {
+					$data['status'] = "APPROVED";
+				} else if ($dealer_request->status == 'FOR CANCELLATION') {
+					$data['status'] = "CANCELLED (COMPLETED)";
+				}
+				
+				$html = "You have successfully approved the <b>" . $dealer_request->status . "</b> Warehouse Request with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Request Approved :: " . $dealer_request_code;
 			}
 			
 			$where = "dealer_request_id = " . $dealer_request_id;
 			$this->spare_parts_model->update_dealer_request($data, $where);
 
-			$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
+			$this->return_json("1","Successful Approval/Disapproval of Dealer Request.",array("html" => $html, "title" => $title));
 						
 		}	
 		return;	
@@ -237,24 +253,33 @@ class Dealer_request extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: View Details";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Dealer Request Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 
 			$where = "dealer_request_id = {$dealer_request_id}";
 			$dealer_request_details = $this->spare_parts_model->get_dealer_request_detail($where);
-		
-			$data = array(
-				//'dealer_request' => $dealer_request,
+			
+			$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);	
+
+			// check if has items for return
+			$where = "department_module_id = ". $department_module_details->department_module_id ." AND request_id = ". $dealer_request_id ." AND status NOT IN ('CANCELLED')";		
+			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);
+
+			$data = array(				
 				'segment_request_summary' => $dealer_request,
 				'segment_request_details' =>$dealer_request_details,
-				'listing_action' => $listing_action
+				'listing_action' => $listing_action,
+				'segment_request_summary_remarks' => $dealer_request->remarks,
+				'segment_name' => $this->segment_name,
+				'reprocessed_item_details' => $reprocessed_item_details,
+				'department_module_details' => $department_module_details,
 			);
 		
 			$html = $this->load->view("template_view_details",$data,true);
 			 
 			$title = "View Details :: " . $dealer_request_code;
-			$this->return_json("1","View Details Warehouse Request", array("html" => $html, "title" => $title, "request_status" => $dealer_request->status));
+			$this->return_json("1","View Details Dealer Request", array("html" => $html, "title" => $title, "request_status" => $dealer_request->status));
 			
 		}
 			
@@ -362,7 +387,7 @@ class Dealer_request extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Confirm";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
+			$this->return_json("0","Dealer Request Code not found in DB", array("html" => $html, "title" => $title));			
 
 		} else {
 
@@ -392,7 +417,7 @@ class Dealer_request extends Admin_Controller {
 
 			if ($listing_action == 'cancel') {
 				$title = "Cancel Request :: " . $dealer_request_code;
-				$html = "<p>You are about to cancel the Warehouse Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
+				$html = "<p>You are about to cancel the Dealer Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;' maxlength='320' placeholder='Put remarks here...' /><br/>
@@ -401,6 +426,11 @@ class Dealer_request extends Admin_Controller {
 							<br/>
 							Do you want to continue?</p>";
 			}	
+
+			if ($listing_action == 'cancel completed') {
+				$title = "For Approval - Cancel Completed Request :: " . $dealer_request_code;
+				$html = "You are about to request the approval of <b>Cancellation of a Completed Request</b> with Request Code: <strong>" . $dealer_request_code . "</strong>.<br/><br/>Do you want to continue?";
+			}	
 	
 			$data = array (
 				'dealer_request_id' => $dealer_request_id,
@@ -408,7 +438,7 @@ class Dealer_request extends Admin_Controller {
 				'listing_action' => $listing_action
 				);	
 
-			$this->return_json("1","Confirm Action of Warehouse Request.",array("html" => $html, "title" => $title, "data" => $data));
+			$this->return_json("1","Confirm Action of Dealer Request.",array("html" => $html, "title" => $title, "data" => $data));
 		
 		}
 		
@@ -429,7 +459,7 @@ class Dealer_request extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$dealer_request_code}].</p>";
 			$title = "Error: Proceed";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Dealer Request Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 	
@@ -448,7 +478,7 @@ class Dealer_request extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have cancelled the Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
+				$html = "You have cancelled the Dealer Request Code: <strong>{$dealer_request_code}</strong>.";
 				$title = "Cancelled :: " . $dealer_request_code;
 
 			} else if ($listing_action == 'for approval') {
@@ -460,7 +490,7 @@ class Dealer_request extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$dealer_request_code}</strong>.";
+				$html = "You have successfully filed the request for approval with Dealer Request Code: <strong>{$dealer_request_code}</strong>.";
 				$title = "File For Approval :: " . $dealer_request_code;
 			
 			} else if ($listing_action == 'forward to warehouse') {
@@ -496,13 +526,24 @@ class Dealer_request extends Admin_Controller {
 				$title = "Assign P.O. Number :: " . $dealer_request_code;
 			
 			}
+
+			if ($listing_action == 'cancel completed') {
+				$data = array(
+					'status' => "FOR CANCELLATION",
+					'approved_by' => $this->user->user_id,					
+					'approve_timestamp' => $current_datetime
+				);
+
+				$html = "You have successfully filed the request for approval with Dealer Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "For Approval - Cancel Completed Request :: " . $dealer_request_code;
+			}
 			
 			$where = "dealer_request_id = " . $dealer_request_id;
 			$this->spare_parts_model->update_dealer_request($data, $where);
 	
 		}	
 
-		$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
+		$this->return_json("1","Successful Approval of Dealer Request.",array("html" => $html, "title" => $title));
 
 		return;	
 	}
@@ -1118,9 +1159,120 @@ class Dealer_request extends Admin_Controller {
 		return;
 	}	
 
+	public function proceed_reprocess_item()
+	{
+		$request_code = trim($this->input->post("request_code"));
+		$request_detail_id = abs($this->input->post("request_detail_id"));
+		$srp = abs($this->input->post("srp"));
+		$charge_discount = abs($this->input->post("charge_discount"));
+		$charge_discount_amount = abs($this->input->post("charge_discount_amount"));
+		$good_quantity = abs($this->input->post("good_quantity"));
+		$bad_quantity = abs($this->input->post("bad_quantity"));
+		$remarks = trim($this->input->post("remarks"));		
+		$action_option = trim($this->input->post("action_option"));
+		$id_number = $this->input->post("id_number");
+
+		$has_error = 0;
+		$good_error_message = "";
+		$bad_error_message = "";
+
+		if ($good_quantity == '')
+			$good_quantity = 0;
+
+		if ($bad_quantity == '')
+			$bad_quantity = 0;
+
+		if ($charge_discount_amount == '')
+			$charge_discount_amount = 0.00;
+
+		$recipient_name = "N/A";
+		if ($action_option == "return") {
+			$id_number = NULL;
+		} else {
+			$recipient_details = $this->human_relations_model->get_employment_information_view_by_id($id_number);
+			$recipient_name = $recipient_details->complete_name;
+		}	
+
+		$action = strtoupper($action_option);
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+
+		$dealer_request_detail_details = $this->spare_parts_model->get_dealer_request_detail_by_id($request_detail_id);
+
+		if ($dealer_request_detail_details->good_quantity < $good_quantity) {
+			$has_error = 1;
+			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $dealer_request_detail_details->good_quantity . "</strong> good quantities available.</p><br/>";
+		}
+
+		if ($dealer_request_detail_details->bad_quantity < $bad_quantity) {
+			$has_error = 1;
+			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $dealer_request_detail_details->bad_quantity . "</strong> bad quantities available.</p><br/>";
+		}
+
+		if ($has_error == 1) {
+			$html = $good_error_message . $bad_error_message;
+			$title = "Error :: Not Enough Inventory";
+
+			$this->return_json("0","Not Enough Inventory", array("html" => $html, "title" => $title));
+			return;
+		}
+	
+		// compute the total charge amount		
+		if ($charge_discount_amount == 0) {
+			$total_amount = $good_quantity * ($srp - ($srp * ($charge_discount / 100)));
+			$total_amount = $total_amount + ($bad_quantity  * ($srp - ($srp * ($charge_discount / 100))));
+		} else {
+			$total_amount = $good_quantity * $charge_discount_amount;
+			$total_amount = $total_amount + ($bad_quantity * $charge_discount_amount);
+		}
+
+		$formatted_total_amount = number_format($total_amount, 2);
+
+		$item_remarks_encoded  = "";
+		if (strlen(trim($remarks)) > 0) {
+			$current_datetime = date('Y-m-d H:i:s');
+			$data[] =array(
+					'datetime' => $current_datetime,
+					'message' => $remarks
+				);
+
+			$item_remarks_encoded = json_encode($data);
+			$data_insert['remarks'] = $item_remarks_encoded;
+		}
+
+		// insert to is_reprocessed_item table
+		$data_insert = array(
+				"department_module_id" => $department_module_details->department_module_id,
+				"request_id" => $dealer_request_detail_details->dealer_request_id,
+				"request_detail_id" => $request_detail_id,
+				"id_number" => $id_number,
+				"charge_discount" => $charge_discount,
+				"charge_discount_amount" => $charge_discount_amount,
+				"total_amount" => $total_amount,
+				"good_quantity" => $good_quantity,
+				"bad_quantity" => $bad_quantity,
+				"action" => $action,
+				"remarks" => $item_remarks_encoded,				
+			);
+		
+		$this->spare_parts_model->insert_reprocessed_item($data_insert);
+
+		$reprocessed_item_id = $this->spare_parts_model->insert_id();
+
+		// get item details 
+		$item_details = $this->spare_parts_model->get_item_view_by_id($dealer_request_detail_details->item_id);
+
+		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been reprocessed successfully!</p>";
+		$title = $action . " Item :: Item Request";
+
+		//$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_dealer_request_detail_id' => $active_dealer_request_detail_id);
+		$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "item_details" => $item_details, "recipient_name" => $recipient_name, 'item_total_amount' => $formatted_total_amount, 'active_reprocessed_item_id' => $reprocessed_item_id, 'active_dealer_request_detail_id' => $request_detail_id));		
+			
+		return;
+	}	
+
 	public function confirm_remove_item() {
-		$request_code = $this->input->post("request_code");
-		//$item_id = $this->input->post("item_id");
+		$request_code = $this->input->post("request_code");		
 		$dealer_request_detail_id = $this->input->post("dealer_request_detail_id");
 
 		// get dealer_request_id
@@ -1128,11 +1280,10 @@ class Dealer_request extends Admin_Controller {
 
 		$dealer_request_detail_info = $this->spare_parts_model->get_dealer_request_detail_by_id($dealer_request_detail_id);
 
-
 		$item_view_details = $this->spare_parts_model->get_item_view_by_id($dealer_request_detail_info->item_id);
 		
 		$title = "Delete Item :: [SKU] " . $item_view_details->sku;
-		$html = "<p>You are about to delete an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
+		$html = "<p>You are about to remove an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
 					<label><strong>Model:</strong></label>&nbsp;&nbsp;" . $item_view_details->model_name . "
 					<label><strong>Brand:</strong></label>&nbsp;&nbsp;" . $item_view_details->brand_name . "
 					<label><strong>Description:</strong></label>&nbsp;&nbsp;" . $item_view_details->description . "
@@ -1150,19 +1301,23 @@ class Dealer_request extends Admin_Controller {
 
 	public function proceed_remove_item() {
 		$dealer_request_id = $this->input->post("dealer_request_id");
-		//$item_id = $this->input->post("item_id");
+		$is_reprocess_item = $this->input->post("is_reprocess_item");
 		$dealer_request_detail_id = $this->input->post("dealer_request_detail_id");
 		$remarks = $this->input->post("remarks");
 
 		//$where = "dealer_request_id = '{$dealer_request_id}' AND item_id = '{$item_id}'";
-		$where = "dealer_request_detail_id = " . $dealer_request_detail_id;
 		//$dealer_request_detail = $this->spare_parts_model->get_dealer_request_detail($where);
+		$where = "dealer_request_detail_id = " . $dealer_request_detail_id;		
 		$dealer_request_detail_info = $this->spare_parts_model->get_dealer_request_detail_by_id($dealer_request_detail_id);
-
 
 		$current_datetime = date('Y-m-d H:i:s');
 
-		$complete_remarks = $dealer_request_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		// TODO json_encode remarks
+		if ($is_reprocess_item == 0) {			
+			$complete_remarks = $dealer_request_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		} else {
+			$complete_remarks = "[" . $current_datetime . "] " . $remarks . "\n";
+		}	
 
 		// update status to DELETED
 		$data = array(
@@ -1171,13 +1326,138 @@ class Dealer_request extends Admin_Controller {
 			'update_timestamp' => $current_datetime
 			);
 
-		$this->spare_parts_model->update_dealer_request_detail($data, $where);
+		if ($is_reprocess_item == 0) {			
+			$this->spare_parts_model->update_dealer_request_detail($data, $where);
+		} else {
+			
+			$request_item_id = $this->input->post("request_item_id");
+		
+			$where = "reprocessed_item_id = " . $request_item_id;
+			$this->spare_parts_model->update_reprocessed_item($data, $where);
+		}	
 
 		$html = "Item is now successfully removed from request.";
 		$title = "Delete An Item :: Item Request";
 
 		$this->return_json("1","Item Successfully Tagged as DELETED", array("html" => $html, "title" => $title));
 		return;
+
+	}
+
+	public function reprocess_items($dealer_request_id = 0)
+	{
+
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+		
+		$dealer_request_details = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);
+
+		if (!empty($dealer_request_details)) {
+			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($dealer_request_details->id_number);
+			
+			$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
+			$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
+
+			$this->template->requester_details = $requester_details;
+			$this->template->department_details = $department_details;
+			$this->template->position_details = $position_details;
+
+			$request_item_amount_total = get_items_total_amount($dealer_request_details->request_code);		
+			$this->template->request_item_amount_total = $request_item_amount_total;
+
+			// get request items
+			$where = "status NOT IN ('CANCELLED', 'DELETED') AND dealer_request_id = " . $dealer_request_id;
+			$dealer_request_detail_details = $this->spare_parts_model->get_dealer_request_detail($where);
+
+			$json_items = array();
+			for($k = 0;$k<count($dealer_request_detail_details);$k++)
+			{
+				$dealer_request_detail_id = $dealer_request_detail_details[$k]->dealer_request_detail_id;
+				
+				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
+				$po_items = array(
+						'dealer_request_detail_id' => $dealer_request_detail_id,
+						'item_id' => $dealer_request_detail_details[$k]->item_id,
+						'srp' => $dealer_request_detail_details[$k]->srp,
+						'discount' => $dealer_request_detail_details[$k]->discount,
+						'discount_amount' => $dealer_request_detail_details[$k]->discount_amount,
+						'good_quantity' => $dealer_request_detail_details[$k]->good_quantity,
+						'bad_quantity' => $dealer_request_detail_details[$k]->bad_quantity,
+						'total_amount' => $dealer_request_detail_details[$k]->total_amount,
+						'remarks' => $dealer_request_detail_details[$k]->remarks,
+
+				);
+				//creates an array of the items that will be json encoded later
+				array_push($json_items, $po_items);
+
+			}
+
+			$this->template->json_items = json_encode($json_items);
+
+			$json_reprocessed_items = array();			
+			$where = "action IN ('RETURN', 'CHARGE') AND status NOT IN ('CANCELLED', 'DELETED') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $dealer_request_id;
+			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);			
+
+			for($l = 0;$l<count($reprocessed_item_details);$l++)
+			{				
+
+				$dealer_request_detail_details = $this->spare_parts_model->get_dealer_request_detail_by_id($reprocessed_item_details[$l]->request_detail_id);
+
+				$ri_items = array(
+						'request_item_id' => $reprocessed_item_details[$l]->reprocessed_item_id,
+						'dealer_request_detail_id' => $reprocessed_item_details[$l]->request_detail_id,
+						'item_id' => $dealer_request_detail_details->item_id,
+						'srp' => $dealer_request_detail_details->srp,
+						'id_number' => $reprocessed_item_details[$l]->id_number,
+						'discount' => $reprocessed_item_details[$l]->charge_discount,
+						'discount_amount' => $reprocessed_item_details[$l]->charge_discount_amount,
+						'good_quantity' => $reprocessed_item_details[$l]->good_quantity,
+						'bad_quantity' => $reprocessed_item_details[$l]->bad_quantity,
+						'total_amount' => $reprocessed_item_details[$l]->total_amount,
+						'status' => $reprocessed_item_details[$l]->status,
+						'action' => $reprocessed_item_details[$l]->action,
+						'remarks' => $reprocessed_item_details[$l]->remarks,
+				);
+
+				//creates an array of the items that will be json encoded later
+				array_push($json_reprocessed_items, $ri_items);
+
+			}
+			
+			$this->template->json_reprocessed_items = json_encode($json_reprocessed_items);
+
+		}
+
+		$where = "status IN ('FORWARDED') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $dealer_request_id;
+		$forwarded_to_wh = $this->spare_parts_model->get_reprocessed_item($where);			
+
+		$is_forwarded = 0;
+		if (count($forwarded_to_wh) > 0) {
+			$is_forwarded = 1;
+		}
+
+
+		$items = $this->spare_parts_model->get_item(null,null,"sku ASC");
+		$items_array = array();
+		
+		foreach($items as $i)
+		{
+			$items_array[$i->item_id] = $i;
+		}
+
+		$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view('','', 'brand_name', 'motorcycle_brand_model_id, brand_name, model_name');
+		
+		$warehouse_details = $this->warehouse_model->get_warehouse("is_active = 1", '', '', 'warehouse_id, warehouse_name, description, manager_id_number, encoder_id_number');	
+
+		//$this->template->return_url = $return_url;
+		$this->template->items = $items_array;
+		$this->template->is_forwarded = $is_forwarded;
+		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
+		$this->template->warehouse_details = $warehouse_details;
+		$this->template->dealer_request_details = $dealer_request_details;
+		$this->template->department_module_details = $department_module_details;				
+		$this->template->view("dealer_request/reprocess_items");
+
 
 	}
 
@@ -1324,7 +1604,7 @@ class Dealer_request extends Admin_Controller {
 	      	$start_column_num = 4;
       	
 	      	$objPHPExcel->setActiveSheetIndex(0);
-	      	$objPHPExcel->getActiveSheet()->setTitle("Warehouse Request List");
+	      	$objPHPExcel->getActiveSheet()->setTitle("Dealer Request List");
       
 	      	// auto resize columns
 	      	$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
@@ -1345,7 +1625,7 @@ class Dealer_request extends Admin_Controller {
 	      	$objPHPExcel->getActiveSheet()->getStyle('A' . $start_column_num . ':J' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
       
 	      	$header = "SPARE PARTS SYSTEM";
-			$header2 = "Warehouse Request List";
+			$header2 = "Dealer Request List";
 			$header3 = "From " . $from_date . " to " . $to_date;
 			$print_date = date('M d, Y H:i:s');
 			$print_date_header = " (Printed On: {$print_date})";

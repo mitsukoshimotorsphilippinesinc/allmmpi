@@ -39,7 +39,7 @@
 	<?php echo js('libs/google-code-prettify/prettify.js'); ?>
 	<?php echo js('libs/base_plugins.min.js'); ?>
 	<?php echo js('apps/core.js'); ?>
-	<?php echo js('apps/site.js'); ?> 
+	<!--?php echo js('apps/site.js'); ?--> 
 
 	<div class="container-full">
 		<div id='content'>

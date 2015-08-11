@@ -1287,8 +1287,12 @@ class Warehouse_request extends Admin_Controller {
 		if ($charge_discount_amount == '')
 			$charge_discount_amount = 0.00;
 
+		$recipient_name = "N/A";
 		if ($action_option == "return") {
 			$id_number = NULL;
+		} else {
+			$recipient_details = $this->human_relations_model->get_employment_information_view_by_id($id_number);
+			$recipient_name = $recipient_details->complete_name;
 		}	
 
 		$action = strtoupper($action_option);
@@ -1355,6 +1359,8 @@ class Warehouse_request extends Admin_Controller {
 		
 		$this->spare_parts_model->insert_reprocessed_item($data_insert);
 
+		$reprocessed_item_id = $this->spare_parts_model->insert_id();
+
 		// get item details 
 		$item_details = $this->spare_parts_model->get_item_view_by_id($warehouse_request_detail_details->item_id);
 
@@ -1362,14 +1368,14 @@ class Warehouse_request extends Admin_Controller {
 		$title = $action . " Item :: Item Request";
 
 		//$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_warehouse_request_detail_id' => $active_warehouse_request_detail_id);
-		$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "item_details" => $item_details, 'item_total_amount' => $formatted_total_amount));		
+		$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "item_details" => $item_details, "recipient_name" => $recipient_name, 'item_total_amount' => $formatted_total_amount, 'active_reprocessed_item_id' => $reprocessed_item_id, 'active_warehouse_request_detail_id' => $request_detail_id));		
+			
 		return;
 	}	
 
 
 	public function confirm_remove_item() {
-		$request_code = $this->input->post("request_code");
-		//$item_id = $this->input->post("item_id");
+		$request_code = $this->input->post("request_code");		
 		$warehouse_request_detail_id = $this->input->post("warehouse_request_detail_id");
 
 		// get warehouse_request_id
@@ -1379,8 +1385,8 @@ class Warehouse_request extends Admin_Controller {
 
 		$item_view_details = $this->spare_parts_model->get_item_view_by_id($warehouse_request_detail_info->item_id);
 		
-		$title = "Delete Item :: [SKU] " . $item_view_details->sku;
-		$html = "<p>You are about to delete an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
+		$title = "Remove Item :: [SKU] " . $item_view_details->sku;
+		$html = "<p>You are about to remove an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
 					<label><strong>Model:</strong></label>&nbsp;&nbsp;" . $item_view_details->model_name . "
 					<label><strong>Brand:</strong></label>&nbsp;&nbsp;" . $item_view_details->brand_name . "
 					<label><strong>Description:</strong></label>&nbsp;&nbsp;" . $item_view_details->description . "
@@ -1398,28 +1404,41 @@ class Warehouse_request extends Admin_Controller {
 
 	public function proceed_remove_item() {
 		$warehouse_request_id = $this->input->post("warehouse_request_id");
-		//$item_id = $this->input->post("item_id");
+		$is_reprocess_item = $this->input->post("is_reprocess_item");
 		$warehouse_request_detail_id = $this->input->post("warehouse_request_detail_id");
-		$remarks = $this->input->post("remarks");
+		$remarks = $this->input->post("remarks");		
 
 		//$where = "warehouse_request_id = '{$warehouse_request_id}' AND item_id = '{$item_id}'";
-		$where = "warehouse_request_detail_id = " . $warehouse_request_detail_id;
 		//$warehouse_request_detail = $this->spare_parts_model->get_warehouse_request_detail($where);
+		$where = "warehouse_request_detail_id = " . $warehouse_request_detail_id;		
 		$warehouse_request_detail_info = $this->spare_parts_model->get_warehouse_request_detail_by_id($warehouse_request_detail_id);
 
+		$current_datetime = date('Y-m-d H:i:s');		
 
-		$current_datetime = date('Y-m-d H:i:s');
-
-		$complete_remarks = $warehouse_request_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		// TODO json_encode remarks
+		if ($is_reprocess_item == 0) {			
+			$complete_remarks = $warehouse_request_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		} else {
+			$complete_remarks = "[" . $current_datetime . "] " . $remarks . "\n";
+		}	
 
 		// update status to DELETED
 		$data = array(
 			'status' => 'DELETED',
 			'remarks' => $complete_remarks,
 			'update_timestamp' => $current_datetime
-			);
+		);
 
-		$this->spare_parts_model->update_warehouse_request_detail($data, $where);
+
+		if ($is_reprocess_item == 0) {			
+			$this->spare_parts_model->update_warehouse_request_detail($data, $where);
+		} else {
+			
+			$request_item_id = $this->input->post("request_item_id");
+		
+			$where = "reprocessed_item_id = " . $request_item_id;
+			$this->spare_parts_model->update_reprocessed_item($data, $where);
+		}	
 
 		$html = "Item is now successfully removed from request.";
 		$title = "Delete An Item :: Item Request";
@@ -1428,6 +1447,7 @@ class Warehouse_request extends Admin_Controller {
 		return;
 
 	}
+
 	
 	public function reprocess_items($warehouse_request_id = 0)
 	{
@@ -1480,7 +1500,7 @@ class Warehouse_request extends Admin_Controller {
 			$this->template->json_items = json_encode($json_items);
 
 			$json_reprocessed_items = array();			
-			$where = "action IN ('RETURN', 'CHARGE') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $warehouse_request_id;
+			$where = "action IN ('RETURN', 'CHARGE') AND status NOT IN ('CANCELLED', 'DELETED') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $warehouse_request_id;
 			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);			
 
 			for($l = 0;$l<count($reprocessed_item_details);$l++)
@@ -1489,6 +1509,7 @@ class Warehouse_request extends Admin_Controller {
 				$warehouse_request_detail_details = $this->spare_parts_model->get_warehouse_request_detail_by_id($reprocessed_item_details[$l]->request_detail_id);
 
 				$ri_items = array(
+						'request_item_id' => $reprocessed_item_details[$l]->reprocessed_item_id,
 						'warehouse_request_detail_id' => $reprocessed_item_details[$l]->request_detail_id,
 						'item_id' => $warehouse_request_detail_details->item_id,
 						'srp' => $warehouse_request_detail_details->srp,
@@ -1544,22 +1565,6 @@ class Warehouse_request extends Admin_Controller {
 
 
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	public function reports()

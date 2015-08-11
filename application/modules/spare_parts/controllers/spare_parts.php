@@ -529,6 +529,32 @@ class Spare_parts extends Admin_Controller {
 		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($segment_name);
 
 		if ($is_forwarded == 0) {
+
+			// one time insert
+			$insert_sql = "INSERT INTO 
+								tr_warehouse_return
+								(department_module_id, 
+								transaction_number, 
+								request_id, 								
+								reprocessed_item_id)
+							(SELECT 
+								department_module_id, 
+								'{$request_code}',
+								request_id, 								
+								reprocessed_item_id 
+							FROM 
+								is_reprocessed_item
+							WHERE
+								department_module_id = {$department_module_details->department_module_id}
+							AND
+								request_id = {$request_summary->request_id}							
+							AND
+								action = 'RETURN'
+							AND
+								status IN ('PENDING'))";
+
+			$this->db_spare_parts->query($insert_sql);
+
 			// update all PENDING items under is_reprocessed_item
 			$update_iri_sql = "UPDATE 
 									is_reprocessed_item 
@@ -537,48 +563,62 @@ class Spare_parts extends Admin_Controller {
 								WHERE 
 									department_module_id = " . $department_module_details->department_module_id . "
 								AND 
-									request_id = " . $request_summary->request_id;
+									request_id = " . $request_summary->request_id . "
+								AND 
+									status IN ('PENDING')
+								AND
+									action = 'RETURN'";
 
 			$this->db_spare_parts->query($update_iri_sql);
 
 			// update status in tr_warehouse_return
 			$data = array(
 					"return_status" => 'PENDING',
-					"update_timestamp" => now()
+					"update_timestamp" => date("Y-m-d H:i:s")
 				);
-
-			// 20150731 HERE HERE HERE!!!
-			$where = "status IN ('PREPARING') AND department_module_id = ". $department_module_details->department_module_id ." AND reprocessed_item_id = 1";
-			$this->spare_parts_model->update_warehouse_return($data, $where);
-
 
 			$is_forwarded = 1;
 
 			$title = "Forward To Warehouse :: " . $request_code;
 			$html = "You have successfully forwarded the request to warehouse with Request Code : <strong>" . $request_code . "</strong>.";		
 			
-		} else {
+		} /*else {
 			// update all PENDING items under is_reprocessed_item
-			$update_iri_sql = "UPDATE 
-									is_reprocessed_item 
-								SET 
-									status = 'PENDING',
-									update_timestamp = now() 
-								WHERE 
-									department_module_id = " . $department_module_details->department_module_id . "
+			$where = "department_module_id " . $department_module_details->department_module_id . "
 								AND 
-									request_id = " . $request_summary->request_id;
+									request_id = " . $request_summary->request_id . "
+								AND 
+									status = 'FORWARDED'";
 
-			$this->db_spare_parts->query($update_iri_sql);
+			$data_update = array(
+					'status' => 'PENDING',
+					'update_timestamp' => date("Y-m-d H:i:s")
+				);
+
+			$this->spare_parts_model->update_reprocessed_item($data_update, $where);
+
+			$where = "department_module_id " . $department_module_details->department_module_id . "
+								AND 
+									request_id = " . $request_summary->request_id . "
+								AND 
+									return_status = 'FORWARDED'";
+
+			$data_update = array(
+					'status' => 'PENDING',
+					'update_timestamp' => date("Y-m-d H:i:s")
+				);	
+
+			// update tr_warehouse_return
+			$this->spare_parts_model->update_warehouse_return($data, $where);
 
 			$is_forwarded = 0;
 
 			$title = "Cancel Forward To Warehouse :: " . $request_code;
 			$html = "You have cancelled the forwarded request to warehouse with Request Code : <strong>" . $request_code . "</strong>.";		
 
-		}	
+		}	*/
 
-		$this->return_json("1", "Successfully " . $title, array('html' => $html, 'title' => $title, 'is_forwarded' => $is_forwarded));
+		$this->return_json("1", "Successfully Forwarded Items to Warehouse" . $title, array('html' => $html, 'title' => $title, 'is_forwarded' => $is_forwarded));
 		return;
 	}
 

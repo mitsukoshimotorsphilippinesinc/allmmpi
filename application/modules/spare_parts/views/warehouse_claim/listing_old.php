@@ -1,8 +1,4 @@
-<?php
-	$breadcrumb_container = assemble_breadcrumb();
-?>
 
-<?= $breadcrumb_container; ?>
 <div class='alert alert-danger'><h2>Request List<a href='/spare_parts/warehouse_claim/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;" title='Download'><i class='icon-download' disabled="disabled"></i>&nbsp;Download Result</a></h2></div>
 
 <br>
@@ -12,17 +8,14 @@
 
 		<strong>Status:&nbsp;</strong>
 		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
-			<option value="ALL">ALL</option>						
-			<option value="APPROVED">APPROVED</option>
-			<option value="CANCELLED">CANCELLED</option>
-			<option value="CANCELLED (COMPLETED">CANCELLED (COMPLETED)</option>
-			<option value="COMPLETED">COMPLETED</option>
-			<option value="DENIED">DENIED</option>
-			<option value="DENIED (COMPLETED)">DENIED (COMPLETED)</option>			
-			<option value="FORWARDED">FORWARDED</option>
-			<option value="FOR APPROVAL">FOR APPROVAL</option>
+			<option value="ALL">ALL</option>
 			<option value="PENDING">PENDING</option>
-			<option value="PROCESSING">PROCESSING</option>			
+			<option value="FOR APPROVAL">FOR APPROVAL</option>
+			<option value="APPROVED">APPROVED</option>
+			<option value="DENIED">DENIED</option>
+			<option value="FORWARDED">FORWARDED</option>
+			<option value="COMPLETED">COMPLETED</option>
+			<option value="CANCELLED">CANCELLED</option>
 		</select>  
 	
 		<br/>
@@ -64,14 +57,14 @@
 <table class='table table-striped table-bordered'>
 	<thead>
 		<tr>			
-			<th style='width:80px;'>Request Code</th>
+			<th style=''>Request Code</th>
 			<th>Status</th>
-			<th style=''>Requested By</th>
-			<th style=''>Motor Brand/Model</th>
-			<th style='width:50px;'>Number of Items</th>
+			<th style='width:100px;'>Requested By</th>
+			<th style='width:100px;'>Motor Brand/Model</th>
 			<th style='width:100px;'>Warehouse</th>
-			<th style=';'>Approved By (Warehouse)</th>			
-			<th style='width:70px;'>Date Created</th>
+			<th style='width:100px;'>Approved By (Warehouse)</th>			
+			<th style='width:120px;'>Remarks</th>
+			<th style='width:70px;'>Date Created</th>			
 			<th style='width:118px;'>Action</th>
 		</tr>
 	</thead>
@@ -84,25 +77,19 @@
 									
 			<td><?= $t->request_code; ?></td>
 			
-			<?php			
-			$status_class = strtolower(trim($t->status));			
-			$status_class = str_replace(" ", "-", $status_class);
-		
-			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
-
-			/*if ($t->status == 'PENDING') {
+			<?php
+			if ($t->status == 'PENDING') {
 				echo "<td><span class='label label-important' >{$t->status}</span></td>";
 			} else if ($t->status == 'FORWARDED') {
 				echo "<td><span class='label label-info' >{$t->status}</span></td>";
-			} else if (($t->status == 'FOR APPROVAL') || ($t->status == 'FOR CANCELLATION')) {
+			} else if ($t->status == 'FOR APPROVAL') {
 				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
 			} else {
 				echo "<td><span class='label label-success' >{$t->status}</span></td>";
-			}*/			
+			}			
 
 			// get requestor details
-			$id = str_pad($t->id_number, 7, '0', STR_PAD_LEFT);
-			$requestor_details = $this->human_relations_model->get_employment_information_by_id($id);
+			$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);
 
 			if (count($requestor_details) == 0) {
 				echo "<td>N/A</td>";
@@ -118,18 +105,6 @@
 				echo "<td>{$motor_brand_model_details->brand_name}" . " - " . "{$motor_brand_model_details->model_name}</td>"; 
 			}				
 
-			// get number of items
-			$where = "warehouse_claim_id = " . $t->warehouse_claim_id . " AND status IN ('PENDING', 'COMPLETED')";
-			$warehouse_claim_detail_info = $this->spare_parts_model->get_warehouse_claim_detail($where);
-
-			$total_items = 0;
-			foreach ($warehouse_claim_detail_info as $wrdi) {
-				$total_items = $total_items + ($wrdi->good_quantity + $wrdi->bad_quantity);
-			}
-			$total_items = number_format($total_items);
-
-			echo "<td  style='text-align:right;'>{$total_items}</td>";
-
 			// get warehouse detail			
 			$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($t->warehouse_id);
 
@@ -138,17 +113,12 @@
 			} else { 
 				echo "<td>{$warehouse_details->warehouse_name}</td>"; 
 			}
-
-			if (($t->warehouse_approved_by == 0) || ($t->warehouse_approved_by == '0')) {
-				echo "<td>N/A</td>";
-			} else {
-				$id = str_pad($t->warehouse_approved_by, 7, '0', STR_PAD_LEFT);
-				$warehouse_signatory_details = $this->human_relations_model->get_employment_information_view_by_id($id);
-				echo "<td>{$warehouse_signatory_details->complete_name}</td>";
-			}
-
-			?>				
+			?>	
+			<td></td>
+			<td><?= $t->remarks; ?></td>
 			<td><?= $t->insert_timestamp; ?></td>
+
+			
 
 			<td data1="<?= $t->warehouse_claim_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
@@ -165,14 +135,10 @@
 
 				if ($t->status == 'COMPLETED') {
 					if (($t->mtr_number == 0) || ($t->mtr_number == NULL)) {
-						echo "<a class='btn btn-small btn-primary process-btn' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>
-								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
+						echo "<a class='btn btn-small btn-primary process-btn' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>";
 					} else {
-						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>
-								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
-					}						
-
-
+						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
+					}
 				}					
 				?>
 			</td>
@@ -196,9 +162,11 @@
 
 	});
 
-	
+
 	$(".process-btn").click(function(){
-		processButtonAction($(this).parent().attr("data1"), $(this).parent().attr("data2"), $(this).attr("data"));	
+
+		processButtonAction($(this).parent().attr("data1"), $(this).parent().attr("data2"), $(this).attr("data"));
+	
 	});
 
 	var processButtonAction = function(warehouse_claim_id, warehouse_claim_code, listing_action) {
@@ -326,7 +294,7 @@
 			data: {
 				"warehouse_claim_id" : warehouse_claim_id,
 				"warehouse_claim_code" : warehouse_claim_code,
-				"listing_action" : listing_action,				
+				"listing_action" : listing_action,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
@@ -354,22 +322,12 @@
 					} else if (data.data.request_status == "APPROVED") {
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,
-							width:800,							
+							width:800,
+							//disableClose: true,
 							html: data.data.html,
 							buttons: {
 								'Forward To Warehouse' : function() {
 									processButtonAction(warehouse_claim_id, warehouse_claim_code, 'forward to warehouse');
-								}									
-							}
-						});
-					} else if (data.data.request_status == "COMPLETED") {						
-						viewDetailsModal = b.modal.new({
-							title: data.data.title,
-							width:800,							
-							html: data.data.html,
-							buttons: {
-								'Reprocess Items' : function() {
-									redirect("/spare_parts/warehouse_claim/reprocess_items/" + warehouse_claim_id);
 								}									
 							}
 						});
@@ -409,10 +367,6 @@
 		var years = "";
 		var months = "";
 		var days = "";
-
-		var _search_status = '<?= $search_status ?>';
-		var _search_by = '<?= $search_by ?>';
-		var _search_text = '<?= $search_text ?>';
 
 		download_modal.init({
 
@@ -474,7 +428,7 @@
 														url: "/spare_parts/warehouse_claim/download_proceed",
 														data: {
 															"start_date": start_date,
-															"end_date": end_date,															
+															"end_date": end_date
 														},
 														on_success: function(data){
 															var download_xls_modal = b.modal.new({});
@@ -501,7 +455,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/warehouse_claim/export_xls/'+ start_date +'/' + end_date +'/' + _search_status +'/' + _search_by +'/' + _search_text);
+																			redirect('/spare_parts/warehouse_claim/export_xls/'+ start_date +'/' + end_date);
 																
 																			
 																		}

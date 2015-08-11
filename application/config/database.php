@@ -91,10 +91,10 @@ $db['default']['swap_pre'] = '';
 $db['default']['autoinit'] = TRUE;
 $db['default']['stricton'] = FALSE;
 $db['default']['failover'] = array();
-/*
-$db['spare_parts']['hostname'] = '195.100.100.7';
-$db['spare_parts']['username'] = 'devteam';
-$db['spare_parts']['password'] = 'D3vteam';
+
+$db['spare_parts']['hostname'] = '195.100.100.68';
+$db['spare_parts']['username'] = 'root';
+$db['spare_parts']['password'] = 'confirm';
 $db['spare_parts']['database'] = 'spare_parts';
 $db['spare_parts']['dbdriver'] = 'mysql';
 $db['spare_parts']['dbprefix'] = '';
@@ -109,9 +109,9 @@ $db['spare_parts']['autoinit'] = TRUE;
 $db['spare_parts']['stricton'] = FALSE;
 $db['spare_parts']['failover'] = array();
 
-$db['hrdatabase']['hostname'] = '195.100.100.7';
-$db['hrdatabase']['username'] = 'devteam';
-$db['hrdatabase']['password'] = 'D3vteam';
+$db['hrdatabase']['hostname'] = '195.100.100.68';
+$db['hrdatabase']['username'] = 'root';
+$db['hrdatabase']['password'] = 'confirm';
 $db['hrdatabase']['database'] = 'HRDataBase';
 $db['hrdatabase']['dbdriver'] = 'mysql';
 $db['hrdatabase']['dbprefix'] = '';
@@ -126,9 +126,9 @@ $db['hrdatabase']['autoinit'] = TRUE;
 $db['hrdatabase']['stricton'] = FALSE;
 $db['hrdatabase']['failover'] = array();
 
-$db['human_relations']['hostname'] = '195.100.100.7';
-$db['human_relations']['username'] = 'devteam';
-$db['human_relations']['password'] = 'D3vteam';
+$db['human_relations']['hostname'] = '195.100.100.68';
+$db['human_relations']['username'] = 'root';
+$db['human_relations']['password'] = 'confirm';
 $db['human_relations']['database'] = 'human_relations';
 $db['human_relations']['dbdriver'] = 'mysql';
 $db['human_relations']['dbprefix'] = '';
@@ -143,9 +143,9 @@ $db['human_relations']['autoinit'] = TRUE;
 $db['human_relations']['stricton'] = FALSE;
 $db['human_relations']['failover'] = array();
 
-$db['warehouse']['hostname'] = '195.100.100.7';
-$db['warehouse']['username'] = 'devteam';
-$db['warehouse']['password'] = 'D3vteam';
+$db['warehouse']['hostname'] = '195.100.100.68';
+$db['warehouse']['username'] = 'root';
+$db['warehouse']['password'] = 'confirm';
 $db['warehouse']['database'] = 'warehouse';
 $db['warehouse']['dbdriver'] = 'mysql';
 $db['warehouse']['dbprefix'] = '';
@@ -160,9 +160,9 @@ $db['warehouse']['autoinit'] = TRUE;
 $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
 
-$db['warehouse']['hostname'] = '195.100.100.7';
-$db['warehouse']['username'] = 'devteam';
-$db['warehouse']['password'] = 'D3vteam';
+$db['warehouse']['hostname'] = '195.100.100.68';
+$db['warehouse']['username'] = 'root';
+$db['warehouse']['password'] = 'confirm';
 $db['warehouse']['database'] = 'warehouse';
 $db['warehouse']['dbdriver'] = 'mysql';
 $db['warehouse']['dbprefix'] = '';
@@ -176,8 +176,8 @@ $db['warehouse']['swap_pre'] = '';
 $db['warehouse']['autoinit'] = TRUE;
 $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
-*/
 
+/*
 $db['spare_parts']['hostname'] = 'localhost';
 $db['spare_parts']['username'] = 'root';
 $db['spare_parts']['password'] = '';
@@ -262,7 +262,7 @@ $db['warehouse']['swap_pre'] = '';
 $db['warehouse']['autoinit'] = TRUE;
 $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
-
+*/
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */

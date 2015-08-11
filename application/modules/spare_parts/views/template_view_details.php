@@ -211,7 +211,7 @@
 
 				} else {
 					// show add form modal
-					approveRequestModal.hide();					
+					//approveRequestModal.hide();					
 					errorApproveRequestModal = b.modal.new({
 						title: data.data.title,
 						width:450,	

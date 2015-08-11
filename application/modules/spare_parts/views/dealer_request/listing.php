@@ -1,4 +1,8 @@
+<?php
+	$breadcrumb_container = assemble_breadcrumb();
+?>
 
+<?= $breadcrumb_container; ?>
 <div class='alert alert-danger'><h2>Request List<a href='/spare_parts/dealer_request/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;" title='Download' disabled="disabled"><i class='icon-download'></i>&nbsp;Download Result</a></h2></div>
 
 <br>
@@ -8,14 +12,17 @@
 
 		<strong>Status:&nbsp;</strong>
 		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
-			<option value="ALL">ALL</option>
-			<option value="PENDING">PENDING</option>
-			<option value="FOR APPROVAL">FOR APPROVAL</option>
+			<option value="ALL">ALL</option>						
 			<option value="APPROVED">APPROVED</option>
-			<option value="DENIED">DENIED</option>
-			<option value="FORWARDED">FORWARDED</option>
-			<option value="COMPLETED">COMPLETED</option>
 			<option value="CANCELLED">CANCELLED</option>
+			<option value="CANCELLED (COMPLETED">CANCELLED (COMPLETED)</option>
+			<option value="COMPLETED">COMPLETED</option>
+			<option value="DENIED">DENIED</option>
+			<option value="DENIED (COMPLETED)">DENIED (COMPLETED)</option>			
+			<option value="FORWARDED">FORWARDED</option>
+			<option value="FOR APPROVAL">FOR APPROVAL</option>
+			<option value="PENDING">PENDING</option>
+			<option value="PROCESSING">PROCESSING</option>					
 		</select>  
 	
 		<br/>
@@ -60,9 +67,9 @@
 			<th style=''>Request Code</th>
 			<th>Status</th>
 			<th style='width:200px;'>Requested By</th>
+			<th style='width:50px;'>Number of Items</th>
 			<th style='width:100px;'>Total Amount</th>
-			<th style='width:200px;'>Agent Name</th>
-			<th style='width:200px;'>Remarks</th>
+			<th style=''>Agent Name</th>			
 			<th style='width:70px;'>Date Created</th>			
 			<th style='width:150px;'>Action</th>
 		</tr>
@@ -77,15 +84,19 @@
 			<td><?= $t->request_code; ?></td>
 			
 			<?php
-			if ($t->status == 'PENDING') {
-				echo "<td><span class='label label-important' >{$t->status}</span></td>";
-			} else if ($t->status == 'FORWARDED') {
-				echo "<td><span class='label label-info' >{$t->status}</span></td>";
-			} else if ($t->status == 'FOR APPROVAL') {
-				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
-			} else {
-				echo "<td><span class='label label-success' >{$t->status}</span></td>";
-			}			
+			$status_class = strtolower(trim($t->status));			
+			$status_class = str_replace(" ", "-", $status_class);
+		
+			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
+			//if ($t->status == 'PENDING') {
+			//	echo "<td><span class='label label-important' >{$t->status}</span></td>";
+			//} else if ($t->status == 'FORWARDED') {
+			//	echo "<td><span class='label label-info' >{$t->status}</span></td>";
+			//} else if ($t->status == 'FOR APPROVAL') {
+			//	echo "<td><span class='label label-warning' >{$t->status}</span></td>";
+			//} else {
+			//	echo "<td><span class='label label-success' >{$t->status}</span></td>";
+			//}			
 
 			// get requestor details
 			$requestor_details = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
@@ -103,6 +114,18 @@
 				$agent_name = $agent_details->complete_name;
 			}	
 
+			// get number of items
+			$where = "dealer_request_id = " . $t->dealer_request_id . " AND status IN ('PENDING', 'COMPLETED')";
+			$dealer_request_detail_info = $this->spare_parts_model->get_dealer_request_detail($where);
+
+			$total_items = 0;
+			foreach ($dealer_request_detail_info as $wrdi) {
+				$total_items = $total_items + ($wrdi->good_quantity + $wrdi->bad_quantity);
+			}
+			$total_items = number_format($total_items);
+
+			echo "<td  style='text-align:right;'>{$total_items}</td>";
+
 			// total amount
 			$where = "status IN ('PENDING') AND dealer_request_id = " . $t->dealer_request_id;
 			$dealer_request_details = $this->spare_parts_model->get_dealer_request_detail($where);
@@ -115,8 +138,7 @@
 			}
 			?>	
 			<td style='text-align:right'><?= number_format($total_amount, 2); ?></td>
-			<td><?= $agent_name; ?></td>
-			<td><?= $t->remarks; ?></td>
+			<td><?= $agent_name; ?></td>		
 			<td><?= $t->insert_timestamp; ?></td>
 
 			
@@ -137,9 +159,12 @@
 				if ($t->status == 'COMPLETED') {
 					
 					if (($t->purchase_order_number == 0) || ($t->purchase_order_number == NULL)) {
-						echo "<a class='btn btn-small btn-primary process-btn' data='assign po' title='Assign P.O. Number'><i class='icon-white icon-pencil'></i></a>";
+						echo "<a class='btn btn-small btn-primary process-btn' data='assign po' title='Assign P.O. Number'><i class='icon-white icon-pencil'></i></a>						
+								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
+
 					} else {
-						echo "<a href='/spare_parts/display_po/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print P.O.' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>";
+						echo "<a href='/spare_parts/display_po/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print P.O.' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>
+								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
 					}
 				}
 
@@ -332,6 +357,17 @@
 							buttons: {
 								'Forward To Warehouse' : function() {
 									processButtonAction(dealer_request_id, dealer_request_code, 'forward to warehouse');
+								}									
+							}
+						});
+					} else if (data.data.request_status == "COMPLETED") {						
+						viewDetailsModal = b.modal.new({
+							title: data.data.title,
+							width:800,							
+							html: data.data.html,
+							buttons: {
+								'Reprocess Items' : function() {
+									redirect("/spare_parts/dealer_request/reprocess_items/" + dealer_request_id);
 								}									
 							}
 						});

@@ -35,7 +35,7 @@ class Spare_parts_model extends Base_Model
 			'department_module_submodule' => 'rf_department_module_submodule',
 			'department' => 'rf_department',
 			'reprocessed_item' => 'is_reprocessed_item',
-			'warehouse_return' => 'tr_warehouse_return',
+			'warehouse_return' => 'tr_warehouse_return',			
 		);
 
 	}
@@ -747,7 +747,7 @@ class Spare_parts_model extends Base_Model
 
 	function get_warehouse_claim_detail_by_id($warehouse_claim_detail_id) 
 	{
-		$result = $this->get_warehouse_claim(array('warehouse_claim_detail_id' => $warehouse_claim_detail_id));
+		$result = $this->get_warehouse_claim_detail(array('warehouse_claim_detail_id' => $warehouse_claim_detail_id));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];
@@ -899,7 +899,7 @@ class Spare_parts_model extends Base_Model
 
 	function get_service_unit_detail_by_id($service_unit_detail_id) 
 	{
-		$result = $this->get_warehouse_request_detail(array('service_unit_detail_id' => $service_unit_detail_id));
+		$result = $this->get_service_unit_detail(array('service_unit_detail_id' => $service_unit_detail_id));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];
@@ -1519,5 +1519,6 @@ class Spare_parts_model extends Base_Model
 	}
 		
 	// ===========================================================================
+	
 
 }

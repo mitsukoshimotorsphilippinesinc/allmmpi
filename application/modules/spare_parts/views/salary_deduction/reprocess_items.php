@@ -35,8 +35,8 @@
 <?php
 $isAdd = false;
 $titlePrefix = "Reprocess Items - &nbsp;";
-$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/reprocess/" . $warehouse_request_details->warehouse_request_id;
-$_id = $warehouse_request_details->warehouse_request_id;
+$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/reprocess/" . $salary_deduction_details->salary_deduction_id;
+$_id = $salary_deduction_details->salary_deduction_id;
 $show_approval = false;
 
 ?>
@@ -44,7 +44,7 @@ $show_approval = false;
 <?php
 	$breadcrumb_container = assemble_breadcrumb();
 					
-	$details_content = get_requester_details($warehouse_request_details->id_number, "employee", 1);
+	$details_content = get_requester_details($salary_deduction_details->id_number, "employee", 1);
 
 ?>
 
@@ -94,8 +94,8 @@ $show_approval = false;
 				<td><?= $details_content->contact_number ?></td>
 				<td><strong>REMARKS:</strong></td>
 				<?php
-					if (strlen(trim($warehouse_request_details->remarks)) > 0)
-						echo "<td><a href='#' id='view-full-remarks' data='{$warehouse_request_details->remarks}'><u>View Remarks</u></a></td>";
+					if (strlen(trim($salary_deduction_details->remarks)) > 0)
+						echo "<td><a href='#' id='view-full-remarks' data='{$salary_deduction_details->remarks}'><u>View Remarks</u></a></td>";
 					else
 						echo "<td><strong>N/A</strong></td>";
 				?>				
@@ -119,8 +119,8 @@ $show_approval = false;
 		
 		<br/>
 		<div class='alert alert-success'><h4>Items
-			<?php if(!$isAdd && !empty($warehouse_request_details)):?>
-				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $warehouse_request_details->request_code?></label>
+			<?php if(!$isAdd && !empty($salary_deduction_details)):?>
+				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $salary_deduction_details->request_code?></label>
 			<?php elseif($isAdd): ?>
 				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $department_module_details->module_code ?></label>
 			<?php endif; ?>
@@ -165,7 +165,7 @@ $show_approval = false;
 									// get item_name based on item_id
 									$item_view_details = $this->spare_parts_model->get_item_view_by_id($ri->item_id);
 
-									$item_detail_options[$ri->warehouse_request_detail_id] = $item_view_details->sku . ' - ' . $item_view_details->description;
+									$item_detail_options[$ri->salary_deduction_detail_id] = $item_view_details->sku . ' - ' . $item_view_details->description;
 									
 								}
 
@@ -277,7 +277,7 @@ $show_approval = false;
 						<td class="discount_price"><?=number_format(set_value('discount_price['.$i.']',$temp[$i]['discount_amount']),2)?></td>
 						<td class="price"><?=number_format(set_value('item_total_amount['.$i.']',$temp[$i]['total_amount']),2)?></td>
 						<td class="remark"><?=set_value('item_remarks['.$i.']',$row)?></td>						
-						<td class ="remove_item" id="<?= $temp[$i]['request_item_id'] ?>" data="<?= $temp[$i]['warehouse_request_detail_id'] ?>" data-id="<?= $temp[$i]['request_item_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>						
+						<td class ="remove_item" id="<?= $temp[$i]['request_item_id'] ?>" data="<?= $temp[$i]['salary_deduction_detail_id'] ?>" data-id="<?= $temp[$i]['request_item_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>						
 						<td class="hidden_values">
 							<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<?=set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity'])?>">
 							<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<?=set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])?>">
@@ -305,7 +305,7 @@ $show_approval = false;
 		<hr/>
 		<div class="controls" align="right">
 			<a id='forward_to_warehouse' class="btn btn-primary" data="<?= $is_forwarded ?>"><span id="ftw_caption"></span></a>
-			<a href='/spare_parts/display_returnslip/<?= $warehouse_request_details->request_code ?>' target = '_blank' id='print_return_slip' class="btn btn-primary"><span id="prs_caption">Print Return Slip Form</span></a>						
+			<a href='/spare_parts/display_returnslip/<?= $salary_deduction_details->request_code ?>' target = '_blank' id='print_return_slip' class="btn btn-primary"><span id="prs_caption">Print Return Slip Form</span></a>						
 			<a class="btn return-btn add-close">Close</a>
 		</div>
 		
@@ -354,7 +354,7 @@ $show_approval = false;
 		<td class="qty"><%= item_discount_price %></td>\n\
 		<td class="price"><%= item_total_amount %></td>\n\
 		<td class="remark"><%= item_remarks %></td>\n\
-		<td id="<%= active_reprocessed_item_id %>" data="<%= active_warehouse_request_detail_id %>" data-id="<%= active_reprocessed_item_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
+		<td id="<%= active_reprocessed_item_id %>" data="<%= active_salary_deduction_detail_id %>" data-id="<%= active_reprocessed_item_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
 		<td class="hidden_values">\n\
 			<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<%= hidden_item_good_qty %>">\n\
 			<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<%= hidden_item_bad_qty %>">\n\
@@ -620,7 +620,7 @@ $show_approval = false;
 
 			// ajax request
 			b.request({
-				url : '/spare_parts/warehouse_request/proceed_reprocess_item',
+				url : '/spare_parts/salary_deduction/proceed_reprocess_item',
 				data : {				
 					'request_code' : $("#item-request-code-label").text(),
 					'request_detail_id' : request_detail_id,
@@ -662,7 +662,7 @@ $show_approval = false;
 						<td class="qty"><%= item_discount_price %></td>\n\
 						<td class="price"><%= item_total_amount %></td>\n\
 						<td class="remark"><%= item_remarks %></td>\n\
-						<td id="<%= active_reprocessed_item_id %>" data="<%= active_warehouse_request_detail_id %>" data-id="<%= active_reprocessed_item_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
+						<td id="<%= active_reprocessed_item_id %>" data="<%= active_salary_deduction_detail_id %>" data-id="<%= active_reprocessed_item_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
 						<td class="hidden_values">\n\
 							<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<%= hidden_item_good_qty %>">\n\
 							<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<%= hidden_item_bad_qty %>">\n\
@@ -690,7 +690,7 @@ $show_approval = false;
 							item_discount_price: numberFormat($('input[name="add_item_discount_price"]').val(),2),
 							item_total_amount: data.data.item_total_amount,
 							item_remarks: $('input[name="add_item_remarks"]').val(),
-							active_warehouse_request_detail_id: data.data.active_warehouse_request_detail_id,
+							active_salary_deduction_detail_id: data.data.active_salary_deduction_detail_id,
 							active_reprocessed_item_id: data.data.active_reprocessed_item_id,
 							hidden_item_price: $('input[name="add_item_price"]').val(),
 							hidden_item_discount: $('input[name="add_item_discount"]').val(),
@@ -730,15 +730,15 @@ $show_approval = false;
 
 	$(".rmv_wr_item").live('click',function(){
 
-		var warehouse_request_detail_id = $(this).parent().attr("data");
+		var salary_deduction_detail_id = $(this).parent().attr("data");
 		var request_item_id = $(this).parent().attr("data-id");
 
 		b.request({
 			type: 'POST',
-			url : '/spare_parts/warehouse_request/confirm_remove_item',
+			url : '/spare_parts/salary_deduction/confirm_remove_item',
 			data : {				
 				'request_code' : $("#item-request-code-label").text(),
-				'warehouse_request_detail_id' : warehouse_request_detail_id,				
+				'salary_deduction_detail_id' : salary_deduction_detail_id,				
 			},
 			on_success: function(data){
 
@@ -764,10 +764,10 @@ $show_approval = false;
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/warehouse_request/proceed_remove_item',
+									url : '/spare_parts/salary_deduction/proceed_remove_item',
 									data : {				
-										'warehouse_request_id' : data.data.warehouse_request_id,
-										'warehouse_request_detail_id' : warehouse_request_detail_id,	
+										'salary_deduction_id' : data.data.salary_deduction_id,
+										'salary_deduction_detail_id' : salary_deduction_detail_id,	
 										'remarks' : $("#txt-remarks").val(),
 										'is_reprocess_item' : 1,
 										'request_item_id' : request_item_id,
@@ -785,7 +785,7 @@ $show_approval = false;
 												html: data.data.html,
 												buttons: {
 													'Ok' : function() {
-														//$("#" + warehouse_request_detail_id + "").parent().remove();
+														//$("#" + salary_deduction_detail_id + "").parent().remove();
 														$("#" + request_item_id + "").parent().remove();
 														proceedRemoveItemModal.hide();
 													}
@@ -840,13 +840,13 @@ $show_approval = false;
 
 	$(".add-close").live('click',function(){
 
-		window.location.href = '/spare_parts/warehouse_request/listing';
+		window.location.href = '/spare_parts/salary_deduction/listing';
 		return false;
 	})
 
 	$("#view-full-remarks").click(function(e){
 
-		var request_code = '<?= $warehouse_request_details->request_code ?>';
+		var request_code = '<?= $salary_deduction_details->request_code ?>';
 		var segment_name = '<?= $department_module_details->segment_name ?>';	
 
 		b.request({
@@ -888,7 +888,7 @@ $show_approval = false;
 
 	$("#add_new_requester_remarks").click(function(e){
 
-		var request_code = '<?= $warehouse_request_details->request_code ?>';
+		var request_code = '<?= $salary_deduction_details->request_code ?>';
 		var segment_name = '<?= $department_module_details->segment_name ?>';
 
 		b.request({
@@ -928,9 +928,9 @@ $show_approval = false;
 	
 	$("#forward_to_warehouse").live('click',function(){
 
-		var request_code = '<?= $warehouse_request_details->request_code ?>';
+		var request_code = '<?= $salary_deduction_details->request_code ?>';
 		var segment_name = '<?= $department_module_details->segment_name ?>';
-		var request_id   = <?= $warehouse_request_details->warehouse_request_id ?>;
+		var request_id   = <?= $salary_deduction_details->salary_deduction_id ?>;
 		var is_forwarded_val = $(this).attr("data");
 
 		b.request({
