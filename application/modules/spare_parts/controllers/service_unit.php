@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class service_unit extends Admin_Controller {
+class Service_unit extends Admin_Controller {
 
 	function __construct()
 	{
@@ -22,14 +22,7 @@ class service_unit extends Admin_Controller {
 	public $segment_name = "service_unit";
 
 	public function index()
-	{
-		//$test_id = abs($this->input->get('test_id'));		
-
-		//$db_spare_parts = $this->load->database('spare_parts', TRUE);
-
-		//$query = $db_spare_parts->select('sku, good_quantity, bad_quantity')->get('is_item');
-  		//var_dump($query);			
-
+	{		
 		$this->template->view('service_unit/dashboard');
 	}
 
@@ -75,11 +68,13 @@ class service_unit extends Admin_Controller {
 		}
 
 		if (empty($search_status)) {
-			$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', 'FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+			$where = "status IN ('FOR APPROVAL', 'APPROVED', 'DENIED', 'CANCELLATION-FOR APPROVAL', 'CANCELLATION-APPROVED', 'CANCELLATION-DENIED')";
+			//$where = "";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('PENDING', 'FOR APPROVAL', 'APPROVED', 'FORWARDED', 'FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				$where = "status IN ('FOR APPROVAL', 'APPROVED', 'DENIED', 'CANCELLATION-FOR APPROVAL', 'CANCELLATION-APPROVED', 'CANCELLATION-DENIED')";
+				//$where = "";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}			
@@ -132,15 +127,15 @@ class service_unit extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$service_unit_code}].</p>";
 			$title = "Error: Confirm Approval";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
+			$this->return_json("0","Service Unit Code not found in DB", array("html" => $html, "title" => $title));			
 
 		} else {
 
 			if ($is_approved == 'yes') {							
-				$html = "You are about to approve the <b>" . $service_unit->status . "</b> Warehouse Request with Request Code: <strong>" . $service_unit_code . "</strong>. <br/><br/>Do you want to continue?";
+				$html = "You are about to approve the <b>" . $service_unit->status . "</b> Service Unit with Request Code: <strong>" . $service_unit_code . "</strong>. <br/><br/>Do you want to continue?";
 				$title = "Confirm Approval :: " . $service_unit_code;
 			} else {
-				$html = "<p>You are about to deny the <b>" . $service_unit->status . "</b> Warehouse Request with Request Code: <strong>" . $service_unit_code . "</strong>. <br/>
+				$html = "<p>You are about to deny the <b>" . $service_unit->status . "</b> Service Unit with Request Code: <strong>" . $service_unit_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;'/><br/>
@@ -157,7 +152,7 @@ class service_unit extends Admin_Controller {
 				'is_approved' => $is_approved
 				);	
 
-			$this->return_json("1","Confirm Approval of Warehouse Request.",array("html" => $html, "title" => $title, "data" => $data));
+			$this->return_json("1","Confirm Approval of Service Unit.",array("html" => $html, "title" => $title, "data" => $data));
 		
 		}
 		
@@ -177,7 +172,7 @@ class service_unit extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$service_unit_code}].</p>";
 			$title = "Error: Proceed Approval";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Service Unit Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 	
@@ -199,14 +194,14 @@ class service_unit extends Admin_Controller {
 					$return_html = return_reserved_items($service_unit_code, 'DENIED', $remarks);
 					$data['status'] = "DENIED";
 
-				} else if ($service_unit->status == 'FOR CANCELLATION') {
+				} else if ($service_unit->status == 'CANCELLATION-FOR APPROVAL') {
 					
-					$return_html = return_reserved_items($service_unit_code, 'DENIED (COMPLETED)', $remarks);
-					$data['status'] = "DENIED (COMPLETED)";					
+					$return_html = return_reserved_items($service_unit_code, 'CANCELLATION-DENIED', $remarks);
+					$data['status'] = "CANCELLATION-DENIED";					
 				
 				}
 
-				$html = "You have denied the <b>" . $service_unit->status . "</b> Warehouse Request with Request Code: <strong>{$service_unit_code}</strong>.";
+				$html = "You have denied the <b>" . $service_unit->status . "</b> Service Unit with Request Code: <strong>{$service_unit_code}</strong>.";
 				$title = "Request Denied :: " . $service_unit_code;			
 
 			} else {
@@ -218,18 +213,18 @@ class service_unit extends Admin_Controller {
 
 				if ($service_unit->status == 'FOR APPROVAL') {
 					$data['status'] = "APPROVED";
-				} else if ($service_unit->status == 'FOR CANCELLATION') {
-					$data['status'] = "CANCELLED (COMPLETED)";
+				} else if ($service_unit->status == 'CANCELLATION-FOR APPROVAL') {
+					$data['status'] = "CANCELLATION-APPROVED";
 				}
 				
-				$html = "You have successfully approved the <b>" . $service_unit->status . "</b> Warehouse Request with Request Code: <strong>{$service_unit_code}</strong>.";
+				$html = "You have successfully approved the <b>" . $service_unit->status . "</b> Service Unit with Request Code: <strong>{$service_unit_code}</strong>.";
 				$title = "Request Approved :: " . $service_unit_code;
 			}
 			
 			$where = "service_unit_id = " . $service_unit_id;
 			$this->spare_parts_model->update_service_unit($data, $where);
 
-			$this->return_json("1","Successful Approval/Disapproval of Warehouse Request.",array("html" => $html, "title" => $title));
+			$this->return_json("1","Successful Approval/Disapproval of Service Unit.",array("html" => $html, "title" => $title));
 						
 		}	
 		return;	
@@ -248,7 +243,7 @@ class service_unit extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$service_unit_code}].</p>";
 			$title = "Error: View Details";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Service Unit Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 
@@ -275,7 +270,7 @@ class service_unit extends Admin_Controller {
 			$html = $this->load->view("template_view_details",$data,true);
 			 
 			$title = "View Details :: " . $service_unit_code;
-			$this->return_json("1","View Details Warehouse Request", array("html" => $html, "title" => $title, "request_status" => $service_unit->status));
+			$this->return_json("1","View Details Service Unit", array("html" => $html, "title" => $title, "request_status" => $service_unit->status));
 			
 		}
 			
@@ -325,11 +320,13 @@ class service_unit extends Admin_Controller {
 		} 
 
 		if (empty($search_status)) {
-			$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+			//$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+			$where = "";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+				//$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+				$where = "";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}
@@ -346,7 +343,6 @@ class service_unit extends Admin_Controller {
 					$where = $search_by ." LIKE '%" . $search_text . "%'";
 			}
 		}	
-		
 
 		// set pagination data
 		$config = array(
@@ -383,7 +379,7 @@ class service_unit extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$service_unit_code}].</p>";
 			$title = "Error: Confirm";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
+			$this->return_json("0","Service Unit Code not found in DB", array("html" => $html, "title" => $title));			
 
 		} else {
 
@@ -392,7 +388,7 @@ class service_unit extends Admin_Controller {
 				$html = "You are about to forward the request for approval with Request Code: <strong>" . $service_unit_code . "</strong>. Do you want to continue?";
 			}
 
-			if ($listing_action == 'forward to warehouse') {
+			if (($listing_action == 'forward to warehouse') || ($listing_action == 'cancellation-forward to warehouse')) {
 				$title = "Forward To Warehouse :: " . $service_unit_code;
 				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $service_unit_code . "</strong>. <br/>							
 							<br/>
@@ -413,7 +409,7 @@ class service_unit extends Admin_Controller {
 
 			if ($listing_action == 'cancel') {
 				$title = "Cancel Request :: " . $service_unit_code;
-				$html = "<p>You are about to cancel the Warehouse Request with Request Code: <strong>" . $service_unit_code . "</strong>. <br/>
+				$html = "<p>You are about to cancel the Service Unit with Request Code: <strong>" . $service_unit_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;' maxlength='320' placeholder='Put remarks here...' /><br/>
@@ -434,7 +430,7 @@ class service_unit extends Admin_Controller {
 				'listing_action' => $listing_action
 				);	
 
-			$this->return_json("1","Confirm Action of Warehouse Request.",array("html" => $html, "title" => $title, "data" => $data));
+			$this->return_json("1","Confirm Action of Service Unit.",array("html" => $html, "title" => $title, "data" => $data));
 		
 		}
 		
@@ -455,7 +451,7 @@ class service_unit extends Admin_Controller {
 			$html = "<p>There is something wrong with this transaction [Request Code: {$service_unit_code}].</p>";
 			$title = "Error: Proceed";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Service Unit Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 	
@@ -475,7 +471,7 @@ class service_unit extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have cancelled the Warehouse Request Code: <strong>{$service_unit_code}</strong>.";
+				$html = "You have cancelled the Service Unit Code: <strong>{$service_unit_code}</strong>.";
 				$title = "Cancelled :: " . $service_unit_code;	
 
 			} else if ($listing_action == 'for approval') {
@@ -487,7 +483,7 @@ class service_unit extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$service_unit_code}</strong>.";
+				$html = "You have successfully filed the request for approval with Service Unit Code: <strong>{$service_unit_code}</strong>.";
 				$title = "File For Approval :: " . $service_unit_code;
 			
 			} else if ($listing_action == 'forward to warehouse') {
@@ -512,6 +508,31 @@ class service_unit extends Admin_Controller {
 				$where = "transaction_number = '{$service_unit_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
+			} else if ($listing_action == 'cancellation-forward to warehouse') {
+
+				// change status to FORWARDED
+				$data = array(
+					'status' => "CANCELLATION-FORWARDED",
+					'approved_by' => $this->user->user_id,					
+					'approve_timestamp' => $current_datetime,
+					'mtr_number' =>	 $mtr_number
+				);
+
+				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$service_unit_code}</strong>.";
+				$title = "Forward To Warehouse :: " . $service_unit_code;
+
+				//spare_parts_helper
+				$return_val = return_items_to_process($service_unit_id, $service_unit_code);
+
+				/*$data_reservation = array(
+					'status' => "PENDING",				
+					'update_timestamp' => $current_datetime
+				);
+
+				$where = "transaction_number = '{$service_unit_code}'";
+				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);	
+				*/
+
 			} else if ($listing_action == 'assign mtr') {
 
 				// change status to FOR APPROVAL
@@ -527,12 +548,12 @@ class service_unit extends Admin_Controller {
 
 			if ($listing_action == 'cancel completed') {
 				$data = array(
-					'status' => "FOR CANCELLATION",
+					'status' => "CANCELLATION-FOR APPROVAL",
 					'approved_by' => $this->user->user_id,					
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$service_unit_code}</strong>.";
+				$html = "You have successfully filed the request for approval with Service Unit Code: <strong>{$service_unit_code}</strong>.";
 				$title = "For Approval - Cancel Completed Request :: " . $service_unit_code;
 			}
 			
@@ -541,7 +562,7 @@ class service_unit extends Admin_Controller {
 	
 		}	
 
-		$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
+		$this->return_json("1","Successful Approval of Service Unit.",array("html" => $html, "title" => $title));
 
 		return;	
 	}
@@ -675,11 +696,13 @@ class service_unit extends Admin_Controller {
 			}
 
 			if (empty($search_status)) {
-				$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				//$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				$where = "";
 			} else {
 
 				if ($search_status == 'ALL') {
-					$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+					//$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+					$where = "";
 				} else {
 					$where = "status = '". $search_status ."'";
 				}			
@@ -1301,14 +1324,25 @@ class service_unit extends Admin_Controller {
 
 		$service_unit_detail_details = $this->spare_parts_model->get_service_unit_detail_by_id($request_detail_id);
 
-		if ($service_unit_detail_details->good_quantity < $good_quantity) {
+		// get remaining number of items available
+		$where = "request_detail_id = {$request_detail_id} AND department_module_id = {$department_module_details->department_module_id}
+		AND status NOT IN ('CANCELLED', 'DELETED')";
+		$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where, NULL, NULL, "SUM(good_quantity) AS good_quantity, SUM(bad_quantity) AS bad_quantity");
+		$reprocessed_item_details = $reprocessed_item_details[0];
+
+		$available_good_quantity = $service_unit_detail_details->good_quantity - $reprocessed_item_details->good_quantity;
+		$available_bad_quantity = $service_unit_detail_details->bad_quantity - $reprocessed_item_details->bad_quantity;
+
+		//var_dump($available_good_quantity . '|' .$available_bad_quantity);
+
+		if ($available_good_quantity < $good_quantity) {
 			$has_error = 1;
-			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $service_unit_detail_details->good_quantity . "</strong> good quantities available.</p><br/>";
+			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $available_good_quantity . "</strong> good quantities available.</p><br/>";
 		}
 
-		if ($service_unit_detail_details->bad_quantity < $bad_quantity) {
+		if ($available_bad_quantity < $bad_quantity) {
 			$has_error = 1;
-			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $service_unit_detail_details->bad_quantity . "</strong> bad quantities available.</p><br/>";
+			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $available_bad_quantity . "</strong> bad quantities available.</p><br/>";
 		}
 
 		if ($has_error == 1) {
@@ -1361,6 +1395,55 @@ class service_unit extends Admin_Controller {
 
 		$reprocessed_item_id = $this->spare_parts_model->insert_id();
 
+		$status_sql = "SELECT DISTINCT(action) 
+						FROM 
+							is_reprocessed_item 
+						WHERE 
+							department_module_id = {$department_module_details->department_module_id} 
+						AND 
+							request_id = {$service_unit_detail_details->service_unit_id} 
+						AND 
+							status NOT IN ('CANCELLED', 'DELETED') 
+						ORDER BY 
+							action DESC";
+
+		$tmp_status = array();
+		$has_charge = 0;
+		$has_return = 0;
+		
+		$query = $this->db_spare_parts->query($status_sql);
+		if(count($query->result_array()) > 0) {
+			$tmp_status = $query->result_object();			
+		}					
+
+		if (count($tmp_status) > 0) {
+			foreach ($tmp_status as $ts) {
+				//$new_status = $new_status . substr($ts->action, 0, 1);
+				if ($ts->action == 'RETURN')
+					$has_return = 1;
+				if ($ts->action == 'CHARGE')
+					$has_charge = 1; 
+			}
+		}
+		
+		if (($has_return == 0) && ($has_charge == 0)) {
+			$new_status = "COMPLETED";
+		} else if (($has_return == 0) && ($has_charge == 1)) {
+			$new_status = "COMPLETED-C";
+		} else if (($has_return == 1) && ($has_charge == 0)) {	
+			$new_status = "COMPLETED-R";
+		} else {
+			$new_status = "COMPLETED-RC";
+		}	
+
+		$current_datetime = date('Y-m-d H:i:s');		
+		$data_update  = array(
+				"update_timestamp" => $current_datetime,
+				"status" => $new_status,
+			);
+
+		$this->spare_parts_model->update_service_unit($data_update, "service_unit_id = " . $service_unit_detail_details->service_unit_id);
+
 		// get item details 
 		$item_details = $this->spare_parts_model->get_item_view_by_id($service_unit_detail_details->item_id);
 
@@ -1374,7 +1457,7 @@ class service_unit extends Admin_Controller {
 	}	
 
 
-	function confirm_remove_item() {
+	public function confirm_remove_item() {
 		$request_code = $this->input->post("request_code");		
 		$service_unit_detail_id = $this->input->post("service_unit_detail_id");
 
@@ -1410,6 +1493,9 @@ class service_unit extends Admin_Controller {
 
 		//$where = "service_unit_id = '{$service_unit_id}' AND item_id = '{$item_id}'";
 		//$service_unit_detail = $this->spare_parts_model->get_service_unit_detail($where);
+
+		$service_unit_details = $this->spare_parts_model->get_service_unit_by_id($service_unit_id);
+
 		$where = "service_unit_detail_id = " . $service_unit_detail_id;		
 		$service_unit_detail_info = $this->spare_parts_model->get_service_unit_detail_by_id($service_unit_detail_id);
 
@@ -1421,23 +1507,79 @@ class service_unit extends Admin_Controller {
 		} else {
 			$complete_remarks = "[" . $current_datetime . "] " . $remarks . "\n";
 		}	
-
-		// update status to DELETED
-		$data = array(
-			'status' => 'DELETED',
-			'remarks' => $complete_remarks,
-			'update_timestamp' => $current_datetime
-		);
-
-
+		
 		if ($is_reprocess_item == 0) {			
-			$this->spare_parts_model->update_service_unit_detail($data, $where);
+			
+			// from spare_parts_helper			
+			$return_html = return_reserved_items($service_unit_details->request_code, 'DELETED', $remarks, $service_unit_detail_id);			
+
 		} else {
+
+			// update status to DELETED
+			$data = array(
+				'status' => 'DELETED',
+				'remarks' => $complete_remarks,
+				'update_timestamp' => $current_datetime
+			);
 			
 			$request_item_id = $this->input->post("request_item_id");
 		
 			$where = "reprocessed_item_id = " . $request_item_id;
 			$this->spare_parts_model->update_reprocessed_item($data, $where);
+		}
+
+		// get department_module datails
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+
+		if ($is_reprocess_item == 1) {
+			// check status of Service Unit
+			$status_sql = "SELECT DISTINCT(action) 
+							FROM 
+								is_reprocessed_item 
+							WHERE 
+								department_module_id = {$department_module_details->department_module_id} 
+							AND 
+								request_id = {$service_unit_id} 
+							AND 
+								status NOT IN ('CANCELLED', 'DELETED') 
+							ORDER BY 
+								action DESC";
+
+			$tmp_status = array();
+			$has_charge = 0;
+			$has_return = 0;
+			
+			$query = $this->db_spare_parts->query($status_sql);
+			if(count($query->result_array()) > 0) {
+				$tmp_status = $query->result_object();			
+			}					
+
+			if (count($tmp_status) > 0) {
+				foreach ($tmp_status as $ts) {					
+					if ($ts->action == 'RETURN')
+						$has_return = 1;
+					if ($ts->action == 'CHARGE')
+						$has_charge = 1; 
+				}
+			}
+			
+			if (($has_return == 0) && ($has_charge == 0)) {
+				$new_status = "COMPLETED";
+			} else if (($has_return == 0) && ($has_charge == 1)) {
+				$new_status = "COMPLETED-C";
+			} else if (($has_return == 1) && ($has_charge == 0)) {	
+				$new_status = "COMPLETED-R";
+			} else {
+				$new_status = "COMPLETED-RC";
+			}	
+
+			$current_datetime = date('Y-m-d H:i:s');		
+			$data_update  = array(
+					"update_timestamp" => $current_datetime,
+					"status" => $new_status,
+				);
+
+			$this->spare_parts_model->update_service_unit($data_update, "service_unit_id = " . $service_unit_id);
 		}	
 
 		$html = "Item is now successfully removed from request.";
@@ -1560,12 +1702,10 @@ class service_unit extends Admin_Controller {
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
 		$this->template->service_unit_details = $service_unit_details;
-		$this->template->department_module_details = $department_module_details;				
+		$this->template->department_module_details = $department_module_details;
+		$this->template->segment_name = $this->segment_name;
 		$this->template->view("service_unit/reprocess_items");
-
-
 	}
-
 
 	public function reports()
 	{
@@ -1709,7 +1849,7 @@ class service_unit extends Admin_Controller {
 	      	$start_column_num = 4;
       	
 	      	$objPHPExcel->setActiveSheetIndex(0);
-	      	$objPHPExcel->getActiveSheet()->setTitle("Warehouse Request List");
+	      	$objPHPExcel->getActiveSheet()->setTitle("Service Unit List");
       
 	      	// auto resize columns
 	      	$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
@@ -1730,7 +1870,7 @@ class service_unit extends Admin_Controller {
 	      	$objPHPExcel->getActiveSheet()->getStyle('A' . $start_column_num . ':J' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
       
 	      	$header = "SPARE PARTS SYSTEM";
-			$header2 = "Warehouse Request List";
+			$header2 = "Service Unit List";
 			$header3 = "From " . $from_date . " to " . $to_date;
 			$print_date = date('M d, Y H:i:s');
 			$print_date_header = " (Printed On: {$print_date})";

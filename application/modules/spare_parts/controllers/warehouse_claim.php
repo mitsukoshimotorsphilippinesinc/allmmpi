@@ -22,14 +22,7 @@ class Warehouse_claim extends Admin_Controller {
 	public $segment_name = "warehouse_claim";
 
 	public function index()
-	{
-		//$test_id = abs($this->input->get('test_id'));		
-
-		//$db_spare_parts = $this->load->database('spare_parts', TRUE);
-
-		//$query = $db_spare_parts->select('sku, good_quantity, bad_quantity')->get('is_item');
-  		//var_dump($query);			
-
+	{		
 		$this->template->view('warehouse_claim/dashboard');
 	}
 
@@ -75,11 +68,13 @@ class Warehouse_claim extends Admin_Controller {
 		}
 
 		if (empty($search_status)) {
-			$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', 'FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+			$where = "status IN ('FOR APPROVAL', 'APPROVED', 'DENIED', 'CANCELLATION-FOR APPROVAL', 'CANCELLATION-APPROVED', 'CANCELLATION-DENIED')";
+			//$where = "";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('PENDING', 'FOR APPROVAL', 'APPROVED', 'FORWARDED', 'FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				$where = "status IN ('FOR APPROVAL', 'APPROVED', 'DENIED', 'CANCELLATION-FOR APPROVAL', 'CANCELLATION-APPROVED', 'CANCELLATION-DENIED')";
+				//$where = "";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}			
@@ -199,10 +194,10 @@ class Warehouse_claim extends Admin_Controller {
 					$return_html = return_reserved_items($warehouse_claim_code, 'DENIED', $remarks);
 					$data['status'] = "DENIED";
 
-				} else if ($warehouse_claim->status == 'FOR CANCELLATION') {
+				} else if ($warehouse_claim->status == 'CANCELLATION-FOR APPROVAL') {
 					
-					$return_html = return_reserved_items($warehouse_claim_code, 'DENIED (COMPLETED)', $remarks);
-					$data['status'] = "DENIED (COMPLETED)";					
+					$return_html = return_reserved_items($warehouse_claim_code, 'CANCELLATION-DENIED', $remarks);
+					$data['status'] = "CANCELLATION-DENIED";					
 				
 				}
 
@@ -218,8 +213,8 @@ class Warehouse_claim extends Admin_Controller {
 
 				if ($warehouse_claim->status == 'FOR APPROVAL') {
 					$data['status'] = "APPROVED";
-				} else if ($warehouse_claim->status == 'FOR CANCELLATION') {
-					$data['status'] = "CANCELLED (COMPLETED)";
+				} else if ($warehouse_claim->status == 'CANCELLATION-FOR APPROVAL') {
+					$data['status'] = "CANCELLATION-APPROVED";
 				}
 				
 				$html = "You have successfully approved the <b>" . $warehouse_claim->status . "</b> Warehouse Claim with Request Code: <strong>{$warehouse_claim_code}</strong>.";
@@ -325,11 +320,13 @@ class Warehouse_claim extends Admin_Controller {
 		} 
 
 		if (empty($search_status)) {
-			$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+			//$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+			$where = "";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+				//$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+				$where = "";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}
@@ -346,7 +343,6 @@ class Warehouse_claim extends Admin_Controller {
 					$where = $search_by ." LIKE '%" . $search_text . "%'";
 			}
 		}	
-		
 
 		// set pagination data
 		$config = array(
@@ -392,7 +388,7 @@ class Warehouse_claim extends Admin_Controller {
 				$html = "You are about to forward the request for approval with Request Code: <strong>" . $warehouse_claim_code . "</strong>. Do you want to continue?";
 			}
 
-			if ($listing_action == 'forward to warehouse') {
+			if (($listing_action == 'forward to warehouse') || ($listing_action == 'cancellation-forward to warehouse')) {
 				$title = "Forward To Warehouse :: " . $warehouse_claim_code;
 				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $warehouse_claim_code . "</strong>. <br/>							
 							<br/>
@@ -512,6 +508,31 @@ class Warehouse_claim extends Admin_Controller {
 				$where = "transaction_number = '{$warehouse_claim_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
+			} else if ($listing_action == 'cancellation-forward to warehouse') {
+
+				// change status to FORWARDED
+				$data = array(
+					'status' => "CANCELLATION-FORWARDED",
+					'approved_by' => $this->user->user_id,					
+					'approve_timestamp' => $current_datetime,
+					'mtr_number' =>	 $mtr_number
+				);
+
+				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$warehouse_claim_code}</strong>.";
+				$title = "Forward To Warehouse :: " . $warehouse_claim_code;
+
+				//spare_parts_helper
+				$return_val = return_items_to_process($warehouse_claim_id, $warehouse_claim_code);
+
+				/*$data_reservation = array(
+					'status' => "PENDING",				
+					'update_timestamp' => $current_datetime
+				);
+
+				$where = "transaction_number = '{$warehouse_claim_code}'";
+				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);	
+				*/
+
 			} else if ($listing_action == 'assign mtr') {
 
 				// change status to FOR APPROVAL
@@ -527,7 +548,7 @@ class Warehouse_claim extends Admin_Controller {
 
 			if ($listing_action == 'cancel completed') {
 				$data = array(
-					'status' => "FOR CANCELLATION",
+					'status' => "CANCELLATION-FOR APPROVAL",
 					'approved_by' => $this->user->user_id,					
 					'approve_timestamp' => $current_datetime
 				);
@@ -675,11 +696,13 @@ class Warehouse_claim extends Admin_Controller {
 			}
 
 			if (empty($search_status)) {
-				$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				//$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				$where = "";
 			} else {
 
 				if ($search_status == 'ALL') {
-					$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+					//$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+					$where = "";
 				} else {
 					$where = "status = '". $search_status ."'";
 				}			
@@ -1301,14 +1324,25 @@ class Warehouse_claim extends Admin_Controller {
 
 		$warehouse_claim_detail_details = $this->spare_parts_model->get_warehouse_claim_detail_by_id($request_detail_id);
 
-		if ($warehouse_claim_detail_details->good_quantity < $good_quantity) {
+		// get remaining number of items available
+		$where = "request_detail_id = {$request_detail_id} AND department_module_id = {$department_module_details->department_module_id}
+		AND status NOT IN ('CANCELLED', 'DELETED')";
+		$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where, NULL, NULL, "SUM(good_quantity) AS good_quantity, SUM(bad_quantity) AS bad_quantity");
+		$reprocessed_item_details = $reprocessed_item_details[0];
+
+		$available_good_quantity = $warehouse_claim_detail_details->good_quantity - $reprocessed_item_details->good_quantity;
+		$available_bad_quantity = $warehouse_claim_detail_details->bad_quantity - $reprocessed_item_details->bad_quantity;
+
+		//var_dump($available_good_quantity . '|' .$available_bad_quantity);
+
+		if ($available_good_quantity < $good_quantity) {
 			$has_error = 1;
-			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $warehouse_claim_detail_details->good_quantity . "</strong> good quantities available.</p><br/>";
+			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $available_good_quantity . "</strong> good quantities available.</p><br/>";
 		}
 
-		if ($warehouse_claim_detail_details->bad_quantity < $bad_quantity) {
+		if ($available_bad_quantity < $bad_quantity) {
 			$has_error = 1;
-			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $warehouse_claim_detail_details->bad_quantity . "</strong> bad quantities available.</p><br/>";
+			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $available_bad_quantity . "</strong> bad quantities available.</p><br/>";
 		}
 
 		if ($has_error == 1) {
@@ -1361,6 +1395,55 @@ class Warehouse_claim extends Admin_Controller {
 
 		$reprocessed_item_id = $this->spare_parts_model->insert_id();
 
+		$status_sql = "SELECT DISTINCT(action) 
+						FROM 
+							is_reprocessed_item 
+						WHERE 
+							department_module_id = {$department_module_details->department_module_id} 
+						AND 
+							request_id = {$warehouse_claim_detail_details->warehouse_claim_id} 
+						AND 
+							status NOT IN ('CANCELLED', 'DELETED') 
+						ORDER BY 
+							action DESC";
+
+		$tmp_status = array();
+		$has_charge = 0;
+		$has_return = 0;
+		
+		$query = $this->db_spare_parts->query($status_sql);
+		if(count($query->result_array()) > 0) {
+			$tmp_status = $query->result_object();			
+		}					
+
+		if (count($tmp_status) > 0) {
+			foreach ($tmp_status as $ts) {
+				//$new_status = $new_status . substr($ts->action, 0, 1);
+				if ($ts->action == 'RETURN')
+					$has_return = 1;
+				if ($ts->action == 'CHARGE')
+					$has_charge = 1; 
+			}
+		}
+		
+		if (($has_return == 0) && ($has_charge == 0)) {
+			$new_status = "COMPLETED";
+		} else if (($has_return == 0) && ($has_charge == 1)) {
+			$new_status = "COMPLETED-C";
+		} else if (($has_return == 1) && ($has_charge == 0)) {	
+			$new_status = "COMPLETED-R";
+		} else {
+			$new_status = "COMPLETED-RC";
+		}	
+
+		$current_datetime = date('Y-m-d H:i:s');		
+		$data_update  = array(
+				"update_timestamp" => $current_datetime,
+				"status" => $new_status,
+			);
+
+		$this->spare_parts_model->update_warehouse_claim($data_update, "warehouse_claim_id = " . $warehouse_claim_detail_details->warehouse_claim_id);
+
 		// get item details 
 		$item_details = $this->spare_parts_model->get_item_view_by_id($warehouse_claim_detail_details->item_id);
 
@@ -1374,7 +1457,7 @@ class Warehouse_claim extends Admin_Controller {
 	}	
 
 
-	function confirm_remove_item() {
+	public function confirm_remove_item() {
 		$request_code = $this->input->post("request_code");		
 		$warehouse_claim_detail_id = $this->input->post("warehouse_claim_detail_id");
 
@@ -1410,6 +1493,9 @@ class Warehouse_claim extends Admin_Controller {
 
 		//$where = "warehouse_claim_id = '{$warehouse_claim_id}' AND item_id = '{$item_id}'";
 		//$warehouse_claim_detail = $this->spare_parts_model->get_warehouse_claim_detail($where);
+
+		$warehouse_claim_details = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);
+
 		$where = "warehouse_claim_detail_id = " . $warehouse_claim_detail_id;		
 		$warehouse_claim_detail_info = $this->spare_parts_model->get_warehouse_claim_detail_by_id($warehouse_claim_detail_id);
 
@@ -1421,23 +1507,79 @@ class Warehouse_claim extends Admin_Controller {
 		} else {
 			$complete_remarks = "[" . $current_datetime . "] " . $remarks . "\n";
 		}	
-
-		// update status to DELETED
-		$data = array(
-			'status' => 'DELETED',
-			'remarks' => $complete_remarks,
-			'update_timestamp' => $current_datetime
-		);
-
-
+		
 		if ($is_reprocess_item == 0) {			
-			$this->spare_parts_model->update_warehouse_claim_detail($data, $where);
+			
+			// from spare_parts_helper			
+			$return_html = return_reserved_items($warehouse_claim_details->request_code, 'DELETED', $remarks, $warehouse_claim_detail_id);			
+
 		} else {
+
+			// update status to DELETED
+			$data = array(
+				'status' => 'DELETED',
+				'remarks' => $complete_remarks,
+				'update_timestamp' => $current_datetime
+			);
 			
 			$request_item_id = $this->input->post("request_item_id");
 		
 			$where = "reprocessed_item_id = " . $request_item_id;
 			$this->spare_parts_model->update_reprocessed_item($data, $where);
+		}
+
+		// get department_module datails
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+
+		if ($is_reprocess_item == 1) {
+			// check status of Warehouse Claim
+			$status_sql = "SELECT DISTINCT(action) 
+							FROM 
+								is_reprocessed_item 
+							WHERE 
+								department_module_id = {$department_module_details->department_module_id} 
+							AND 
+								request_id = {$warehouse_claim_id} 
+							AND 
+								status NOT IN ('CANCELLED', 'DELETED') 
+							ORDER BY 
+								action DESC";
+
+			$tmp_status = array();
+			$has_charge = 0;
+			$has_return = 0;
+			
+			$query = $this->db_spare_parts->query($status_sql);
+			if(count($query->result_array()) > 0) {
+				$tmp_status = $query->result_object();			
+			}					
+
+			if (count($tmp_status) > 0) {
+				foreach ($tmp_status as $ts) {					
+					if ($ts->action == 'RETURN')
+						$has_return = 1;
+					if ($ts->action == 'CHARGE')
+						$has_charge = 1; 
+				}
+			}
+			
+			if (($has_return == 0) && ($has_charge == 0)) {
+				$new_status = "COMPLETED";
+			} else if (($has_return == 0) && ($has_charge == 1)) {
+				$new_status = "COMPLETED-C";
+			} else if (($has_return == 1) && ($has_charge == 0)) {	
+				$new_status = "COMPLETED-R";
+			} else {
+				$new_status = "COMPLETED-RC";
+			}	
+
+			$current_datetime = date('Y-m-d H:i:s');		
+			$data_update  = array(
+					"update_timestamp" => $current_datetime,
+					"status" => $new_status,
+				);
+
+			$this->spare_parts_model->update_warehouse_claim($data_update, "warehouse_claim_id = " . $warehouse_claim_id);
 		}	
 
 		$html = "Item is now successfully removed from request.";
@@ -1560,12 +1702,10 @@ class Warehouse_claim extends Admin_Controller {
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
 		$this->template->warehouse_claim_details = $warehouse_claim_details;
-		$this->template->department_module_details = $department_module_details;				
+		$this->template->department_module_details = $department_module_details;
+		$this->template->segment_name = $this->segment_name;
 		$this->template->view("warehouse_claim/reprocess_items");
-
-
 	}
-
 
 	public function reports()
 	{

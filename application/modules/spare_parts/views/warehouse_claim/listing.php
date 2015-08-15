@@ -3,7 +3,7 @@
 ?>
 
 <?= $breadcrumb_container; ?>
-<div class='alert alert-danger'><h2>Request List<a href='/spare_parts/warehouse_claim/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;" title='Download'><i class='icon-download' disabled="disabled"></i>&nbsp;Download Result</a></h2></div>
+<div class='alert alert-danger'><h2>Request List<a href='/spare_parts/warehouse_claim/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;display:none;" title='Download'><i class='icon-download' disabled="disabled"></i>&nbsp;Download Result</a></h2></div>
 
 <br>
 
@@ -11,14 +11,20 @@
 	<form id='search_details' method='get' action =''>
 
 		<strong>Status:&nbsp;</strong>
-		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
+		<select name="search_status" id="search_status" style="width:250px;margin-left:20px" value="<?= $search_status ?>">
 			<option value="ALL">ALL</option>						
 			<option value="APPROVED">APPROVED</option>
 			<option value="CANCELLED">CANCELLED</option>
-			<option value="CANCELLED (COMPLETED">CANCELLED (COMPLETED)</option>
+			<option value="CANCELLATION-APPROVED">CANCELLATION-APPROVED</option>
+			<option value="CANCELLATION-DENIED">CANCELLATION-DENIED</option>
+			<option value="CANCELLATION-COMPLETED">CANCELLATION-COMPLETED</option>
+			<option value="CANCELLATION-FORWARDED">CANCELLATION-FORWARDED</option>
+			<option value="CANCELLATION-FOR APPROVAL">CANCELLATION-FOR APPROVAL</option>
 			<option value="COMPLETED">COMPLETED</option>
-			<option value="DENIED">DENIED</option>
-			<option value="DENIED (COMPLETED)">DENIED (COMPLETED)</option>			
+			<option value="COMPLETED-C">COMPLETED W/ CHARGE</option>
+			<option value="COMPLETED-R">COMPLETED W/ RETURN</option>
+			<option value="COMPLETED-RC">COMPLETED W/ RETURN AND CHARGE</option>
+			<option value="DENIED">DENIED</option>			
 			<option value="FORWARDED">FORWARDED</option>
 			<option value="FOR APPROVAL">FOR APPROVAL</option>
 			<option value="PENDING">PENDING</option>
@@ -28,7 +34,7 @@
 		<br/>
 
 		<strong>Search By:&nbsp;</strong>
-		<select name="search_option" id="search_option" style="width:150px;" value="<?= $search_by ?>">
+		<select name="search_option" id="search_option" style="width:250px;" value="<?= $search_by ?>">
 			<option value="request_code">Code</option>
 			<option value="name">Name</option>
 		</select>                 
@@ -68,7 +74,7 @@
 			<th>Status</th>
 			<th style=''>Requested By</th>
 			<th style=''>Motor Brand/Model</th>
-			<th style='width:50px;'>Number of Items</th>
+			<th style='width:50px;'>Total Items</th>
 			<th style='width:100px;'>Warehouse</th>
 			<th style=';'>Approved By (Warehouse)</th>			
 			<th style='width:70px;'>Date Created</th>
@@ -84,21 +90,16 @@
 									
 			<td><?= $t->request_code; ?></td>
 			
-			<?php			
+			<?php									
 			$status_class = strtolower(trim($t->status));			
+
+			if (substr($status_class, 0, 12) == "cancellation") {
+				$status_class = substr($status_class, 13);
+			}
+
 			$status_class = str_replace(" ", "-", $status_class);
 		
 			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
-
-			/*if ($t->status == 'PENDING') {
-				echo "<td><span class='label label-important' >{$t->status}</span></td>";
-			} else if ($t->status == 'FORWARDED') {
-				echo "<td><span class='label label-info' >{$t->status}</span></td>";
-			} else if (($t->status == 'FOR APPROVAL') || ($t->status == 'FOR CANCELLATION')) {
-				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
-			} else {
-				echo "<td><span class='label label-success' >{$t->status}</span></td>";
-			}*/			
 
 			// get requestor details
 			$id = str_pad($t->id_number, 7, '0', STR_PAD_LEFT);
@@ -119,7 +120,7 @@
 			}				
 
 			// get number of items
-			$where = "warehouse_claim_id = " . $t->warehouse_claim_id . " AND status IN ('PENDING', 'COMPLETED')";
+			$where = "warehouse_claim_id = " . $t->warehouse_claim_id . " AND status NOT IN ('CANCELLED', 'DELETED')";
 			$warehouse_claim_detail_info = $this->spare_parts_model->get_warehouse_claim_detail($where);
 
 			$total_items = 0;
@@ -163,9 +164,13 @@
 					echo "<a class='btn btn-small btn-success process-btn' data='forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
 				}
 
+				if ($t->status == 'CANCELLATION-APPROVED') {
+					echo "<a class='btn btn-small btn-success process-btn' data='cancellation-forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
+				}
+
 				if ($t->status == 'COMPLETED') {
 					if (($t->mtr_number == 0) || ($t->mtr_number == NULL)) {
-						echo "<a class='btn btn-small btn-primary process-btn' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>
+						echo "<a class='btn btn-small btn-primary assign-mtr' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>
 								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
 					} else {
 						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>
@@ -196,7 +201,116 @@
 
 	});
 
+	$(".assign-mtr").click(function(){
+
+		var _request_id = $(this).parent().attr("data1");
+		var _request_code = $(this).parent().attr("data2")
+
+		b.request({
+			url: "/spare_parts/load_assign_mtr",
+			data: {
+				'request_id' : _request_id,
+				'request_code' : _request_code,				
+			},
+			on_success: function(data){
+
+				if (data.status == "1")	{
+					
+					// show add form modal					
+					confirmAssignMTRModal = b.modal.new({
+						title: data.data.title,
+						width:450,
+						disableClose: true,
+						html: data.data.html,
+						buttons: {
+							'Cancel' : function() {
+								confirmAssignMTRModal.hide();								
+							},
+							'Proceed' : function() {
+								if ($.trim($("#txt-mtrnumber").val()) == "") {
+									$("#error-mtrnumber").show();
+									return;
+								
+								} else {									
+									b.request({
+										url : '/spare_parts/check_mtr',
+										data : {
+											'request_id' : _request_id,
+											'request_code' : _request_code,																
+											'mtr_number' : $("#txt-mtrnumber").val(),
+										},
+										on_success : function(data) {
+											if (data.status == "1")	{													
+												b.request({
+													url : '/spare_parts/proceed_assign_mtr',
+													data : {
+														'request_id' : _request_id,
+														'request_code' : _request_code,																
+														'mtr_number' : $("#txt-mtrnumber").val(),
+													},
+													on_success : function(data) {
+														if (data.status == "1")	{													
+															// show add form modal
+															confirmAssignMTRModal.hide();					
+															proceedAssignMTRModal = b.modal.new({
+																title: data.data.title,
+																width:450,	
+																html: data.data.html,
+																buttons: {
+																	'Ok' : function() {
+																		proceedAssignMTRModal.hide();
+																		redirect('spare_parts/warehouse_claim/listing');
+																	}
+																}
+															});
+															proceedAssignMTRModal.show();
+														} else {
+															confirmAssignMTRModal.hide();					
+															errorAssignMTRModal = b.modal.new({
+																title: data.data.title,
+																width:450,	
+																html: data.data.html,
+															});
+															errorAssignMTRModal.show();
+														}												
+													} 
+												})
+											} else {
+												$("#error-mtrnumber").text(data.data.html);
+												$("#error-mtrnumber").show();												
+												return;
+											}												
+										} 
+									})
+
+								}
+							}
+						}
+					});
+					confirmAssignMTRModal.show();
+
+					
+				} else {
+					// show add form modal
+					approveRequestModal.hide();					
+					errorApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:450,	
+						html: data.data.html,
+					});
+					errorApproveRequestModal.show();	
+
+				}		
+			}	
+				
+		})
+		return false;
+		
+	});
 	
+
+
+
 	$(".process-btn").click(function(){
 		processButtonAction($(this).parent().attr("data1"), $(this).parent().attr("data2"), $(this).attr("data"));	
 	});
@@ -226,6 +340,9 @@
 							},
 							'Proceed' : function() {
 
+								$("#error-reasonremarks").hide();
+
+
 								if (listing_action == 'cancel') {
 									
 									if ($.trim($("#txt-remarks").val()) == "") {
@@ -234,16 +351,7 @@
 									}
 								}	
 								$("#error-reasonremarks").hide();
-
-								if (listing_action == 'assign mtr') {
-									
-									if ($.trim($("#txt-mtrnumber").val()) == "") {
-										$("#error-mtrnumber").show();
-										return;
-									}
-								}	
-								$("#error-reasonremarks").hide();
-
+								
 								// ajax request
 								b.request({
 									url : '/spare_parts/warehouse_claim/for_listing_proceed',
@@ -252,7 +360,7 @@
 										'warehouse_claim_code' : warehouse_claim_code,
 										'listing_action' : listing_action,
 										'remarks' : $("#txt-remarks").val(),
-										'mtr_number' : $("#txt-mtrnumber").val(),
+										//'mtr_number' : $("#txt-mtrnumber").val(),
 									},
 									on_success : function(data) {
 										
@@ -290,6 +398,7 @@
 
 								})
 								return false;
+								
 							}									
 						}
 					});
@@ -362,7 +471,7 @@
 								}									
 							}
 						});
-					} else if (data.data.request_status == "COMPLETED") {						
+					} else if (((data.data.request_status).substr(0, 9)) == "COMPLETED") {
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,
 							width:800,							
@@ -416,7 +525,7 @@
 
 		download_modal.init({
 
-			title: "Download Warehouse Requests",
+			title: "Download Warehouse Claims",
 			width: 350,
 			html: '<label for="start_date">Start Date: </label>\n<div class="form-inline wc-date">\n<div class="input-append"><input type="text" class="input-medium" id="pp_start_date" name="pp_start_date" readonly="readonly" style="cursor:pointer;z-index:2050" /><span id="pp_start_date_icon" class="add-on" style="cursor:pointer;"><i class="icon-calendar"></i></span></div>\n</div>\n\
 			<br>\n\

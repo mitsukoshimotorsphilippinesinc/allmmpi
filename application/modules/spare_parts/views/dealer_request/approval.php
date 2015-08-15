@@ -7,11 +7,15 @@
 	<form id='search_details' method='get' action =''>
 
 		<strong>Status:&nbsp;</strong>
-		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
+		<select name="search_status" id="search_status" style="width:250px;margin-left:20px" value="<?= $search_status ?>">
 			<option value="ALL">ALL</option>
 			<option value="FOR APPROVAL">FOR APPROVAL</option>
 			<option value="APPROVED">APPROVED</option>
-		</select>                 
+			<option value="DENIED">DENIED</option>			
+			<option value="CANCELLATION-FOR APPROVAL">CANCELLATION-FOR APPROVAL</option>
+			<option value="CANCELLATION-APPROVED">CANCELLATION-APPROVED</option>
+			<option value="CANCELLATION-DENIED">CANCELLATION-DENIED</option>			
+		</select>               
 	
 		<br/>
 
@@ -122,7 +126,7 @@
 			<td data1="<?= $t->dealer_request_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-primary view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
-				if ($t->status == 'FOR APPROVAL') {
+				if (($t->status == 'FOR APPROVAL') || ($t->status == 'CANCELLATION-FOR APPROVAL')) {
 					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>
 						<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>
 						";

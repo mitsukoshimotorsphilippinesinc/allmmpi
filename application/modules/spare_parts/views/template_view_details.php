@@ -105,30 +105,31 @@
 		<table  class='table table-striped table-bordered'>
 			<thead>
 				<tr>
-					<th colspan="10" style="color:blue;font-size:16px">Requested Items</th>
+					<th colspan="11" style="color:blue;font-size:16px">Requested Items</th>
 				</tr>
 				<tr>			
-					<th style=''>Description</th>
+					<th style='width:80em;'>Description</th>
 					<th>SRP</th>
-					<th style='width:100px;'>Discount</th>
-					<th style='width:100px;'>Discount Amount</th>
-					<th style='width:100px;'>Good Qty</th>
-					<th style='width:100px;'>Bad Qty</th>			
-					<th style='width:120px;'>Total Amount</th>
-					<th style='width:120px;'>Rack Location</th>
-					<th style='width:70px;'>Status</th>			
+					<th style=''>Discount</th>
+					<th style=''>Discount Amount</th>
+					<th style=''>Good Qty</th>
+					<th style=''>Bad Qty</th>
+					<th style=''>Total Qty</th>
+					<th style=''>Total Amount</th>
+					<th style=''>Rack Location</th>
+					<th style=''>Status</th>			
 					<th style=''>Remarks</th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php if(empty($segment_request_details)):?>
-					<tr><td colspan='9' style='text-align:center;'><strong>No Record Found</strong></td></tr>
+					<tr><td colspan='11' style='text-align:center;'><strong>No Record Found</strong></td></tr>
 				<?php else: ?>
 				<?php foreach ($segment_request_details as $srd): 
 
 					$item_view_details = $this->spare_parts_model->get_item_view_by_id($srd->item_id);
 
-					$complete_description = "[" . $item_view_details->model_name . " / " . $item_view_details->brand_name . "] " . $item_view_details->description;
+					$complete_description = "[" . $item_view_details->sku . "][" . $item_view_details->model_name . " / " . $item_view_details->brand_name . "] " . $item_view_details->description;
 
 					$status_class = strtolower(trim($srd->status));			
 					$status_class = str_replace(" ", "-", $status_class);		
@@ -140,6 +141,7 @@
 					<td style="text-align:right;"><?= number_format($srd->discount_amount, 2); ?></td>
 					<td style="text-align:right;"><?= number_format($srd->good_quantity, 2); ?></td>
 					<td style="text-align:right;"><?= number_format($srd->bad_quantity, 2); ?></td>
+					<td style="text-align:right;"><?= number_format(($srd->good_quantity + $srd->bad_quantity), 2); ?></td>
 					<td style="text-align:right;"><?= number_format($srd->total_amount, 2); ?></td>
 					<td style="text-align:right;"><?= $item_view_details->rack_location; ?></td>
 					<td><span class='label label-<?= $status_class ?>' ><?= $srd->status; ?></span></td>	

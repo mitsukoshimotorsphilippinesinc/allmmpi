@@ -8,6 +8,7 @@ class Spare_parts extends Admin_Controller {
 	
 		$this->load->model('spare_parts_model');
 		$this->load->model('human_relations_model');	
+		$this->load->model('warehouse_model');
 		$this->load->helper('spare_parts_helper');
 
 		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);	
@@ -408,6 +409,147 @@ class Spare_parts extends Admin_Controller {
 
 	}
 
+	public function get_requested_items()
+	{
+		$search_key = $this->input->get_post('search_key');
+		$segment_name = $this->input->get_post('segment_name');
+		$request_id = $this->input->get_post('request_id');
+		$search_key = trim($search_key);
+	
+		/*if (empty($search_key)) 
+		{
+			$this->return_json("error","Item Name is empty.");
+			return;
+
+		}*/
+
+		$keys = explode(" ", $search_key);
+		for ($i = 0; $i < count($keys); $i++)
+		{
+			$escaped_keys[] = mysql_real_escape_string($keys[$i]);
+		}
+
+		$key_count = count($escaped_keys);  
+
+		// get possible combinations
+		$combinations = array();
+
+		$this->load->library('Math_Combinatorics');
+		$combinatorics = new Math_Combinatorics;
+		foreach( range(1, count($escaped_keys)) as $subset_size ) {
+    		foreach($combinatorics->permutations($escaped_keys, $subset_size) as $p) {
+	  			$combinations[sizeof($p)-1][] = $p;
+    		}
+		}
+
+		$combinations = array_reverse($combinations);
+
+		// exact match search
+		$has_exact = false;
+		$tmp_items = array();
+
+		foreach($combinations as $comb_group)
+		{
+			foreach($comb_group as $comb)
+			{
+				$name = strtoupper(join('', $comb));
+
+				$sql = "SELECT 
+							a.". $segment_name ."_id as request_id, 
+							a.". $segment_name ."_detail_id as request_detail_id, 
+							a.item_id, 
+							b.sku, 
+							b.brand_name, 
+							b.model_name, 
+							b.description, 
+							b.warehouse_name,
+							b.rack_location,
+							a.srp, 
+							a.discount, 
+							a.discount_amount, 
+							a.good_quantity, 
+							CASE WHEN c.good_quantity IS NULL THEN 0 ELSE c.good_quantity END AS reprocessed_good_quantity, 
+							(a.good_quantity - (CASE WHEN c.good_quantity IS NULL THEN 0 ELSE c.good_quantity END)) AS remaining_good_quantity, 
+							a.bad_quantity, 
+							CASE WHEN c.bad_quantity IS NULL THEN 0 ELSE c.bad_quantity END AS reprocessed_bad_quantity,
+							(a.bad_quantity - (CASE WHEN c.bad_quantity IS NULL THEN 0 ELSE c.bad_quantity END)) AS remaining_bad_quantity
+						FROM 
+							is_". $segment_name ."_detail a
+						LEFT JOIN
+							is_item_view b on a.item_id = b.item_id
+						LEFT JOIN
+							is_reprocessed_item c on a.". $segment_name ."_detail_id = c.request_detail_id
+						WHERE 
+							a.". $segment_name ."_id = {$request_id}
+						AND 
+							a.status NOT IN ('CANCELLED', 'DELETED')
+						AND 
+							(((a.good_quantity - (CASE WHEN c.good_quantity IS NULL THEN 0 ELSE c.good_quantity END)) <> 0) 
+								OR ((a.bad_quantity - (CASE WHEN c.bad_quantity IS NULL THEN 0 ELSE c.good_quantity END)) <> 0))		
+						AND
+							((REPLACE(b.sku,' ','') LIKE '%{$name}%') OR (REPLACE(b.model_name,' ','') LIKE '%{$name}%') OR (REPLACE(b.description,' ','') LIKE '%{$name}%') OR (REPLACE(b.sku,' ','') LIKE '%{$name}%')) ORDER BY b.sku, b.description LIMIT 50";
+
+
+				$query = $this->db_spare_parts->query($sql);
+				if(count($query->result_array()) > 0)
+				{
+					$tmp_items = $query->result_object();
+					$has_exact = true;
+					break;
+				}
+			}
+			if($has_exact)
+			{
+				break;
+			}
+		}
+		
+		$return_items = array();
+
+		if (count($tmp_items) == 0)
+		{
+			// if these is reached then nothing are found.
+			$this->return_json("error","Not found.", array('items' => $return_items, 'keys' => $keys));
+			return;
+		}
+		
+		foreach ($tmp_items as $itm)
+		{
+			$return_items[$itm->item_id] = array(
+				"item_id" => $itm->item_id,
+				"sku" => $itm->sku,
+				"brand_model" => strtoupper($itm->brand_name) . " / " . strtoupper($itm->model_name),
+				"description" => strtoupper($itm->description),
+				"full_description" => "[".  strtoupper($itm->brand_name) . " / " . strtoupper($itm->model_name) . "]" . strtoupper($itm->description),
+				"srp" => strtoupper($itm->srp),
+				"warehouse_name" => strtoupper($itm->warehouse_name),
+				"rack_location" => strtoupper($itm->rack_location),
+				"bad_quantity" => $itm->bad_quantity,
+				"remaining_bad_quantity" => $itm->remaining_bad_quantity,
+				"good_quantity" => $itm->good_quantity,
+				"remaining_good_quantity" => $itm->remaining_good_quantity,
+				"discount" => $itm->discount,
+				"discount_amount" => $itm->discount_amount,
+				"request_detail_id" => $itm->request_detail_id,
+
+			);
+		}
+		
+		$this->return_json("ok","Ok.", array('items' => $return_items, 'keys' => $keys));
+		return;
+
+	}
+
+
+
+
+
+
+
+
+
+
+
 	function get_requester_details()
 	{
 		$id_number = $this->input->post("id_number");
@@ -675,32 +817,6 @@ class Spare_parts extends Admin_Controller {
 		
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	public function approval()
 	{
 
@@ -883,6 +999,120 @@ class Spare_parts extends Admin_Controller {
 		}
 			
 		return;
+	}
+
+	public function load_assign_mtr()
+	{
+		$request_id = $this->input->post("request_id");
+		$request_code = $this->input->post("request_code");		
+
+		$title = "Assign MTR Number :: " . $request_code;
+		$html = "<p>Enter a MTR for Request Code : <strong>" . $request_code . "</strong>. <br/>
+					<div id='reasonremarks-container'>
+						<span><strong>MTR Number:</strong></span></br>
+						<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
+						<span id='error-mtrnumber' style='color:red;display:none'>MTR Number is required.</span>
+					</div>	
+					<br/>
+					Click Proceed to continue...</p>";
+			
+		$this->return_json("1","Load Assign MTR Modal.",array("html" => $html, "title" => $title));
+		
+		return;
+	}
+
+	public function check_mtr()
+	{
+		$request_id = trim($this->input->post("request_id"));
+		$request_code = trim($this->input->post("request_code"));	
+		$mtr_number = trim($this->input->post("mtr_number"));	
+
+		$return_val = check_mtr($request_code, $mtr_number);
+		
+		$used_by_request_code = "";
+		if (empty($return_val)) {
+			$html = "MTR is available.";	
+			$this->return_json("1","Available MTR", array("html" => $html));
+		} else {
+			$used_by_request_code = $return_val[0]->request_code;
+			$html = "Sorry, MTR Number was already used by ". $used_by_request_code .". Please try another.";
+			$this->return_json("0","Not Available MTR", array("html" => $html, "request_code_mtr_user" => $return_val));
+		}
+
+		return;
+	}
+
+	public function proceed_assign_mtr()
+	{
+		$request_id = $this->input->post("request_id");
+		$request_code = $this->input->post("request_code");		
+		$mtr_number =  trim($this->input->post("mtr_number"));
+		
+		$result_val = assign_mtr($request_id, $request_code, $mtr_number);
+
+		$html = "You have successfully assigned a MTR Number to the request with Request Code: <strong>{$request_code}</strong>.";
+		$title = "Assign MTR Number :: " . $request_code;
+
+		$this->return_json("1","Successful MTR Number Assignment.",array("html" => $html, "title" => $title));
+
+		return;	
+	}
+
+	public function load_assign_po()
+	{
+		$request_id = $this->input->post("request_id");
+		$request_code = $this->input->post("request_code");		
+
+		$title = "Assign P.O. Number :: " . $request_code;
+		$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $request_code . "</strong>. <br/>
+					<div id='reasonremarks-container'>
+						<span><strong>MTR Number:</strong></span></br>
+						<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
+						<span id='error-mtrnumber' style='color:red;display:none'>P.O. Number is required.</span>
+					</div>	
+					<br/>
+					Click Proceed to continue...</p>";
+			
+		$this->return_json("1","Load Assign PO Modal.",array("html" => $html, "title" => $title));
+		
+		return;
+	}
+
+	public function check_po()
+	{
+		$request_id = trim($this->input->post("request_id"));
+		$request_code = trim($this->input->post("request_code"));	
+		$mtr_number = trim($this->input->post("mtr_number"));	
+
+		$return_val = check_mtr($request_code, $mtr_number);
+		
+		$used_by_request_code = "";
+		if (empty($return_val)) {
+			$html = "P.O. Number is available.";	
+			$this->return_json("1","Available PO", array("html" => $html));
+		} else {
+			$used_by_request_code = $return_val[0]->request_code;
+			$html = "Sorry, P.O. Number was already used by ". $used_by_request_code .". Please try another.";
+			$this->return_json("0","Not Available PO Number", array("html" => $html, "request_code_mtr_user" => $return_val));
+		}
+
+		return;
+	}
+
+	public function proceed_assign_po()
+	{
+		$request_id = $this->input->post("request_id");
+		$request_code = $this->input->post("request_code");		
+		$mtr_number =  trim($this->input->post("mtr_number"));
+		
+		$result_val = assign_mtr($request_id, $request_code, $mtr_number);
+
+		$html = "You have successfully assigned a P.O. Number to the request with Request Code: <strong>{$request_code}</strong>.";
+		$title = "Assign P.O. Number :: " . $request_code;
+
+		$this->return_json("1","Successful PO Number Assignment.",array("html" => $html, "title" => $title));
+
+		return;	
 	}
 
 	

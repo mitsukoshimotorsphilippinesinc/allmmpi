@@ -14,7 +14,7 @@
 				<td colspan="2" align="left" class=""><h3>Merchandise Transfer Receipt - <?= $department_module_details->module_name ?></h3></td>
 			</tr>
 			<tr>
-				<td colspan='1' align='left' valign="bottom" ><h4>MTR No: <?= $request_summary->mtr_number; ?></h4></td>									
+				<td colspan='1' align='left' valign="bottom" ><h4>MTR No: <?= str_pad($request_summary->mtr_number, 6, '0', STR_PAD_LEFT); ?></h4></td>									
 				<td colspan="1" align='right'><h4><?= $copy ?> Copy</h4></td>					
 			</tr>
 			<tr>
@@ -29,8 +29,15 @@
 				<td align='right'>Warehouse:<b> <?= $warehouse->warehouse_name; ?> </b></td>
 			</tr>
 			<tr>
-				<td align='left'>ID Number:<b> <?= $requester->id_number; ?></b></td>				
-				<td align='right'>Approved By:<b> <?= $requester->complete_name; ?></b></td>
+				<td align='left'>ID Number:<b> <?= $requester->id_number; ?></b></td>
+				<?php
+					$brand_model = "N/A";
+					if ($request_summary->motorcycle_brand_model_id > 0) {
+						$brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($request_summary->motorcycle_brand_model_id);
+						$brand_model = $brand_model_details->brand_name . " / " . $brand_model_details->model_name;
+					}
+				?>				
+				<td align='right'>Brand/Model:<b> <?= $brand_model; ?></b></td>
 			</tr>
 			<tr>
 				<td align='left'>Total Amount:<b> Php <?= number_format($total_amount, 2); ?></b></td>

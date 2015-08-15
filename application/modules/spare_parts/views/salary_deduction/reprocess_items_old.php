@@ -46,12 +46,6 @@ $show_approval = false;
 					
 	$details_content = get_requester_details($salary_deduction_details->id_number, "employee", 1);
 
-	$motor_brand_model_detail = "N/A";
-	if ($salary_deduction_details->motorcycle_brand_model_id > 0) {
-		$motor_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($salary_deduction_details->motorcycle_brand_model_id);
-		$motor_brand_model_detail = $motor_details->brand_name . " / " . $motor_details->model_name;
-	}
-
 ?>
 
 <?= $breadcrumb_container; ?>
@@ -67,7 +61,7 @@ $show_approval = false;
 		<tbody>
 			<tr>
 				<td style="width:130px"><strong>NAME:</strong></td>
-				<td style="width:400px"><?= $details_content->complete_name ?></td>
+				<td><?= $details_content->complete_name ?></td>
 				<td style="width:130px"><strong>WAREHOUSE:</strong></td>
 				<td></td>
 			</tr>	
@@ -75,25 +69,25 @@ $show_approval = false;
 				<td><strong>ID NUMBER:</strong></td>
 				<td><?= $details_content->id_number ?></td>
 				<td><strong>MOTOR BRAND/MODEL:</strong></td>
-				<td><?= $motor_brand_model_detail ?></td>
+				<td></td>
 			</tr>	
 			<tr>
 				<td><strong>DEPARTMENT:</strong></td>
 				<td><?= $details_content->department_name ?></td>
 				<td><strong>ENGINE:</strong></td>
-				<td><?= $salary_deduction_details->engine ?></td>
+				<td></td>
 			</tr>	
 			<tr>
 				<td><strong>POSITION:</strong></td>
 				<td><?= $details_content->position_name ?></td>
 				<td><strong>CHASSIS:</strong></td>
-				<td><?= $salary_deduction_details->chassis ?></td>
+				<td></td>
 			</tr>	
 			<tr>
 				<td><strong>EMAIL:</strong></td>
 				<td><?= $details_content->email_address ?></td>
 				<td><strong>STATUS:</strong></td>
-				<td><?= $salary_deduction_details->status ?></td>
+				<td></td>
 			</tr>	
 			<tr>
 				<td><strong>CONTACT NUMBER:</strong></td>
@@ -103,7 +97,7 @@ $show_approval = false;
 					if (strlen(trim($salary_deduction_details->remarks)) > 0)
 						echo "<td><a href='#' id='view-full-remarks' data='{$salary_deduction_details->remarks}'><u>View Remarks</u></a></td>";
 					else
-						echo "<td>N/A</td>";
+						echo "<td><strong>N/A</strong></td>";
 				?>				
 			</tr>								
 		<tbody>
@@ -161,36 +155,8 @@ $show_approval = false;
 							echo form_dropdown('add_item_action', $action_options, NULL, 'id="action_option" class="action"');
 							?>
 						</td>
-						
 						<td>
-							<div class="control-group <?= $this->form_validation->error_class('add_item_name') ?>">
-								<div class="controls">
-									<?= form_input('search_item',NULL,'id="search_item" class="item" placeholder="Item" readonly');?>
-									<input type="hidden" name="add_item_name" id="add_item_name" class="add_item_name" readonly>
-									<?php if(false): ?>
-									<select class="item" name="add_item_name">
-										<option selected="selected" value="">Select Item</option>
-										<option value="new">Create New Item</option>
-										<?php foreach($items as $item):?>
-										<option value="<?=$item->item_id?>" data="<?=$item->item_name?>"><?=$item->item_name?></option>
-										<?php endforeach;?>
-										<?php
-										$new_items = set_value('list_new_item_names');
-										if(!empty($new_items)):?>
-											<?php foreach(array_filter(explode('|',$new_items)) as $new_item):?>
-										<option value="add[]" data="<?=$new_item?>">*New* <?=$new_item?></option>
-											<?php endforeach; ?>
-										<?php endif;?>
-									</select>
-									<?php endif; ?>
-								</div>
-							</div>
-							<?=form_hidden('list_new_item_names',implode('|',array_unique(explode('|',set_value('list_new_item_names')))));?>
-							<?=form_hidden('new_item_name');?>
-						</td>
-												
-						<!--td>
-							
+							<?php
 								$request_items = json_decode($json_items);
 
 								$item_detail_options = array('0' => 'Please select an item...');
@@ -203,17 +169,14 @@ $show_approval = false;
 									
 								}
 
-								echo form_dropdown('select_item', $item_detail_options, NULL, 'id='select_item' class='item');
+								echo form_dropdown('select_item', $item_detail_options, NULL, 'id="select_item" class="item"');
 
 							?>						
-						</td-->
-											
-
+						</td>						
 						<td><?= form_input('add_item_good_qty',NULL,'class="good_qty" placeholder=" Good Qty"');?></td>
 						<td><?= form_input('add_item_bad_qty',NULL,'class="bad_qty" placeholder="Bad Qty"');?></td>
 						<td>
-							<?= form_input('add_item_price',NULL,'id="add_item_price" class="price" placeholder="Unit Price" readonly');?>							
-							<?= form_input('add_request_detail_id',NULL,'id="add_request_detail_id" class="price" placeholder="Request Detail ID" style="display:none"');?>
+							<?= form_input('add_item_price',NULL,'id="add_item_price" class="price" placeholder="Unit Price" readonly');?>
 						</td>						
 						<td>
 							<?php
@@ -262,7 +225,6 @@ $show_approval = false;
 						<th class="">Item</th>						
 						<th class="">Good Qty</th>
 						<th class="">Bad Qty</th>
-						<th class="">Total Qty</th>
 						<th class="">SRP</th>
 						<th class="">Recipient</th>
 						<th class="">Charge Discount</th>
@@ -307,9 +269,8 @@ $show_approval = false;
 						?>
 						<td class="unit"><?=set_value('item_action['.$i.']',$temp[$i]['action'])?></td>						
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->description)?></td>
-						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']),2)?></td>
-						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']),2)?></td>
-						<td class="qty"><?=number_format((set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']) + set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])),2)?></td>
+						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']))?></td>
+						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']))?></td>
 						<td class="price"><?=number_format(set_value('item_price['.$i.']',$temp[$i]['srp']),2)?></td>
 						<td class="item"><?=set_value('item_recipient['.$i.']',$requester_name)?></td>
 						<td class="discount"><?=number_format(set_value('discount['.$i.']',$temp[$i]['discount']))?></td>
@@ -332,7 +293,7 @@ $show_approval = false;
 				</tbody>
 			</table>
 		</div>
-		<div style="margin-left:30px;display:none;">
+		<div style="margin-left:30px;">
 			<?php 
 			if (!$isAdd) {
 				echo "<h3>Total Amount: <span id='total-amount'>{$request_item_amount_total->total_amount}</span></h3>";
@@ -352,8 +313,6 @@ $show_approval = false;
 </form>
 <?php
 	$this->load->view('template_search_requester');	
-	$this->load->view('template_search_requested_item');	
-
 ?>
 
 <script type="text/javascript">
@@ -370,15 +329,13 @@ $show_approval = false;
 			document.getElementById('add_wr_item').setAttribute("disabled","disabled");
 			$("#test_table *").attr("disabled", "disabled").off('click');
 			document.getElementById("forward_to_warehouse").className = "btn btn-danger";
-			//$(".remove_item").hide();
-			$(".rmv_wr_item").hide();
+			$(".remove_item").hide();
 			$("#forward_to_warehouse").hide();
 		} else {
 			$("#ftw_caption").text("Forward To WH");
 			$("#test_table *").removeAttr("disabled", "disabled").off('click');
 			document.getElementById("forward_to_warehouse").className = "btn btn-primary";
-			//$(".remove_item").show();	
-			$(".rmv_wr_item").show();					
+			$(".remove_item").show();						
 			$("#forward_to_warehouse").show();
 		}
 
@@ -391,7 +348,6 @@ $show_approval = false;
 		<td class="item"><%= select_item %></td>\n\
 		<td class="qty"><%= item_good_qty %></td>\n\
 		<td class="qty"><%= item_bad_qty %></td>\n\
-		<td class="qty"><%= item_total_qty %></td>\n\
 		<td class="price"><%= item_price %></td>\n\
 		<td class="item"><%= item_recipient %></td>\n\
 		<td class="qty"><%= item_discount %></td>\n\
@@ -524,7 +480,7 @@ $show_approval = false;
 	});
 
 
-	/*$(document).on("change",'#select_item',function(e) {
+	$(document).on("change",'#select_item',function(e) {
 		e.preventDefault();		
 		select_item();
 
@@ -565,7 +521,6 @@ $show_approval = false;
 					document.getElementsByName('add_item_good_qty')[0].placeholder= $(this).data("good_quantity");
 					document.getElementsByName('add_item_bad_qty')[0].placeholder= $(this).data("bad_quantity");
 
-					
 					document.search_item_modal.hide();
 					document.search_item_modal = null;
 				});
@@ -573,149 +528,95 @@ $show_approval = false;
 			} 
 		});
 		
-	}*/
-
-
-	$(document).on("click",'#search_item',function(e) {	
-		e.preventDefault();		
-		select_item();
-	});
-
-	document.search_item_modal = null;
-
-	var select_item = function() {
-		document.search_item_modal = b.modal.create({
-			title: "Select Item",
-			width: 800,
-			html: _.template($("#select-item-template").html(),{}),
-		});
-
-		document.search_item_modal.show();
-
-		$("#btn_item_search").click(function(e) {
-			e.preventDefault();
-			
-			var search_key = $.trim($("#txt_item_search_key").val());
-			var item_type_id = $.trim($("#item_type_search").val());
-
-			var warehouse_option = $("#item_warehouse_option").val();
-	
-			b.request({
-				url: "/spare_parts/get_requested_items",
-				data: {
-					"search_key": search_key,
-					"request_id": <?= $salary_deduction_details->salary_deduction_id ?>,
-					"segment_name": '<?= $segment_name ?>',
-				},
-				on_success: function(data) {
-
-					var items = data.data.items;
-
-					$("#item-listing").html(_.template($("#item-list-template").html(),{"items": items}));
-					
-					$("#item-listing .btn-select-item").click(function(e) {
-						e.preventDefault();
-						var item_id = $(this).data("id");
-						var item = items_array[item_id];
-
-						$("#search_item").val($(this).data("description"));
-						$("#add_item_name").val(item_id);
-						$("#add_item_price").val($(this).data("srp"));
-						$("#add_request_detail_id").val($(this).data("request_detail_id"));
-						// always 1 since there is only 1 unit type (pieces)
-						$('select[name="add_item_unit"]').val(1);						
-
-						document.getElementsByName('add_item_good_qty')[0].placeholder= $(this).data("remaining_good_quantity");
-						document.getElementsByName('add_item_bad_qty')[0].placeholder= $(this).data("remaining_bad_quantity");
-
-						document.search_item_modal.hide();
-						document.search_item_modal = null;
-					});
-					
-				} 
-			});
-		});
-
-		$("#btn_item_search").trigger("click");		
 	}
 
 	//$("#add_wr_item").click(function(){
 	$("#add_wr_item").live('click',function(){
 
-		var _hasError = 0;
 		var input_errors = "";
-		var item_name = "";
+		var hasError = 0;
 
 		if ($("#select_item").val() == 0) {
-			_hasError = 1;
-			input_errors += "Select an Item first. "
-		}
-
-		if (($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) {
-			_hasError = 1;
-			input_errors += "The Quantity fields are required. "			
-		}
-		
-		if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1)) {
-			_hasError = 1;
-			input_errors += "The Good Quantity field must contain an integer. "
-		}
-
-		if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1)) {
-			_hasError = 1;
-			input_errors += "The Bad Quantity field must contain an integer. "
-		}
-
-		if (($('input[name="add_item_good_qty"]').val() <= 0) && ($('input[name="add_item_bad_qty"]').val() <= 0)) {
-			_hasError = 1;
-			input_errors += "The Quantity fields should be greater than 0. "			
-		}
-
-		if ($('input[name="add_item_good_qty"]').val() < 0) {
-			_hasError = 1;
-			input_errors += "The Good Quantity field should be greater than 0. "			
-		}	
-
-		if ($('input[name="add_item_bad_qty"]').val() < 0) {
-			_hasError = 1;
-			input_errors += "The Bad Quantity field should be greater than 0. "			
-		}
-		
-		if($('input[name="add_item_name"]').val() == '' || $('input[name="add_item_name"]').val() == 'new') {
-			_hasError = 1;
 			input_errors += "The Item field is required. ";
-		}	
+			hasError = 1;
+		}
+
+		if (($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == ''))
+		{
+			input_errors += "The Quantity fields are required. ";
+			hasError = 1;
+		}
+		else if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1))
+		{
+			input_errors += "The Good Quantity field must contain an integer. "
+			hasError = 1;
+		}
+		else if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1))
+		{
+			input_errors += "The Bad Quantity field must contain an integer. "
+			hasError = 1;
+		}
+
+		if ($("#action_option").val() == "charge") {
+			if ($("#search_recipient").val() == "") {
+				input_errors += " Recipient is required. ";	
+				hasError = 1;
+			}
+		}
+
+
+		if($('select[name="add_item_unit"]').val() == '') {
+			input_errors += "The Unit field is required. ";
+			hasError = 1;
+		}
+
+		if($('input[name="add_item_name"]').val() == '' || $('input[name="add_item_name"]').val() == 'new') {
+			input_errors += "The Item field is required. ";
+			hasError = 1;
+		}
 
 		$('#input_errors').html('<p>'+input_errors+'</p>');
+	
+		// if has no error
+		if (hasError == 0) {
 
-		if (_hasError == 1) {
-			return false;
-		} else {
+			var request_detail_id = $("#select_item").val();
 
-			var item_name = "";
-			if($('#search_item').val() == 'add[]')
-			{
-				item_name = $('input[name="new_item_name"]').val();
-			}
-			else
-			{
-				item_name = $('#search_item').val();
-			}
 			$('#input_errors').html('');
 
 			var good_qty = $('input[name="add_item_good_qty"]').val();
 			var bad_qty = $('input[name="add_item_bad_qty"]').val();
 
 			good_qty = good_qty.replace(new RegExp('[,]', 'gi'), '');
-			bad_qty = bad_qty.replace(new RegExp('[,]', 'gi'), '');			
+			bad_qty = bad_qty.replace(new RegExp('[,]', 'gi'), '');
+
+			var input_errors;
+			if((!(_.isNumber(good_qty * 1)) || _.isNaN(good_qty * 1)) && (!(_.isNumber(bad_qty * 1)) || _.isNaN(bad_qty * 1))) 
+			{
+				input_errors = "The Quantity fields must contain an integer. ";
+				var item_error_modal = b.modal.create({
+					title: "Error :: Item Request",
+					width: 450,
+					html: "<p>There was an error in your request.</p><p>"+input_errors+"</p>"
+				});
+				item_error_modal.show();
+				return;
+			}
+			
+			if ((good_qty == '0') && (bad_qty == '0')) 
+			{
+				input_errors = "One of the Quantity fields must be greater than zero. ";
+				var item_error_modal = b.modal.create({
+					title: "Error :: Item Request",
+					width: 450,
+					html: "<p>There was an error in your request.</p><p>"+input_errors+"</p>"
+				});
+				item_error_modal.show();
+				return;				
+			}
 
 			$('input[name="add_item_good_qty"]').val(good_qty);
 			$('input[name="add_item_bad_qty"]').val(bad_qty);
-
-			//var request_detail_id = $("#select_item").val();
-			var request_detail_id = $("#add_request_detail_id").val();
-			$('#input_errors').html('');
-
 
 			// ajax request
 			b.request({
@@ -755,7 +656,6 @@ $show_approval = false;
 						<td class="item"><%= select_item %></td>\n\
 						<td class="qty"><%= item_good_qty %></td>\n\
 						<td class="qty"><%= item_bad_qty %></td>\n\
-						<td class="qty"><%= item_total_qty %></td>\n\
 						<td class="price"><%= item_price %></td>\n\
 						<td class="item"><%= item_recipient %></td>\n\
 						<td class="qty"><%= item_discount %></td>\n\
@@ -786,7 +686,6 @@ $show_approval = false;
 							item_recipient: data.data.recipient_name,
 							item_good_qty: numberFormat($('input[name="add_item_good_qty"]').val(),2),
 							item_bad_qty: numberFormat($('input[name="add_item_bad_qty"]').val(),2),
-							item_total_qty: numberFormat(($('input[name="add_item_good_qty"]').val() + $('input[name="add_item_bad_qty"]').val()),2),
 							item_discount: numberFormat($('select[name="add_item_discount"]>option:selected').text()) + '%',
 							item_discount_price: numberFormat($('input[name="add_item_discount_price"]').val(),2),
 							item_total_amount: data.data.item_total_amount,

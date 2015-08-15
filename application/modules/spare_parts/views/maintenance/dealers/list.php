@@ -1,10 +1,10 @@
 <?php
-	$upload_url = $this->config->item("media_url") . "/agents";
+	$upload_url = $this->config->item("media_url") . "/dealers";
 	$breadcrumb_container = assemble_breadcrumb();
 ?>
 
 <?= $breadcrumb_container; ?>
-<h2>Agents <a href='/spare_parts/maintenance/add_agent' class='btn btn-small'  style='float:right;'><i class="icon-plus"></i><span> Add New</span></a></h2>
+<h2>Dealers <a href='/spare_parts/maintenance/add_dealer' class='btn btn-small'  style='float:right;'><i class="icon-plus"></i><span> Add New</span></a></h2>
 <hr/>
 
 <form id='search_details' method='get' action =''>
@@ -14,6 +14,7 @@
 		<option value="complete_name">Complete Name</option>
 		<option value="complete_address">Complete Address</option>
 		<option value="contact_number">Contact Number</option>
+		<option value="contact_number">Agent</option>
 	</select>                 
 
 	<input title="Search" class="input-large search-query" style="margin-top:-10px;margin-left:5px;" type="text" id="search_string" name="search_string" value="" maxlength='25' autofocus="">	
@@ -49,30 +50,44 @@
 			<th>Complete Name</th>
 			<th style="width: 25em;">Address</th>
 			<th style="width: 15em;">Contact Number</th>
-			<th style='width: 10em;'>&nbsp;</th>
+			<th style="width: 15em;">Agent</th>
+			<th style="width: 5em;">Max Discount</th>
+			<th style="width: 5em;">Active</th>
+			<th style='width: 15em;'>&nbsp;</th>
 		</tr>
 	</thead>
 	<tbody>
-	<?php if(empty($agents)): ?>
+	<?php if(empty($dealers)): ?>
 		<tr><td colspan='5' style='text-align:center;'><strong>No Records Found</strong></td></tr>
 	<?php else: ?>
-	<?php foreach ($agents as $r): ?>
+	<?php foreach ($dealers as $r): ?>
 		<tr>
 			<?php			
 				if (empty($r->image_filename)) {
-					$image_display = "ni_". strtolower($r->gender) .".png";
-				} else {
-					$image_display = $r->image_filename;
+					$image_display = "ni_dealer.jpg";
 				}
 			?>
 			<td><img id="" style="width:70px; height:70px;" alt="" src="<?= $upload_url; ?>/<?= $image_display ?>"></td>
 			<td><?= $r->complete_name; ?></td>
 			<td><?= $r->complete_address ?></td>
 			<td><?= $r->contact_number ?></td>
+			<?php
+				$agent_name = "N/A";
+				if ($r->agent_id > 0) {
+					$agent_details = $this->spare_parts_model->get_agent_by_id($r->agent_id);
+					$agent_name = $agent_details->complete_name; 
+				}
+				
+
+				$discount = ($r->max_discount * 100) . "%";
+			?>
+			<td><?= $agent_name ?></td>
+			<td style="text-align:right;"><?= $discount ?></td>
+			<td><?= ($r->is_active) ? 'Yes' : 'No'  ?></td>
 			<td>
-				<a href='/spare_parts/maintenance/view_agent/<?= $r->agent_id ?>' class='btn btn-small btn-info' title="View"><i class="icon-search icon-white"></i></a>				
-				<a href='/spare_parts/maintenance/edit_agent/<?= $r->agent_id ?>' class='btn btn-small btn-primary' title="Edit"><i class="icon-pencil icon-white"></i></a>
-				<a href='/spare_parts/maintenance/delete_agent/<?= $r->agent_id ?>' class='btn btn-small btn-danger' title="Delete"><i class="icon-remove icon-white"></i></a>
+				<a href='/spare_parts/maintenance/view_dealer/<?= $r->dealer_id ?>' class='btn btn-small btn-info' title="View"><i class="icon-search icon-white"></i></a>				
+				<a href='/spare_parts/maintenance/edit_dealer/<?= $r->dealer_id ?>' class='btn btn-small btn-primary' title="Edit"><i class="icon-pencil icon-white"></i></a>
+				<a href='/spare_parts/maintenance/delete_dealer/<?= $r->dealer_id ?>' class='btn btn-small btn-danger' title="Delete"><i class="icon-remove icon-white"></i></a>
 			</td>
 		</tr>
 	<?php endforeach; ?>

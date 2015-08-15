@@ -26,7 +26,14 @@
 			</tr>
 			<tr>
 				<td align='left'>ID Number:<b> <?= $requester->id_number; ?></b></td>				
-				<td align='right'>Approved By:<b> <?= $requester->complete_name; ?></b></td>
+				<?php
+					$brand_model = "N/A";
+					if ($request_summary->motorcycle_brand_model_id > 0) {
+						$brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($request_summary->motorcycle_brand_model_id);
+						$brand_model = $brand_model_details->brand_name . " / " . $brand_model_details->model_name;
+					}
+				?>				
+				<td align='right'>Brand/Model:<b> <?= $brand_model; ?></b></td>
 			</tr>
 			<tr>
 				<td align='left'>Total Amount:<b> Php <?= number_format($total_amount, 2); ?></b></td>

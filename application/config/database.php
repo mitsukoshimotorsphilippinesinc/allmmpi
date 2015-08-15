@@ -75,9 +75,9 @@
 $active_group = 'default';
 $active_record = TRUE;
 $db['default']['dsn']      = '';
-$db['default']['hostname'] = 'localhost';
+$db['default']['hostname'] = '195.100.100.68';
 $db['default']['username'] = 'root';
-$db['default']['password'] = '';
+$db['default']['password'] = 'confirm';
 $db['default']['database'] = 'mmpi';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';
@@ -178,6 +178,26 @@ $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
 
 /*
+$active_group = 'default';
+$active_record = TRUE;
+$db['default']['dsn']      = '';
+$db['default']['hostname'] = 'localhost';
+$db['default']['username'] = 'root';
+$db['default']['password'] = '';
+$db['default']['database'] = 'mmpi';
+$db['default']['dbdriver'] = 'mysql';
+$db['default']['dbprefix'] = '';
+$db['default']['pconnect'] = FALSE;
+$db['default']['db_debug'] = TRUE;
+$db['default']['cache_on'] = FALSE;
+$db['default']['cachedir'] = '';
+$db['default']['char_set'] = 'utf8';
+$db['default']['dbcollat'] = 'utf8_unicode_ci';
+$db['default']['swap_pre'] = '';
+$db['default']['autoinit'] = TRUE;
+$db['default']['stricton'] = FALSE;
+$db['default']['failover'] = array();
+
 $db['spare_parts']['hostname'] = 'localhost';
 $db['spare_parts']['username'] = 'root';
 $db['spare_parts']['password'] = '';

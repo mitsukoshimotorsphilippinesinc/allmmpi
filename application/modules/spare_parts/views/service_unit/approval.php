@@ -11,20 +11,20 @@
 	<form id='search_details' method='get' action =''>
 
 		<strong>Status:&nbsp;</strong>
-		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
+		<select name="search_status" id="search_status" style="width:250px;margin-left:20px" value="<?= $search_status ?>">
 			<option value="ALL">ALL</option>
 			<option value="FOR APPROVAL">FOR APPROVAL</option>
 			<option value="APPROVED">APPROVED</option>
-			<option value="FOR CANCELLATION">FOR CANCELLATION</option>
-			<option value="CANCELLED (COMPLETED)">CANCELLED (COMPLETED)</option>
-			<option value="DENIED">DENIED</option>
-			<option value="DENIED (COMPLETED)">DENIED (COMPLETED)</option>
+			<option value="DENIED">DENIED</option>			
+			<option value="CANCELLATION-FOR APPROVAL">CANCELLATION-FOR APPROVAL</option>
+			<option value="CANCELLATION-APPROVED">CANCELLATION-APPROVED</option>
+			<option value="CANCELLATION-DENIED">CANCELLATION-DENIED</option>			
 		</select>                 
 	
 		<br/>
 
 		<strong>Search By:&nbsp;</strong>
-		<select name="search_option" id="search_option" style="width:150px;" value="<?= $search_by ?>">
+		<select name="search_option" id="search_option" style="width:250px;" value="<?= $search_by ?>">
 			<option value="request_code">Code</option>
 			<option value="name">Name</option>
 		</select>                 
@@ -64,7 +64,7 @@
 			<th>Status</th>
 			<th style='width:100px;'>Requested By</th>
 			<th style='width:100px;'>Motor Brand/Model</th>
-			<th style='width:100px;'>Number of Items</th>
+			<th style='width:100px;'>Total Items</th>
 			<th style='width:100px;'>Warehouse</th>
 			<th style='width:100px;'>Approved By (Warehouse)</th>			
 			<th style='width:70px;'>Date Created</th>
@@ -81,17 +81,11 @@
 			<td style='text-align:center;'><?= $t->request_code; ?></td>
 			
 			<?php
-			if (($t->status == 'DENIED') || ($t->status == 'DENIED (COMPLETED)')) {
-				echo "<td><span class='label label-important' >{$t->status}</span></td>";
-			} else if ($t->status == 'PROCESSING') {
-				echo "<td><span class='label label-info' >{$t->status}</span></td>";
-			} else if (($t->status == 'FOR APPROVAL') || ($t->status == 'FOR CANCELLATION')) {
-				echo "<td><span class='label label-warning' >{$t->status}</span></td>";
-			} else {
-				echo "<td><span class='label label-success' >{$t->status}</span></td>";
-			}			
+			$status_class = strtolower(trim($t->status));			
+			$status_class = str_replace(" ", "-", $status_class);
+		
+			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
 
-			// get requestor details
 			// get requestor details
 			$id = str_pad($t->id_number, 7, '0', STR_PAD_LEFT);
 			$requestor_details = $this->human_relations_model->get_employment_information_by_id($id);			
@@ -148,7 +142,7 @@
 			<td data1="<?= $t->service_unit_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
-				if (($t->status == 'FOR APPROVAL') || ($t->status == 'FOR CANCELLATION')) {
+				if (($t->status == 'FOR APPROVAL') || ($t->status == 'CANCELLATION-FOR APPROVAL')) {
 					echo "<a class='btn btn-small btn-success process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>
 						<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>
 						";
@@ -348,7 +342,7 @@
 
 		download_modal.init({
 
-			title: "Download Warehouse Requests",
+			title: "Download Service Units",
 			width: 350,
 			html: '<label for="start_date">Start Date: </label>\n<div class="form-inline wc-date">\n<div class="input-append"><input type="text" class="input-medium" id="pp_start_date" name="pp_start_date" readonly="readonly" style="cursor:pointer;z-index:2050" /><span id="pp_start_date_icon" class="add-on" style="cursor:pointer;"><i class="icon-calendar"></i></span></div>\n</div>\n\
 			<br>\n\

@@ -84,7 +84,7 @@
 			}			
 
 			// get requestor details
-			$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);
+			$requestor_details = $this->human_relations_model->get_employment_information_by_id($t->id_number);			
 
 			if (count($requestor_details) == 0) {
 				echo "<td>N/A</td>";
@@ -115,12 +115,12 @@
 
 			
 
-			<td data1="<?= $t->service_unit_id ?>" data2="<?= $t->request_code ?>">				
+			<td data1="<?= $t->salary_deduction_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-primary view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
 				<?php
 				if ($t->status == 'FOR APPROVAL') {
-					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>
-					<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>";
+					echo "<a class='btn btn-small btn-primary process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>			
+							<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>";
 				}				
 				?>
 			</td>
@@ -147,15 +147,15 @@
 
 	$(".process-btn").click(function(){
 
-		var service_unit_id = $(this).parent().attr("data1");
-		var service_unit_code = $(this).parent().attr("data2");
+		var salary_deduction_id = $(this).parent().attr("data1");
+		var salary_deduction_code = $(this).parent().attr("data2");
 		var is_approved = $(this).attr("data");
 
 		b.request({
-			url: "/spare_parts/service_unit/for_approval_confirm",
+			url: "/spare_parts/salary_deduction/for_approval_confirm",
 			data: {
-				'service_unit_id' : service_unit_id,
-				'service_unit_code' : service_unit_code,
+				'salary_deduction_id' : salary_deduction_id,
+				'salary_deduction_code' : salary_deduction_code,
 				'is_approved' : is_approved,
 			},
 			on_success: function(data){
@@ -186,10 +186,10 @@
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/service_unit/for_approval_proceed',
+									url : '/spare_parts/salary_deduction/for_approval_proceed',
 									data : {				
-										'service_unit_id' : service_unit_id,
-										'service_unit_code' : service_unit_code,
+										'salary_deduction_id' : salary_deduction_id,
+										'salary_deduction_code' : salary_deduction_code,
 										'is_approved' : is_approved,
 										'remarks' : $("#txt-remarks").val(),
 									},
@@ -207,7 +207,7 @@
 												buttons: {
 													'Ok' : function() {
 														proceedApproveRequestModal.hide();
-														redirect('spare_parts/service_unit/approval');
+														redirect('spare_parts/salary_deduction/approval');
 													}
 												}
 											});
@@ -262,14 +262,14 @@
 	});
 	
 	$(".view-details").click(function(){
-		var service_unit_id = $(this).parent().attr("data1");
-		var service_unit_code = $(this).parent().attr("data2");
+		var salary_deduction_id = $(this).parent().attr("data1");
+		var salary_deduction_code = $(this).parent().attr("data2");
 	
 		b.request({
-			url: "/spare_parts/service_unit/view_details",
+			url: "/spare_parts/salary_deduction/view_details",
 			data: {
-				"service_unit_id" : service_unit_id,
-				"service_unit_code" : service_unit_code,
+				"salary_deduction_id" : salary_deduction_id,
+				"salary_deduction_code" : salary_deduction_code,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
@@ -333,7 +333,7 @@
 						$(this_button).addClass("no_clicking");
 
 						b.request({
-							url: "/spare_parts/service_unit/download_check",
+							url: "/spare_parts/salary_deduction/download_check",
 							data: {
 								"start_date": start_date,
 								"end_date": end_date
@@ -371,7 +371,7 @@
 												{
 													$(this_button).addClass("no_clicking")
 													b.request({
-														url: "/spare_parts/service_unit/download_proceed",
+														url: "/spare_parts/salary_deduction/download_proceed",
 														data: {
 															"start_date": start_date,
 															"end_date": end_date
@@ -401,7 +401,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/service_unit/export_xls/'+ start_date +'/' + end_date);
+																			redirect('/spare_parts/salary_deduction/export_xls/'+ start_date +'/' + end_date);
 																
 																			
 																		}

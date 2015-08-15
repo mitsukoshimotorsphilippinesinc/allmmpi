@@ -6,14 +6,14 @@
 			<tbody>
 				<tr>
 					<td><strong>Request Code:</strong></td>
-					<td><?= $service_unit->request_code; ?></td>
+					<td><?= $salary_deduction->request_code; ?></td>
 					<td><strong>Engine:</strong></td>
-					<td><?= $service_unit->engine; ?></td>
+					<td><?= $salary_deduction->engine; ?></td>
 				</tr>	
 				<tr>
 					<td><strong>Requestor:</strong></td>
 					<?php
-					$requestor_details = $this->human_relations_model->get_employment_information_by_id($service_unit->id_number);
+					$requestor_details = $this->human_relations_model->get_employment_information_by_id($salary_deduction->id_number);
 
 					if (count($requestor_details) == 0) {
 						echo "<td>N/A</td>";
@@ -22,14 +22,14 @@
 					}		
 					?>					
 					<td><strong>Chassis:</strong></td>
-					<td><?= $service_unit->chassis; ?></td>
+					<td><?= $salary_deduction->chassis; ?></td>
 				</tr>
 				<tr>
 					<td><strong>Status:</strong></td>
-					<td><?= $service_unit->status; ?></td>
+					<td><?= $salary_deduction->status; ?></td>
 					<td><strong>Brand/Model:</strong></td>					
 					<?php
-					$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($service_unit->motorcycle_brand_model_id);				
+					$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($salary_deduction->motorcycle_brand_model_id);				
 
 					if (count($motor_brand_model_details) == 0) {
 						echo "<td>N/A</td>";
@@ -41,7 +41,7 @@
 				<tr>
 					<td><strong>Warehouse:</strong></td>
 					<?php
-					$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($service_unit->warehouse_id);
+					$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($salary_deduction->warehouse_id);
 
 					if (count($warehouse_details) == 0) {
 						echo "<td>N/A</td>";
@@ -51,7 +51,7 @@
 					?>
 					<td><strong>Approved By (Warehouse):</strong></td>					
 					<?php
-					$warehouse_approvedby_details = $this->human_relations_model->get_employment_information_by_id($service_unit->warehouse_approved_by);
+					$warehouse_approvedby_details = $this->human_relations_model->get_employment_information_by_id($salary_deduction->warehouse_approved_by);
 
 					if (count($warehouse_approvedby_details) == 0) {
 						echo "<td>N/A</td>";
@@ -80,10 +80,10 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php if(empty($service_unit_details)):?>
+				<?php if(empty($salary_deduction_details)):?>
 					<tr><td colspan='9' style='text-align:center;'><strong>No Record Found</strong></td></tr>
 				<?php else: ?>
-				<?php foreach ($service_unit_details as $wrd): ?>
+				<?php foreach ($salary_deduction_details as $wrd): ?>
 				<tr>
 					<td><?= $wrd->item_id; ?></td>
 					<td><?= $wrd->srp; ?></td>

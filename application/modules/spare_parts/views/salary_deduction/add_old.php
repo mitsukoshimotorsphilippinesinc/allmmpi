@@ -1,44 +1,38 @@
 <?php
 
 	//echo css('inventory.css');
-	//echo js('apps/spareparts.js');
+	echo js('apps/spareparts.js');
 
 ?>
 <style type="text/css">
-	.inventory-orders .good_qty {width:80px;text-align:right;}
-	.inventory-orders .bad_qty {width:80px;text-align:right;}
+	.inventory-orders .good_qty {width:80px;}
+	.inventory-orders .bad_qty {width:80px;}
 	.inventory-orders .unit {width:60px;}
 	.inventory-orders .item {width:200px;}
-	.inventory-orders .price {width:80px;text-align:right;}
-	.inventory-orders .discount {width:50px;text-align:right;}
-	.inventory-orders .discount_price {width:100px;text-align:right;}
+	.inventory-orders .price {width:80px;}
 	.inventory-orders .remark {width:100px;}
 
-	.inventory-order-items .qty {width:112px;text-align:right;}
+	.inventory-order-items .qty {width:112px;}
 	.inventory-order-items .unit {width:112px;}
 	.inventory-order-items .item {width:224px;}
-	.inventory-order-items .price {width:112px;text-align:right;}
-	.inventory-order-items .discount {width:50px;text-align:right;}
-	.inventory-order-items .discount_price {width:100px;text-align:right;}
+	.inventory-order-items .price {width:112px;}
 	.inventory-order-items .remark {width:284px;}
 
-	.inventory-order-items input.qty  {width:102px;text-align:right;}
+	.inventory-order-items input.qty  {width:102px;}
 	.inventory-order-items select.unit {width:112px;}
 	.inventory-order-items select.item {width:224px;}
-	.inventory-order-items input.price {width:102px;text-align:right;}
-	.inventory-order-items input.discount {width:50px;text-align:right;}
-	.inventory-order-items input.discount_price {width:100px;text-align:right;}
+	.inventory-order-items input.price {width:102px;}
 	.inventory-order-items input.remark {width:274px;}
 
 </style>
 <?php
 
-if (is_object($warehouse_claim_details))
+if (is_object($salary_deduction_details))
 {
 	$isAdd = false;
 	$titlePrefix = "Edit&nbsp;";
-	$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/edit/" . $warehouse_claim_details->warehouse_claim_id;
-	$_id = $warehouse_claim_details->warehouse_claim_id;
+	$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/edit/" . $salary_deduction_details->salary_deduction_id;
+	$_id = $salary_deduction_details->salary_deduction_id;
 	$show_approval = false;
 }
 else
@@ -51,11 +45,6 @@ else
 }
 ?>
 
-<?php
-	$breadcrumb_container = assemble_breadcrumb();
-?>
-
-<?= $breadcrumb_container; ?>
 
 <div class='alert alert-info'><h3><?= $titlePrefix ?><?= $department_module_details->module_name ?> <a class='btn return-btn add-close' style='float:right;margin-right:-30px;' >Back to Request List</a></h3></div>
 
@@ -63,8 +52,8 @@ else
 	<fieldset >
 		<div class="row-fluid">						
 			<div class='alert alert-success'><h4>Requester Details
-			<?php if(!$isAdd && !empty($warehouse_claim_details)):?>
-				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $warehouse_claim_details->request_code ?></label>
+			<?php if(!$isAdd && !empty($salary_deduction_details)):?>
+				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $salary_deduction_details->request_code ?></label>
 			<?php elseif($isAdd): ?>
 				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $department_module_details->module_code ?></label>
 			<?php endif; ?>
@@ -77,7 +66,7 @@ else
 				<br/>
 				<?php if(!$isAdd): ?>
 				<small class="customer-assign-btn">
-					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly" value="<?= $warehouse_claim_details->id_number ?>">
+					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly" value="<?= $salary_deduction_details->id_number ?>">
 				</small>
 				<?php elseif($isAdd): ?>
 					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly">
@@ -88,8 +77,16 @@ else
 					<label class="control-label" for="requester_details"><strong>Details</strong ></label>					
 					<div class="controls">
 						<?php if(!$isAdd): 
-						
-						$details_content = get_requester_details($warehouse_claim_details->id_number, "employee");
+						$is_employed = ($requester_details->is_employed == 1) ? 'Yes' : 'No';
+						$email_address = ($requester_details->company_email_address == NULL) ? $requester_details->personal_email_address : $requester_details->company_email_address;
+						$contact_number = ($requester_details->mobile_number == NULL) ? $requester_details->phone_number : $requester_details->mobile_number;
+
+						$department_name = "N/A";
+						if (!empty($department_details)) {
+							$department_name = $department_details->department_name;
+						}
+
+						$details_content = "NAME: {$requester_details->complete_name}\nID NUMBER: {$salary_deduction_details->id_number}\nDEPARTMENT: {$department_name}\nPOSITION: {$position_details->position_name}\nIS EMPLOYED: {$is_employed}\nEMAIL: {$email_address}\nCONTACT NUMBER: {$contact_number}\n";
 
 						?>
 						<textarea class='span10' rows="7" placeholder="" name="requester_details" id="requester_details" readonly><?= $details_content ?>
@@ -106,12 +103,12 @@ else
 							<label class="control-label" for="remarks"><strong>Remarks</strong></label>
 							<div class="controls">
 								<?php if(!$isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="current_requester_remarks" readonly><?= $warehouse_claim_details->remarks ?></textarea>
+								<textarea class='span8' rows="4" placeholder="" name="current_remarks" readonly><?= $salary_deduction_details->remarks ?></textarea>
 								<br/><br/>
 								<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
-								<input class="span12" id="requester_remarks" type="text" placeholder="New Remarks">
+								<input class="span12" id="remarks_new" type="text" placeholder="New Remarks">
 								<?php elseif($isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="remarks" id="requester_remarks" maxlength="255"></textarea>
+								<textarea class='span8' rows="4" placeholder="" name="remarks" id="remarks" maxlength="255"><?= set_value('remarks',@$po->remarks) ?></textarea>
 								<p class="help-block"><?= $this->form_validation->error('remarks'); ?></p>
 								<?php endif; ?>
 							</div>
@@ -120,95 +117,20 @@ else
 				</div>
 				
 			</div>
-			<div class="span5">
-				<label><strong>From Warehouse:</strong></label>
-				<br/>
-				<?php if(!$isAdd):
-
-					$warehouse_options = array();
-					if ($warehouse_claim_details->warehouse_id == 0)
-						$warehouse_options = array('0' => 'Select a Warehouse...');
-					
-					foreach ($warehouse_details as $wd) {
-					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
-					}
-
-				?>
-				<?= form_dropdown('add_item_warehouse',$warehouse_options, set_value('add_item_warehouse',$warehouse_claim_details->warehouse_id),'id="add_item_warehouse"') ?>
-				<?php elseif($isAdd): 
-					$warehouse_options = array();
-					$warehouse_options = array('0' => 'Select a Warehouse...');
-					foreach ($warehouse_details as $wd) {
-					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
-					}
-				?>
-					
-				<?= form_dropdown('add_item_warehouse',$warehouse_options, NULL,'id="add_item_warehouse"') ?>
-				<?php endif; ?>
-
-				<br/>
-				<br/>
-				<label><strong>Motorcycle Brand/Model:</strong></label>
-				<br/>
-				<?php if(!$isAdd):
-
-					$brand_model_options = array();
-					if ($warehouse_claim_details->motorcycle_brand_model_id == 0)
-						$brand_model_options = array('0' => 'Select a Brand/Model...');
-
-					foreach ($motorcycle_brandmodel_details as $mbd) {
-						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
-					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
-					}
-					
-					echo form_dropdown('add_item_brandmodel',$brand_model_options, set_value('add_item_brandmodel',$warehouse_claim_details->motorcycle_brand_model_id),'id="add_item_brandmodel"');
-				?>
-				<?php elseif($isAdd):
-					$brand_model_options = array();
-					$brand_model_options = array('0' => 'Select a Brand/Model...');
-					foreach ($motorcycle_brandmodel_details as $mbd) {
-						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
-					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
-					}
-				?>
-				<?= form_dropdown('add_item_brandmodel',$brand_model_options, NULL,'id="add_item_brandmodel"') ?>
-				<?php endif; ?>
-				<br/>
-				<br/>
-				<label><strong>Engine:</strong></label>
-				<br/>
-
-				<?php if(!$isAdd): ?>
-				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." value="<?= $warehouse_claim_details->engine ?>" />
-				<?php elseif($isAdd): ?>
-				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." />
-				<?php endif; ?>
-
-				<br/>
-				<br/>
-				<label><strong>Chassis:</strong></label>
-				<br/>
-
-				<?php if(!$isAdd): ?>
-				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." value="<?= $warehouse_claim_details->chassis ?>" />
-				<?php elseif($isAdd): ?>
-				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." />
-				<?php endif; ?>
-
-			</div>	
+			
 		</div>
 		
 		<br/>
 		<div class='alert alert-success'><h4>Items
-			<?php if(!$isAdd && !empty($warehouse_claim_details)):?>
-				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $warehouse_claim_details->request_code?></label>
+			<?php if(!$isAdd && !empty($salary_deduction_details)):?>
+				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $salary_deduction_details->request_code?></label>
 			<?php elseif($isAdd): ?>
 				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $department_module_details->module_code ?></label>
 			<?php endif; ?>
 		</h4></div>	
 
 		
-		<div class="row-fluid">
+		<div class="row-fluid span8">
 			<table class="table inventory-orders">
 				<thead id="items_header">
 					<tr>
@@ -267,7 +189,7 @@ else
 						<td>
 							<?php
 							$discount_options = array();
-							for ($i=100; $i>=0; $i--) {
+							for ($i=0; $i<=100; $i++) {
 								array_push($discount_options, $i);	
 							}
 							
@@ -306,11 +228,9 @@ else
 						<th class="unit">Unit</th>
 						<th class="qty">Good Qty</th>
 						<th class="qty">Bad Qty</th>
-						<th class="qty">Total Qty</th>
 						<th class="price">SRP</th>
 						<th class="discount">Disc.(%)</th>
 						<th class="discount_price">Disc. Price</th>
-						<th class="price">Total Amount</th>
 						<th class="remark">Remarks</th>
 						<th></th>
 						<th></th>
@@ -321,9 +241,11 @@ else
 					$temp = NULL;
 			
 					if (!$isAdd) {
-						//$temp = array($warehouse_claim_detail_details);
+						//$temp = array($salary_deduction_detail_details);
 						$temp = json_decode($json_items, true);
 					}
+
+					//var_dump($temp);
 
 					for($i=0;$i<count($temp);$i++):?>
 						<!--?php if(set_value('item_qty['.$i.']') != '' || !$isAdd):?-->
@@ -335,15 +257,13 @@ else
 								?>
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->description)?></td>
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->unit)?></td>
-						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']), 2)?></td>
-						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']), 2)?></td>
-						<td class="qty"><?=number_format((set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']) + set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])), 2)?></td>
+						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']))?></td>
+						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']))?></td>
 						<td class="price"><?=number_format(set_value('item_price['.$i.']',$temp[$i]['srp']),2)?></td>
 						<td class="discount"><?=number_format(set_value('discount['.$i.']',$temp[$i]['discount']))?></td>
 						<td class="discount_price"><?=number_format(set_value('discount_price['.$i.']',$temp[$i]['discount_amount']),2)?></td>
-						<td class="price"><?=number_format(set_value('item_total_amount['.$i.']',$temp[$i]['total_amount']),2)?></td>
 						<td class="remark"><?=set_value('item_remarks['.$i.']',$temp[$i]['remarks'])?></td>
-						<td id="<?= $temp[$i]['warehouse_claim_detail_id'] ?>" data="<?= $temp[$i]['warehouse_claim_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
+						<td id="<?= $temp[$i]['salary_deduction_detail_id'] ?>" data="<?= $temp[$i]['salary_deduction_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
 						<td class="hidden_values">
 							<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<?=set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity'])?>">
 							<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<?=set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])?>">
@@ -360,18 +280,13 @@ else
 				</tbody>
 			</table>
 		</div>
-		<div style="margin-left:30px;">
-			<?php 
-			if (!$isAdd) {
-				echo "<h3>Total Amount: <span id='total-amount'>{$request_item_amount_total->total_amount}</span></h3>";
-			} else {
-				echo "<h3>Total Amount: <span id='total-amount'>0.00</span></h3>";
-			}
-			?>
-		</div>
+
+		
+		
+		
 		<hr/>
 		<div class="controls" align="right">
-			<!--a id='submit_order' class="btn btn-primary">Save Warehouse Claim</a-->
+			<!--a id='submit_order' class="btn btn-primary">Save Warehouse Request</a-->
 			<a class="btn return-btn add-close">Close</a>
 		</div>
 		
@@ -400,13 +315,11 @@ else
 		<td class="unit"><%= item_unit_name %></td>\n\
 		<td class="qty"><%= item_good_qty %></td>\n\
 		<td class="qty"><%= item_bad_qty %></td>\n\
-		<td class="qty"><%= item_total_qty %></td>\n\
 		<td class="price"><%= item_price %></td>\n\
 		<td class="qty"><%= item_discount %></td>\n\
 		<td class="qty"><%= item_discount_price %></td>\n\
-		<td class="price"><%= item_total_amount %></td>\n\
 		<td class="remark"><%= item_remarks %></td>\n\
-		<td id="<%= active_warehouse_claim_detail_id %>" data="<%= active_warehouse_claim_detail_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
+		<td id="<%= active_salary_deduction_detail_id %>" data="<%= active_salary_deduction_detail_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
 		<td class="hidden_values">\n\
 			<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<%= hidden_item_good_qty %>">\n\
 			<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<%= hidden_item_bad_qty %>">\n\
@@ -463,25 +376,15 @@ else
 					
 					// apply click event on select buttons
 					$('#assign-requester-listing .btn-select-member').click(function(e) {
-						var id_number = $(this).data('idnumber');
+						var id_number = $(this).data('id_number');
 						
 						$("#id_number").val(id_number);
-
-					
-						// get requester details
-							b.request({
-							url: "/spare_parts/get_requester_details",
-							data: {
-								"id_number": id_number,
-								"requester_type" : "employee",
-							},
-							on_success: function(data) {
-													
-								$("#requester_details").text(data.data.html);
-
-							} 
-						});
-											
+						
+						var details = "NAME: " + $(this).data('fullname') + "\nID NUMBER: " + $(this).data('idnumber');
+						//var details = "NAME: " + $(this).data('fullname') + "\nID NUMBER: " + $(this).data('idnumber') + "\nCOMPANY: " + $(this).data('idnumber') + "\nDEPARTMENT: " + $(this).data('idnumber');
+						//	details = "NAME: " + employees.complete_name + "\nID NUMBER: " + $(this).data('idnumber') + "\nDEPARTMENT: " + $(this).data('department_name') + "\nPOSITION: " + $(this).data('position') + "\nIS EMPLOYED: " + $(this).data('is_employed') + "\nEMAIL: " + $(this).data('company_email_address') + "\nCONTACT NUMBER:\n";
+						//$("#member_details").append(details);
+						$("#requester_details").text(details);
 						$("#search_requester").val($(this).data('idnumber'));
 						
 						
@@ -503,7 +406,7 @@ else
 		with_overlay = typeof(with_overlay) == 'undefined' ? true : with_overlay;
 		b.request({
 			'with_overlay' : with_overlay,
-			url: '/spare_parts/get_requester',
+			url: '/spare_parts/salary_deduction/get_requester',
 			data: {'search_key' : search_key},
 			on_success: function(data, status) {
 				if (_.isFunction(cb)) cb.call(this, data);
@@ -540,7 +443,7 @@ else
 		
 		$("#item_type_search").change(function(e) {
 			var search_key = $.trim($("#txt_item_search_key").val());
-			if(search_key != "") $("#btn_item_search").trigger("click");		
+			if(search_key != "") $("#btn_item_search").trigger("click");
 		})
 		
 		$("#btn_item_search").click(function(e) {
@@ -548,16 +451,14 @@ else
 			
 			var search_key = $.trim($("#txt_item_search_key").val());
 			var item_type_id = $.trim($("#item_type_search").val());
-
-			var warehouse_option = $("#item_warehouse_option").val();
-
+			
 			if (search_key.length == 0) 
 			{
 				return;
 			}
 			
 			b.request({
-				url: "/spare_parts/search_item",
+				url: "/spare_parts/salary_deduction/search_item",
 				data: {
 					"search_key": search_key,
 				},
@@ -608,59 +509,7 @@ else
 			return;				
 		}
 
-		var _hasError = 0;
-		var input_errors = "";
-		var item_name = "";
-
-		if (($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) {
-			_hasError = 1;
-			input_errors += "The Quantity fields are required. "			
-		}
-		
-		if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1)) {
-			_hasError = 1;
-			input_errors += "The Good Quantity field must contain an integer. "
-		}
-
-		if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1)) {
-			_hasError = 1;
-			input_errors += "The Bad Quantity field must contain an integer. "
-		}
-
-		if (($('input[name="add_item_good_qty"]').val() <= 0) && ($('input[name="add_item_bad_qty"]').val() <= 0)) {
-			_hasError = 1;
-			input_errors += "The Quantity fields should be greater than 0. "			
-		}
-		
-		if($('input[name="add_item_name"]').val() == '' || $('input[name="add_item_name"]').val() == 'new') {
-			_hasError = 1;
-			input_errors += "The Item field is required. ";
-		}			
-
-		$('#input_errors').html('<p>'+input_errors+'</p>');
-
-		if (_hasError == 1) {
-			return false;
-		} else {
-
-			var item_name = "";
-			if($('#search_item').val() == 'add[]')
-			{
-				item_name = $('input[name="new_item_name"]').val();
-			}
-			else
-			{
-				item_name = $('#search_item').val();
-			}
-			$('#input_errors').html('');
-
-			var good_qty = $('input[name="add_item_good_qty"]').val();
-			var bad_qty = $('input[name="add_item_bad_qty"]').val();
-
-			good_qty = good_qty.replace(new RegExp('[,]', 'gi'), '');
-			bad_qty = bad_qty.replace(new RegExp('[,]', 'gi'), '');
-
-		/*if ((($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) ||
+		if ((($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) ||
 			$('select[name="add_item_unit"]').val() == '' ||
 			$('input[name="add_item_name"]').val() == '' ||
 			$('input[name="add_item_price"]').val() == '')
@@ -671,13 +520,11 @@ else
 			{
 				input_errors += "The Quantity fields are required. ";
 			}
-			
-			if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1))
+			else if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1))
 			{
 				input_errors += "The Good Quantity field must contain an integer. "
 			}
-			
-			if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1))
+			else if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1))
 			{
 				input_errors += "The Bad Quantity field must contain an integer. "
 			}
@@ -727,41 +574,26 @@ else
 				});
 				item_error_modal.show();
 				return;
-			} else {
-
-				var _hasError = 0;
+			}
 			
-				if ((good_qty <= 0) && (bad_qty <= 0)) {
-					// both
-					input_errors = "Quantity fields must be greater than zero. ";
-					_hasError = 1;
-				} else if ((good_qty < 0) && (bad_qty > 0)) {
-					// good only
-					input_errors = "Good Quantity field must be greater than zero. ";
-					_hasError = 1;
-				} else if ((good_qty > 0) && (bad_qty < 0)) {
-					// bad only
-					input_errors = "Bad Quantity field must be greater than zero. ";
-					_hasError = 1;
-				}
-				
-				if (_hasError == 1) {
-					var item_error_modal = b.modal.create({
-						title: "Error :: Item Request",
-						width: 450,
-						html: "<p>There was an error in your request.</p><p>"+input_errors+"</p>"
-					});
-					item_error_modal.show();
-					return;				
-				}			
-			}*/
+			if ((good_qty == '0') && (bad_qty == '0')) 
+			{
+				input_errors = "One of the Quantity fields must be greater than zero. ";
+				var item_error_modal = b.modal.create({
+					title: "Error :: Item Request",
+					width: 450,
+					html: "<p>There was an error in your request.</p><p>"+input_errors+"</p>"
+				});
+				item_error_modal.show();
+				return;				
+			}
 
 			$('input[name="add_item_good_qty"]').val(good_qty);
 			$('input[name="add_item_bad_qty"]').val(bad_qty);
 
 			// ajax request
 			b.request({
-				url : '/spare_parts/warehouse_claim/create_request',
+				url : '/spare_parts/salary_deduction/create_request',
 				data : {				
 					'request_code' : $("#requester-request-code-label").text(),
 					'item_id' : $('input[name="add_item_name"]').val(),
@@ -771,11 +603,12 @@ else
 					'good_quantity' : $('input[name="add_item_good_qty"]').val(),
 					'bad_quantity' : $('input[name="add_item_bad_qty"]').val(),
 					'remarks' : $('input[name="add_item_remarks"]').val(),
-					'requester_remarks' : $("#requester_remarks").val(),
-					'engine' : $("#engine").val(),
-					'chassis' : $("#chassis").val(),
-					'warehouse_id' : $("#add_item_warehouse").val(),
-					'brandmodel' : $("#add_item_brandmodel").val(),
+					'remarks_requester' : $("#remarks").val(),
+					'remarks_requester_new' : $("#remarks_new").val(),
+					//'engine' : $("#engine").val(),
+					//'chassis' : $("#chassis").val(),
+					//'warehouse_id' : $("#add_item_warehouse").val(),
+					//'brandmodel' : $("#add_item_brandmodel").val(),
 					'requester_id' : $("#search_requester").val(),
 				},
 				on_success : function(data) {
@@ -791,7 +624,6 @@ else
 
 						$("#requester-request-code-label").text(data.data.request_code);
 						$("#item-request-code-label").text(data.data.request_code);
-						$("#total-amount").text(data.data.overall_total_amount);
 
 						$("#wr_items").append('<tr class="item_row">'+
 							item_entry_row({item_id: $('input[name="add_item_name"]').val(),
@@ -801,12 +633,10 @@ else
 							item_price: numberFormat($('input[name="add_item_price"]').val(),2),
 							item_good_qty: numberFormat($('input[name="add_item_good_qty"]').val(),2),
 							item_bad_qty: numberFormat($('input[name="add_item_bad_qty"]').val(),2),
-							item_total_qty: numberFormat(($('input[name="add_item_good_qty"]').val() + $('input[name="add_item_bad_qty"]').val()),2),
 							item_discount: numberFormat($('select[name="add_item_discount"]>option:selected').text()) + '%',
 							item_discount_price: numberFormat($('input[name="add_item_discount_price"]').val(),2),
-							item_total_amount: data.data.item_total_amount,
 							item_remarks: $('input[name="add_item_remarks"]').val(),
-							active_warehouse_claim_detail_id: data.data.active_warehouse_claim_detail_id,
+							active_salary_deduction_detail_id: data.data.active_salary_deduction_detail_id,
 							hidden_item_price: $('input[name="add_item_price"]').val(),
 							hidden_item_discount: $('input[name="add_item_discount"]').val(),
 							hidden_item_discount_price: $('input[name="add_item_discount_price"]').val(),
@@ -824,6 +654,7 @@ else
 						$('input[name="add_item_discount"]>option:selected').text('0');
 						$('input[name="add_item_discount_price"]').val('');
 						$('input[name="add_item_remarks"]').val('');
+						$('#remarks_new').val('');
 						$('input[name="add_item_good_qty"]').attr("placeholder", "0");
 						$('input[name="add_item_bad_qty"]').attr("placeholder", "0");
 						
@@ -831,7 +662,8 @@ else
 
 						errorCreateRequestModal = b.modal.new({
 							title: data.data.title,
-							width:450,							
+							width:450,
+							//disableClose: true,
 							html: data.data.html,
 						});
 						errorCreateRequestModal.show();	
@@ -842,18 +674,17 @@ else
 			})
 		}
 	});
-		
+	
+
 	$(".rmv_wr_item").live('click',function(){
 
-		var warehouse_claim_detail_id = $(this).parent().attr("data");
-		var request_item_id = $(this).parent().attr("data-id");
+		var salary_deduction_detail_id = $(this).parent().attr("data");
 		
 		b.request({
-			url : '/spare_parts/warehouse_claim/confirm_remove_item',
+			url : '/spare_parts/salary_deduction/confirm_remove_item',
 			data : {				
 				'request_code' : $("#requester-request-code-label").text(),
-				'warehouse_claim_detail_id' : warehouse_claim_detail_id,
-				'request_item_id' : request_item_id,	
+				'salary_deduction_detail_id' : salary_deduction_detail_id,	
 			},
 			on_success: function(data){
 
@@ -879,13 +710,11 @@ else
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/warehouse_claim/proceed_remove_item',
+									url : '/spare_parts/salary_deduction/proceed_remove_item',
 									data : {				
-										'warehouse_claim_id' : data.data.warehouse_claim_id,
-										'warehouse_claim_detail_id' : warehouse_claim_detail_id,	
+										'salary_deduction_id' : data.data.salary_deduction_id,
+										'salary_deduction_detail_id' : salary_deduction_detail_id,	
 										'remarks' : $("#txt-remarks").val(),
-										'is_reprocess_item' : 0,
-										'request_item_id' : request_item_id,
 									},
 									on_success : function(data) {
 										
@@ -900,7 +729,7 @@ else
 												html: data.data.html,
 												buttons: {
 													'Ok' : function() {
-														$("#" + warehouse_claim_detail_id + "").parent().remove();
+														$("#" + salary_deduction_detail_id + "").parent().remove();
 														proceedRemoveItemModal.hide();
 													}
 												}
@@ -953,7 +782,7 @@ else
 	});
 
 	$(".add-close").live('click',function(){
-		window.location.href = '/spare_parts/warehouse_claim/listing';
+		window.location.href = '/spare_parts/salary_deduction/listing';
 		return false;
 	})
 	

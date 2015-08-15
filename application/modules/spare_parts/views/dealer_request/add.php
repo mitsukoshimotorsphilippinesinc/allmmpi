@@ -1,27 +1,33 @@
 <?php
 
 	//echo css('inventory.css');
-	echo js('apps/spareparts.js');
+	//echo js('apps/spareparts.js');
 
 ?>
 <style type="text/css">
-	.inventory-orders .good_qty {width:80px;}
-	.inventory-orders .bad_qty {width:80px;}
+	.inventory-orders .good_qty {width:80px;text-align:right;}
+	.inventory-orders .bad_qty {width:80px;text-align:right;}
 	.inventory-orders .unit {width:60px;}
 	.inventory-orders .item {width:200px;}
-	.inventory-orders .price {width:80px;}
+	.inventory-orders .price {width:80px;text-align:right;}
+	.inventory-orders .discount {width:50px;text-align:right;}
+	.inventory-orders .discount_price {width:100px;text-align:right;}
 	.inventory-orders .remark {width:100px;}
 
-	.inventory-order-items .qty {width:112px;}
+	.inventory-order-items .qty {width:112px;text-align:right;}
 	.inventory-order-items .unit {width:112px;}
 	.inventory-order-items .item {width:224px;}
-	.inventory-order-items .price {width:112px;}
+	.inventory-order-items .price {width:112px;text-align:right;}
+	.inventory-order-items .discount {width:50px;text-align:right;}
+	.inventory-order-items .discount_price {width:100px;text-align:right;}
 	.inventory-order-items .remark {width:284px;}
 
-	.inventory-order-items input.qty  {width:102px;}
+	.inventory-order-items input.qty  {width:102px;text-align:right;}
 	.inventory-order-items select.unit {width:112px;}
 	.inventory-order-items select.item {width:224px;}
-	.inventory-order-items input.price {width:102px;}
+	.inventory-order-items input.price {width:102px;text-align:right;}
+	.inventory-order-items input.discount {width:50px;text-align:right;}
+	.inventory-order-items input.discount_price {width:100px;text-align:right;}
 	.inventory-order-items input.remark {width:274px;}
 
 </style>
@@ -45,6 +51,11 @@ else
 }
 ?>
 
+<?php
+	$breadcrumb_container = assemble_breadcrumb();
+?>
+
+<?= $breadcrumb_container; ?>
 
 <div class='alert alert-info'><h3><?= $titlePrefix ?><?= $department_module_details->module_name ?> <a class='btn return-btn add-close' style='float:right;margin-right:-30px;' >Back to Request List</a></h3></div>
 
@@ -103,12 +114,12 @@ else
 							<label class="control-label" for="remarks"><strong>Remarks</strong></label>
 							<div class="controls">
 								<?php if(!$isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="current_remarks" readonly><?= $dealer_request_details->remarks ?></textarea>
+								<textarea class='span8' rows="4" placeholder="" name="current_requester_remarks" readonly><?= $dealer_request_details->remarks ?></textarea>
 								<br/><br/>
 								<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
-								<input class="span12" id="remarks_new" type="text" placeholder="New Remarks">
+								<input class="span12" id="requester_remarks" type="text" placeholder="New Remarks">
 								<?php elseif($isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="remarks" id="remarks" maxlength="255"><?= set_value('remarks',@$po->remarks) ?></textarea>
+								<textarea class='span8' rows="4" placeholder="" name="remarks" id="requester_remarks" maxlength="255"></textarea>
 								<p class="help-block"><?= $this->form_validation->error('remarks'); ?></p>
 								<?php endif; ?>
 							</div>
@@ -117,7 +128,82 @@ else
 				</div>
 				
 			</div>
-			
+			<div class="span5">
+				<label style="display:none;"><strong>From Warehouse:</strong></label>
+				<br/>
+				<?php if(!$isAdd):
+
+					$warehouse_options = array();
+					if ($dealer_request_details->warehouse_id == 0)
+						$warehouse_options = array('0' => 'Select a Warehouse...');
+					
+					foreach ($warehouse_details as $wd) {
+					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
+					}
+
+				?>
+				<?= form_dropdown('add_item_warehouse',$warehouse_options, set_value('add_item_warehouse',$dealer_request_details->warehouse_id),'id="add_item_warehouse" style="display:none;"') ?>
+				<?php elseif($isAdd): 
+					$warehouse_options = array();
+					$warehouse_options = array('0' => 'Select a Warehouse...');
+					foreach ($warehouse_details as $wd) {
+					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
+					}
+				?>
+					
+				<?= form_dropdown('add_item_warehouse',$warehouse_options, NULL,'id="add_item_warehouse" style="display:none;"') ?>
+				<?php endif; ?>
+
+				<br/>
+				<br/>
+				<label style="display:none;"><strong>Motorcycle Brand/Model:</strong></label>
+				<br/>
+				<?php if(!$isAdd):
+
+					$brand_model_options = array();
+					if ($dealer_request_details->motorcycle_brand_model_id == 0)
+						$brand_model_options = array('0' => 'Select a Brand/Model...');
+
+					foreach ($motorcycle_brandmodel_details as $mbd) {
+						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
+					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
+					}
+					
+					echo form_dropdown('add_item_brandmodel',$brand_model_options, set_value('add_item_brandmodel',$dealer_request_details->motorcycle_brand_model_id),'id="add_item_brandmodel" style="display:none;"');
+				?>
+				<?php elseif($isAdd):
+					$brand_model_options = array();
+					$brand_model_options = array('0' => 'Select a Brand/Model...');
+					foreach ($motorcycle_brandmodel_details as $mbd) {
+						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
+					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
+					}
+				?>
+				<?= form_dropdown('add_item_brandmodel',$brand_model_options, NULL,'id="add_item_brandmodel" style="display:none;"') ?>
+				<?php endif; ?>
+				<br/>
+				<br/>
+				<label style="display:none;"><strong>Engine:</strong></label>
+				<br/>
+
+				<?php if(!$isAdd): ?>
+				<input name="engine" id="engine" class="" style="display:none;" placeholder="Enter Engine Number..." value="<?= $dealer_request_details->engine ?>" />
+				<?php elseif($isAdd): ?>
+				<input name="engine" id="engine" class="" style="display:none;" placeholder="Enter Engine Number..." />
+				<?php endif; ?>
+
+				<br/>
+				<br/>
+				<label style="display:none;"><strong>Chassis:</strong></label>
+				<br/>
+
+				<?php if(!$isAdd): ?>
+				<input name="chassis" id="chassis" class="" style="display:none;" placeholder="Enter Chassis Number..." value="<?= $dealer_request_details->chassis ?>" />
+				<?php elseif($isAdd): ?>
+				<input name="chassis" id="chassis" class="" style="display:none;" placeholder="Enter Chassis Number..." />
+				<?php endif; ?>
+
+			</div>
 		</div>
 		
 		<br/>
@@ -130,7 +216,7 @@ else
 		</h4></div>	
 
 		
-		<div class="row-fluid span8">
+		<div class="row-fluid">
 			<table class="table inventory-orders">
 				<thead id="items_header">
 					<tr>
@@ -228,9 +314,11 @@ else
 						<th class="unit">Unit</th>
 						<th class="qty">Good Qty</th>
 						<th class="qty">Bad Qty</th>
+						<th class="qty">Total Qty</th>
 						<th class="price">SRP</th>
 						<th class="discount">Disc.(%)</th>
 						<th class="discount_price">Disc. Price</th>
+						<th class="price">Total Amount</th>
 						<th class="remark">Remarks</th>
 						<th></th>
 						<th></th>
@@ -245,8 +333,6 @@ else
 						$temp = json_decode($json_items, true);
 					}
 
-					//var_dump($temp);
-
 					for($i=0;$i<count($temp);$i++):?>
 						<!--?php if(set_value('item_qty['.$i.']') != '' || !$isAdd):?-->
 					<tr class="item_row">
@@ -257,13 +343,15 @@ else
 								?>
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->description)?></td>
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->unit)?></td>
-						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']))?></td>
-						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']))?></td>
+						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']), 2)?></td>
+						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']), 2)?></td>
+						<td class="qty"><?=number_format((set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']) + set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])), 2)?></td>
 						<td class="price"><?=number_format(set_value('item_price['.$i.']',$temp[$i]['srp']),2)?></td>
 						<td class="discount"><?=number_format(set_value('discount['.$i.']',$temp[$i]['discount']))?></td>
 						<td class="discount_price"><?=number_format(set_value('discount_price['.$i.']',$temp[$i]['discount_amount']),2)?></td>
+						<td class="price"><?=number_format(set_value('item_total_amount['.$i.']',$temp[$i]['total_amount']),2)?></td>
 						<td class="remark"><?=set_value('item_remarks['.$i.']',$temp[$i]['remarks'])?></td>
-						<td id="<?= $temp[$i]['dealer_request_detail_id'] ?>" data="<?= $temp[$i]['dealer_request_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
+						<td id="<?= $temp[$i]['warehouse_request_detail_id'] ?>" data="<?= $temp[$i]['warehouse_request_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
 						<td class="hidden_values">
 							<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<?=set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity'])?>">
 							<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<?=set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])?>">
@@ -280,13 +368,18 @@ else
 				</tbody>
 			</table>
 		</div>
-
-		
-		
-		
+		<div style="margin-left:30px;">
+			<?php 
+			if (!$isAdd) {
+				echo "<h3>Total Amount: <span id='total-amount'>{$request_item_amount_total->total_amount}</span></h3>";
+			} else {
+				echo "<h3>Total Amount: <span id='total-amount'>0.00</span></h3>";
+			}
+			?>
+		</div>
 		<hr/>
 		<div class="controls" align="right">
-			<!--a id='submit_order' class="btn btn-primary">Save Warehouse Request</a-->
+			<!--a id='submit_order' class="btn btn-primary">Save Dealer Request</a-->
 			<a class="btn return-btn add-close">Close</a>
 		</div>
 		
@@ -315,11 +408,13 @@ else
 		<td class="unit"><%= item_unit_name %></td>\n\
 		<td class="qty"><%= item_good_qty %></td>\n\
 		<td class="qty"><%= item_bad_qty %></td>\n\
+		<td class="qty"><%= item_total_qty %></td>\n\
 		<td class="price"><%= item_price %></td>\n\
 		<td class="qty"><%= item_discount %></td>\n\
 		<td class="qty"><%= item_discount_price %></td>\n\
+		<td class="price"><%= item_total_amount %></td>\n\
 		<td class="remark"><%= item_remarks %></td>\n\
-		<td id="<%= active_dealer_request_detail_id %>" data="<%= active_dealer_request_detail_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
+		<td id="<%= active_warehouse_request_detail_id %>" data="<%= active_warehouse_request_detail_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
 		<td class="hidden_values">\n\
 			<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<%= hidden_item_good_qty %>">\n\
 			<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<%= hidden_item_bad_qty %>">\n\
@@ -459,7 +554,7 @@ else
 			}
 			
 			b.request({
-				url: "/spare_parts/dealer_request/search_item",
+				url: "/spare_parts/search_item",
 				data: {
 					"search_key": search_key,
 				},
@@ -621,6 +716,7 @@ else
 
 						$("#requester-request-code-label").text(data.data.request_code);
 						$("#item-request-code-label").text(data.data.request_code);
+						$("#total-amount").text(data.data.overall_total_amount);
 
 						$("#wr_items").append('<tr class="item_row">'+
 							item_entry_row({item_id: $('input[name="add_item_name"]').val(),
@@ -630,10 +726,12 @@ else
 							item_price: numberFormat($('input[name="add_item_price"]').val(),2),
 							item_good_qty: numberFormat($('input[name="add_item_good_qty"]').val(),2),
 							item_bad_qty: numberFormat($('input[name="add_item_bad_qty"]').val(),2),
+							item_total_qty: numberFormat(($('input[name="add_item_good_qty"]').val() + $('input[name="add_item_bad_qty"]').val()),2),
 							item_discount: numberFormat($('select[name="add_item_discount"]>option:selected').text()) + '%',
 							item_discount_price: numberFormat($('input[name="add_item_discount_price"]').val(),2),
+							item_total_amount: data.data.item_total_amount,
 							item_remarks: $('input[name="add_item_remarks"]').val(),
-							active_dealer_request_detail_id: data.data.active_dealer_request_detail_id,
+							active_warehouse_request_detail_id: data.data.active_warehouse_request_detail_id,
 							hidden_item_price: $('input[name="add_item_price"]').val(),
 							hidden_item_discount: $('input[name="add_item_discount"]').val(),
 							hidden_item_discount_price: $('input[name="add_item_discount_price"]').val(),

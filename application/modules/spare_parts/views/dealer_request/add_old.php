@@ -27,12 +27,12 @@
 </style>
 <?php
 
-if (is_object($warehouse_claim_details))
+if (is_object($dealer_request_details))
 {
 	$isAdd = false;
 	$titlePrefix = "Edit&nbsp;";
-	$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/edit/" . $warehouse_claim_details->warehouse_claim_id;
-	$_id = $warehouse_claim_details->warehouse_claim_id;
+	$submitURL = "/spare_parts/" . $department_module_details->segment_name . "/edit/" . $dealer_request_details->dealer_request_id;
+	$_id = $dealer_request_details->dealer_request_id;
 	$show_approval = false;
 }
 else
@@ -52,8 +52,8 @@ else
 	<fieldset >
 		<div class="row-fluid">						
 			<div class='alert alert-success'><h4>Requester Details
-			<?php if(!$isAdd && !empty($warehouse_claim_details)):?>
-				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $warehouse_claim_details->request_code ?></label>
+			<?php if(!$isAdd && !empty($dealer_request_details)):?>
+				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $dealer_request_details->request_code ?></label>
 			<?php elseif($isAdd): ?>
 				<label class="label label-important request-code-label" id="requester-request-code-label" style="float:right;font-size:16px;"><?= $department_module_details->module_code ?></label>
 			<?php endif; ?>
@@ -66,7 +66,7 @@ else
 				<br/>
 				<?php if(!$isAdd): ?>
 				<small class="customer-assign-btn">
-					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly" value="<?= $warehouse_claim_details->id_number ?>">
+					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly" value="<?= $dealer_request_details->id_number ?>">
 				</small>
 				<?php elseif($isAdd): ?>
 					<input id="search_requester" type="text" placeholder="Search Requester" readonly="readonly">
@@ -86,7 +86,7 @@ else
 							$department_name = $department_details->department_name;
 						}
 
-						$details_content = "NAME: {$requester_details->complete_name}\nID NUMBER: {$warehouse_claim_details->id_number}\nDEPARTMENT: {$department_name}\nPOSITION: {$position_details->position_name}\nIS EMPLOYED: {$is_employed}\nEMAIL: {$email_address}\nCONTACT NUMBER: {$contact_number}\n";
+						$details_content = "NAME: {$requester_details->complete_name}\nID NUMBER: {$dealer_request_details->id_number}\nDEPARTMENT: {$department_name}\nPOSITION: {$position_details->position_name}\nIS EMPLOYED: {$is_employed}\nEMAIL: {$email_address}\nCONTACT NUMBER: {$contact_number}\n";
 
 						?>
 						<textarea class='span10' rows="7" placeholder="" name="requester_details" id="requester_details" readonly><?= $details_content ?>
@@ -103,10 +103,10 @@ else
 							<label class="control-label" for="remarks"><strong>Remarks</strong></label>
 							<div class="controls">
 								<?php if(!$isAdd): ?>
-								<textarea class='span8' rows="4" placeholder="" name="current_remarks" readonly><?= $warehouse_claim_details->remarks ?></textarea>
+								<textarea class='span8' rows="4" placeholder="" name="current_remarks" readonly><?= $dealer_request_details->remarks ?></textarea>
 								<br/><br/>
 								<label class="control-label" for="remarks"><strong>Add New Remarks</strong></label>
-								<input class="span12" id="remarks" type="text" placeholder="New Remarks">
+								<input class="span12" id="remarks_new" type="text" placeholder="New Remarks">
 								<?php elseif($isAdd): ?>
 								<textarea class='span8' rows="4" placeholder="" name="remarks" id="remarks" maxlength="255"><?= set_value('remarks',@$po->remarks) ?></textarea>
 								<p class="help-block"><?= $this->form_validation->error('remarks'); ?></p>
@@ -117,88 +117,13 @@ else
 				</div>
 				
 			</div>
-			<div class="span5">
-				<label><strong>From Warehouse:</strong></label>
-				<br/>
-				<?php if(!$isAdd):
-
-					$warehouse_options = array();
-					if ($warehouse_claim_details->warehouse_id == 0)
-						$warehouse_options = array('0' => 'Select a Warehouse...');
-					
-					foreach ($warehouse_details as $wd) {
-					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
-					}
-
-				?>
-				<?= form_dropdown('add_item_warehouse',$warehouse_options, set_value('add_item_warehouse',$warehouse_claim_details->warehouse_id),'id="add_item_warehouse"') ?>
-				<?php elseif($isAdd): 
-					$warehouse_options = array();
-					$warehouse_options = array('0' => 'Select a Warehouse...');
-					foreach ($warehouse_details as $wd) {
-					 	$warehouse_options[$wd->warehouse_id] = $wd->warehouse_name;
-					}
-				?>
-					
-				<?= form_dropdown('add_item_warehouse',$warehouse_options, NULL,'id="add_item_warehouse"') ?>
-				<?php endif; ?>
-
-				<br/>
-				<br/>
-				<label><strong>Motorcycle Brand/Model:</strong></label>
-				<br/>
-				<?php if(!$isAdd):
-
-					$brand_model_options = array();
-					if ($warehouse_claim_details->motorcycle_brand_model_id == 0)
-						$brand_model_options = array('0' => 'Select a Brand/Model...');
-
-					foreach ($motorcycle_brandmodel_details as $mbd) {
-						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
-					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
-					}
-					
-					echo form_dropdown('add_item_brandmodel',$brand_model_options, set_value('add_item_brandmodel',$warehouse_claim_details->motorcycle_brand_model_id),'id="add_item_brandmodel"');
-				?>
-				<?php elseif($isAdd):
-					$brand_model_options = array();
-					$brand_model_options = array('0' => 'Select a Brand/Model...');
-					foreach ($motorcycle_brandmodel_details as $mbd) {
-						$concat_brandmodel =  $mbd->brand_name . ' ' . $mbd->model_name;
-					 	$brand_model_options[$mbd->motorcycle_brand_model_id] = $concat_brandmodel;
-					}
-				?>
-				<?= form_dropdown('add_item_brandmodel',$brand_model_options, NULL,'id="add_item_brandmodel"') ?>
-				<?php endif; ?>
-				<br/>
-				<br/>
-				<label><strong>Engine:</strong></label>
-				<br/>
-
-				<?php if(!$isAdd): ?>
-				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." value="<?= $warehouse_claim_details->engine ?>" />
-				<?php elseif($isAdd): ?>
-				<input name="engine" id="engine" class="" placeholder="Enter Engine Number..." />
-				<?php endif; ?>
-
-				<br/>
-				<br/>
-				<label><strong>Chassis:</strong></label>
-				<br/>
-
-				<?php if(!$isAdd): ?>
-				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." value="<?= $warehouse_claim_details->chassis ?>" />
-				<?php elseif($isAdd): ?>
-				<input name="chassis" id="chassis" class="" placeholder="Enter Chassis Number..." />
-				<?php endif; ?>
-
-			</div>	
+			
 		</div>
 		
 		<br/>
 		<div class='alert alert-success'><h4>Items
-			<?php if(!$isAdd && !empty($warehouse_claim_details)):?>
-				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $warehouse_claim_details->request_code?></label>
+			<?php if(!$isAdd && !empty($dealer_request_details)):?>
+				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $dealer_request_details->request_code?></label>
 			<?php elseif($isAdd): ?>
 				<label class="label label-important request-code-label" id="item-request-code-label" style="float:right;font-size:16px;"><?= $department_module_details->module_code ?></label>
 			<?php endif; ?>
@@ -316,7 +241,7 @@ else
 					$temp = NULL;
 			
 					if (!$isAdd) {
-						//$temp = array($warehouse_claim_detail_details);
+						//$temp = array($dealer_request_detail_details);
 						$temp = json_decode($json_items, true);
 					}
 
@@ -338,7 +263,7 @@ else
 						<td class="discount"><?=number_format(set_value('discount['.$i.']',$temp[$i]['discount']))?></td>
 						<td class="discount_price"><?=number_format(set_value('discount_price['.$i.']',$temp[$i]['discount_amount']),2)?></td>
 						<td class="remark"><?=set_value('item_remarks['.$i.']',$temp[$i]['remarks'])?></td>
-						<td id="<?= $temp[$i]['warehouse_claim_detail_id'] ?>" data="<?= $temp[$i]['warehouse_claim_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
+						<td id="<?= $temp[$i]['dealer_request_detail_id'] ?>" data="<?= $temp[$i]['dealer_request_detail_id'] ?>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>
 						<td class="hidden_values">
 							<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<?=set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity'])?>">
 							<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<?=set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])?>">
@@ -369,7 +294,7 @@ else
 </form>
 <?php
 
-	$this->load->view('template_search_requester');
+	$this->load->view('template_search_dealer');
 	$this->load->view('template_search_item');
 
 
@@ -394,7 +319,7 @@ else
 		<td class="qty"><%= item_discount %></td>\n\
 		<td class="qty"><%= item_discount_price %></td>\n\
 		<td class="remark"><%= item_remarks %></td>\n\
-		<td id="<%= active_warehouse_claim_detail_id %>" data="<%= active_warehouse_claim_detail_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
+		<td id="<%= active_dealer_request_detail_id %>" data="<%= active_dealer_request_detail_id %>"><a class="btn btn-danger rmv_wr_item"><i class="icon-white icon-minus"></i></a></td>\n\
 		<td class="hidden_values">\n\
 			<input type="hidden" name="item_good_qty[]" id="item_good_qty[]" value="<%= hidden_item_good_qty %>">\n\
 			<input type="hidden" name="item_bad_qty[]" id="item_bad_qty[]" value="<%= hidden_item_bad_qty %>">\n\
@@ -442,8 +367,9 @@ else
 				
 				if (data.status == 'ok') {
 				
-					var employees = data.data.employees;
-					$('#assign-requester-listing').html(_.template($('#assign-requester-item-template').html(), {'employees' : employees}));
+					var dealers = data.data.dealers;
+
+					$('#assign-requester-listing').html(_.template($('#assign-requester-item-template').html(), {'dealers' : dealers}));
 					$.each(data.data.keys, function(index, key_item) {
 
 						//$('#assign-requester-listing td:nth-child(2)').highlight(key_item);
@@ -451,16 +377,16 @@ else
 					
 					// apply click event on select buttons
 					$('#assign-requester-listing .btn-select-member').click(function(e) {
-						var id_number = $(this).data('id_number');
+						var id_number = $(this).data('olddealercode');
 						
 						$("#id_number").val(id_number);
 						
-						var details = "NAME: " + $(this).data('fullname') + "\nID NUMBER: " + $(this).data('idnumber');
+						var details = "NAME: " + $(this).data('completename') + "\nDEALER CODE: " + $(this).data('olddealercode');
 						//var details = "NAME: " + $(this).data('fullname') + "\nID NUMBER: " + $(this).data('idnumber') + "\nCOMPANY: " + $(this).data('idnumber') + "\nDEPARTMENT: " + $(this).data('idnumber');
 						//	details = "NAME: " + employees.complete_name + "\nID NUMBER: " + $(this).data('idnumber') + "\nDEPARTMENT: " + $(this).data('department_name') + "\nPOSITION: " + $(this).data('position') + "\nIS EMPLOYED: " + $(this).data('is_employed') + "\nEMAIL: " + $(this).data('company_email_address') + "\nCONTACT NUMBER:\n";
 						//$("#member_details").append(details);
 						$("#requester_details").text(details);
-						$("#search_requester").val($(this).data('idnumber'));
+						$("#search_requester").val($(this).data('id'));
 						
 						
 						assignRequesterModal.hide();
@@ -481,7 +407,7 @@ else
 		with_overlay = typeof(with_overlay) == 'undefined' ? true : with_overlay;
 		b.request({
 			'with_overlay' : with_overlay,
-			url: '/spare_parts/warehouse_claim/get_requester',
+			url: '/spare_parts/dealer_request/get_requester',
 			data: {'search_key' : search_key},
 			on_success: function(data, status) {
 				if (_.isFunction(cb)) cb.call(this, data);
@@ -533,7 +459,7 @@ else
 			}
 			
 			b.request({
-				url: "/spare_parts/warehouse_claim/search_item",
+				url: "/spare_parts/dealer_request/search_item",
 				data: {
 					"search_key": search_key,
 				},
@@ -668,7 +594,7 @@ else
 
 			// ajax request
 			b.request({
-				url : '/spare_parts/warehouse_claim/create_request',
+				url : '/spare_parts/dealer_request/create_request',
 				data : {				
 					'request_code' : $("#requester-request-code-label").text(),
 					'item_id' : $('input[name="add_item_name"]').val(),
@@ -678,10 +604,8 @@ else
 					'good_quantity' : $('input[name="add_item_good_qty"]').val(),
 					'bad_quantity' : $('input[name="add_item_bad_qty"]').val(),
 					'remarks' : $('input[name="add_item_remarks"]').val(),
-					'engine' : $("#engine").val(),
-					'chassis' : $("#chassis").val(),
-					'warehouse_id' : $("#add_item_warehouse").val(),
-					'brandmodel' : $("#add_item_brandmodel").val(),
+					'remarks_requester' : $("#remarks").val(),
+					'remarks_requester_new' : $("#remarks_new").val(),
 					'requester_id' : $("#search_requester").val(),
 				},
 				on_success : function(data) {
@@ -709,7 +633,7 @@ else
 							item_discount: numberFormat($('select[name="add_item_discount"]>option:selected').text()) + '%',
 							item_discount_price: numberFormat($('input[name="add_item_discount_price"]').val(),2),
 							item_remarks: $('input[name="add_item_remarks"]').val(),
-							active_warehouse_claim_detail_id: data.data.active_warehouse_claim_detail_id,
+							active_dealer_request_detail_id: data.data.active_dealer_request_detail_id,
 							hidden_item_price: $('input[name="add_item_price"]').val(),
 							hidden_item_discount: $('input[name="add_item_discount"]').val(),
 							hidden_item_discount_price: $('input[name="add_item_discount_price"]').val(),
@@ -727,6 +651,7 @@ else
 						$('input[name="add_item_discount"]>option:selected').text('0');
 						$('input[name="add_item_discount_price"]').val('');
 						$('input[name="add_item_remarks"]').val('');
+						$('#remarks_new').val('');
 						$('input[name="add_item_good_qty"]').attr("placeholder", "0");
 						$('input[name="add_item_bad_qty"]').attr("placeholder", "0");
 						
@@ -750,13 +675,13 @@ else
 
 	$(".rmv_wr_item").live('click',function(){
 
-		var warehouse_claim_detail_id = $(this).parent().attr("data");
+		var dealer_request_detail_id = $(this).parent().attr("data");
 		
 		b.request({
-			url : '/spare_parts/warehouse_claim/confirm_remove_item',
+			url : '/spare_parts/dealer_request/confirm_remove_item',
 			data : {				
 				'request_code' : $("#requester-request-code-label").text(),
-				'warehouse_claim_detail_id' : warehouse_claim_detail_id,	
+				'dealer_request_detail_id' : dealer_request_detail_id,	
 			},
 			on_success: function(data){
 
@@ -782,10 +707,10 @@ else
 
 								// ajax request
 								b.request({
-									url : '/spare_parts/warehouse_claim/proceed_remove_item',
+									url : '/spare_parts/dealer_request/proceed_remove_item',
 									data : {				
-										'warehouse_claim_id' : data.data.warehouse_claim_id,
-										'warehouse_claim_detail_id' : warehouse_claim_detail_id,	
+										'dealer_request_id' : data.data.dealer_request_id,
+										'dealer_request_detail_id' : dealer_request_detail_id,	
 										'remarks' : $("#txt-remarks").val(),
 									},
 									on_success : function(data) {
@@ -801,7 +726,7 @@ else
 												html: data.data.html,
 												buttons: {
 													'Ok' : function() {
-														$("#" + warehouse_claim_detail_id + "").parent().remove();
+														$("#" + dealer_request_detail_id + "").parent().remove();
 														proceedRemoveItemModal.hide();
 													}
 												}
@@ -854,7 +779,7 @@ else
 	});
 
 	$(".add-close").live('click',function(){
-		window.location.href = '/spare_parts/warehouse_claim/listing';
+		window.location.href = '/spare_parts/dealer_request/listing';
 		return false;
 	})
 	

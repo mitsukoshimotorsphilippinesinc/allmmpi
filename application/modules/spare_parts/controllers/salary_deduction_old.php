@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Warehouse_claim extends Admin_Controller {
+class Salary_deduction extends Admin_Controller {
 
 	function __construct()
 	{
@@ -11,14 +11,15 @@ class Warehouse_claim extends Admin_Controller {
 		$this->load->model('spare_parts_model');
 		$this->load->model('human_relations_model');
 		$this->load->model('warehouse_model');
-		$this->load->library('pager');		
-		$this->load->helper("spare_parts_helper");
+		$this->load->library('pager');	
+		$this->load->helper("spare_parts_helper");	
+		$this->load->helper("breadcrumb_helper");
 
 		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);
 
 	}
 
-	public $segment_name = "warehouse_claim";
+	public $segment_name = "salary_deduction";
 
 	public function index()
 	{
@@ -29,7 +30,7 @@ class Warehouse_claim extends Admin_Controller {
 		//$query = $db_spare_parts->select('sku, good_quantity, bad_quantity')->get('is_item');
   		//var_dump($query);			
 
-		$this->template->view('warehouse_claim/dashboard');
+		$this->template->view('salary_deduction/dashboard');
 	}
 
 	public function approval()
@@ -98,15 +99,15 @@ class Warehouse_claim extends Admin_Controller {
 
 		// set pagination data
 		$config = array(
-				'pagination_url' => "/spare_parts/warehouse_claim/approval/",
-				'total_items' => $this->spare_parts_model->get_warehouse_claim_count($where),
+				'pagination_url' => "/spare_parts/salary_deduction/approval/",
+				'total_items' => $this->spare_parts_model->get_salary_deduction_count($where),
 				'per_page' => 10,
 				'uri_segment' => 4,
 		);
 
 		$this->pager->set_config($config);
 
-		$transfers = $this->spare_parts_model->get_warehouse_claim($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
+		$transfers = $this->spare_parts_model->get_salary_deduction($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
 		
 		// search vars
 		$this->template->search_status = $search_status;
@@ -115,7 +116,7 @@ class Warehouse_claim extends Admin_Controller {
 		$this->template->search_url = $search_url;
 		$this->template->transfers = $transfers;
 		
-		$this->template->view('warehouse_claim/approval');	
+		$this->template->view('salary_deduction/approval');	
 		
 
 	}	
@@ -123,25 +124,25 @@ class Warehouse_claim extends Admin_Controller {
 
 	public function for_approval_confirm()
 	{
-		$warehouse_claim_id = $this->input->post("warehouse_claim_id");
-		$warehouse_claim_code = $this->input->post("warehouse_claim_code");
+		$salary_deduction_id = $this->input->post("salary_deduction_id");
+		$salary_deduction_code = $this->input->post("salary_deduction_code");
 		$is_approved = $this->input->post("is_approved");
 
-		$warehouse_claim = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);
+		$salary_deduction = $this->spare_parts_model->get_salary_deduction_by_id($salary_deduction_id);
 
-		if (empty($warehouse_claim)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$warehouse_claim_code}].</p>";
+		if (empty($salary_deduction)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$salary_deduction_code}].</p>";
 			$title = "Error: Confirm Approval";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
+			$this->return_json("0","Salary Deduction Code not found in DB", array("html" => $html, "title" => $title));			
 
 		} else {
 
 			if ($is_approved == 'yes') {
 
-				$html = "You are about to approve the Warehouse Request with Request Code: <strong>" . $warehouse_claim_code . "</strong>. Do you want to continue?";
+				$html = "You are about to approve the Salary Deduction with Request Code: <strong>" . $salary_deduction_code . "</strong>. Do you want to continue?";
 			} else {
-				$html = "<p>You are about to deny the Warehouse Request with Request Code: <strong>" . $warehouse_claim_code . "</strong>. <br/>
+				$html = "<p>You are about to deny the Salary Deduction with Request Code: <strong>" . $salary_deduction_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;'/><br/>
@@ -151,15 +152,15 @@ class Warehouse_claim extends Admin_Controller {
 							Do you want to continue?</p>";
 			}	
 
-			$title = "Confirm Approval :: " . $warehouse_claim_code;
+			$title = "Confirm Approval :: " . $salary_deduction_code;
 				
 			$data = array (
-				'warehouse_claim_id' => $warehouse_claim_id,
-				'warehouse_claim_code' => $warehouse_claim_code,
+				'salary_deduction_id' => $salary_deduction_id,
+				'salary_deduction_code' => $salary_deduction_code,
 				'is_approved' => $is_approved
 				);	
 
-			$this->return_json("1","Confirm Approval of Warehouse Request.",array("html" => $html, "title" => $title, "data" => $data));
+			$this->return_json("1","Confirm Approval of Salary Deduction.",array("html" => $html, "title" => $title, "data" => $data));
 		
 		}
 		
@@ -168,18 +169,18 @@ class Warehouse_claim extends Admin_Controller {
 	
 	public function for_approval_proceed()
 	{
-		$warehouse_claim_id = $this->input->post("warehouse_claim_id");
-		$warehouse_claim_code = $this->input->post("warehouse_claim_code");
+		$salary_deduction_id = $this->input->post("salary_deduction_id");
+		$salary_deduction_code = $this->input->post("salary_deduction_code");
 		$is_approved = $this->input->post("is_approved");
 		$remarks =  $this->input->post("remarks");
 		
-		$warehouse_claim = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);		
+		$salary_deduction = $this->spare_parts_model->get_salary_deduction_by_id($salary_deduction_id);		
 
-		if (empty($warehouse_claim)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$warehouse_claim_code}].</p>";
+		if (empty($salary_deduction)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$salary_deduction_code}].</p>";
 			$title = "Error: Proceed Approval";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Salary Deduction Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 	
@@ -187,7 +188,7 @@ class Warehouse_claim extends Admin_Controller {
 			$current_datetime = date("Y-m-d H:i:s");
 			
 			if ($is_approved == 'no') {
-				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $warehouse_claim->remarks;
+				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $salary_deduction->remarks;
 
 				$data = array(
 					'status' => "DENIED",
@@ -196,12 +197,12 @@ class Warehouse_claim extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$return_html = return_reserved_items($warehouse_claim_code, 'DENIED', $remarks);
+				$return_html = return_reserved_items($salary_deduction_code, 'DENIED', $remarks);
 
-				$html = "You have denied the Warehouse Request Code: <strong>{$warehouse_claim_code}</strong>.";
-				$title = "Denied :: " . $warehouse_claim_code;
+				$html = "You have denied the Salary Deduction Code: <strong>{$salary_deduction_code}</strong>.";
+				$title = "Denied :: " . $salary_deduction_code;
 
-				$this->return_json("1","Denied Warehouse Request.",array("html" => $html, "title" => $title));		
+				$this->return_json("1","Denied Salary Deduction.",array("html" => $html, "title" => $title));		
 
 			} else {
 				// change status to APPROVED
@@ -211,14 +212,14 @@ class Warehouse_claim extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully approved the Warehouse Request Code: <strong>{$warehouse_claim_code}</strong>.";
-				$title = "Approved :: " . $warehouse_claim_code;
+				$html = "You have successfully approved the Salary Deduction Code: <strong>{$salary_deduction_code}</strong>.";
+				$title = "Approved :: " . $salary_deduction_code;
 			}
 			
-			$where = "warehouse_claim_id = " . $warehouse_claim_id;
-			$this->spare_parts_model->update_warehouse_claim($data, $where);
+			$where = "salary_deduction_id = " . $salary_deduction_id;
+			$this->spare_parts_model->update_salary_deduction($data, $where);
 
-			$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
+			$this->return_json("1","Successful Approval of Salary Deduction.",array("html" => $html, "title" => $title));
 						
 		}	
 		return;	
@@ -227,34 +228,44 @@ class Warehouse_claim extends Admin_Controller {
 
 	public function view_details()
 	{
-		$warehouse_claim_id = $this->input->post("warehouse_claim_id");
-		$warehouse_claim_code = $this->input->post("warehouse_claim_code");
+		$salary_deduction_id = $this->input->post("salary_deduction_id");
+		$salary_deduction_code = $this->input->post("salary_deduction_code");
 		$listing_action = $this->input->post("listing_action");
 			
-		$warehouse_claim = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);		
+		$salary_deduction = $this->spare_parts_model->get_salary_deduction_by_id($salary_deduction_id);		
 
-		if (empty($warehouse_claim)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$warehouse_claim_code}].</p>";
+		if (empty($salary_deduction)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$salary_deduction_code}].</p>";
 			$title = "Error: View Details";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Salary Deduction Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 
-			$where = "warehouse_claim_id = {$warehouse_claim_id}";
-			$warehouse_claim_details = $this->spare_parts_model->get_warehouse_claim_detail($where);
-		
+			$where = "salary_deduction_id = {$salary_deduction_id}";
+			$salary_deduction_details = $this->spare_parts_model->get_salary_deduction_detail($where);
+
+			$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);	
+
+			// check if has items for return
+			$where = "department_module_id = ". $department_module_details->department_module_id ." AND request_id = ". $salary_deduction_id ." AND status NOT IN ('CANCELLED')";		
+			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);
+
 			$data = array(
-				//'warehouse_claim' => $warehouse_claim,
-				'segment_request_summary' => $warehouse_claim,
-				'segment_request_details' =>$warehouse_claim_details,
-				'listing_action' => $listing_action
+				//'salary_deduction' => $salary_deduction,
+				'segment_request_summary' => $salary_deduction,
+				'segment_request_details' =>$salary_deduction_details,
+				'listing_action' => $listing_action,
+				'segment_request_summary_remarks' => $salary_deduction->remarks,
+				'segment_name' => $this->segment_name,
+				'reprocessed_item_details' => $reprocessed_item_details,
+				'department_module_details' => $department_module_details,
 			);
-		
+
 			$html = $this->load->view("template_view_details",$data,true);
 			 
-			$title = "View Details :: " . $warehouse_claim_code;
-			$this->return_json("1","View Details Warehouse Request", array("html" => $html, "title" => $title, "request_status" => $warehouse_claim->status));
+			$title = "View Details :: " . $salary_deduction_code;
+			$this->return_json("1","View Details Salary Deduction", array("html" => $html, "title" => $title, "request_status" => $salary_deduction->status));
 			
 		}
 			
@@ -329,15 +340,15 @@ class Warehouse_claim extends Admin_Controller {
 
 		// set pagination data
 		$config = array(
-				'pagination_url' => "/spare_parts/warehouse_claim/listing/",
-				'total_items' => $this->spare_parts_model->get_warehouse_claim_count($where),
+				'pagination_url' => "/spare_parts/salary_deduction/listing/",
+				'total_items' => $this->spare_parts_model->get_salary_deduction_count($where),
 				'per_page' => 10,
 				'uri_segment' => 4,
 		);
 
 		$this->pager->set_config($config);
 
-		$transfers = $this->spare_parts_model->get_warehouse_claim($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
+		$transfers = $this->spare_parts_model->get_salary_deduction($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
 		
 		// search vars
 		$this->template->search_status = $search_status;
@@ -346,41 +357,41 @@ class Warehouse_claim extends Admin_Controller {
 		$this->template->search_url = $search_url;
 		$this->template->transfers = $transfers;
 		
-		$this->template->view('warehouse_claim/listing');	
+		$this->template->view('salary_deduction/listing');	
 		
 	}	
 
 	public function for_listing_confirm()
 	{
-		$warehouse_claim_id = $this->input->post("warehouse_claim_id");
-		$warehouse_claim_code = $this->input->post("warehouse_claim_code");
+		$salary_deduction_id = $this->input->post("salary_deduction_id");
+		$salary_deduction_code = $this->input->post("salary_deduction_code");
 		$listing_action = $this->input->post("listing_action");
 
-		$warehouse_claim = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);
+		$salary_deduction = $this->spare_parts_model->get_salary_deduction_by_id($salary_deduction_id);
 
-		if (empty($warehouse_claim)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$warehouse_claim_code}].</p>";
+		if (empty($salary_deduction)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$salary_deduction_code}].</p>";
 			$title = "Error: Confirm";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));			
+			$this->return_json("0","Salary Deduction Code not found in DB", array("html" => $html, "title" => $title));			
 
 		} else {
 
 			if ($listing_action == 'for approval') {
-				$title = "File For Approval :: " . $warehouse_claim_code;
-				$html = "You are about forward the request for approval with Request Code: <strong>" . $warehouse_claim_code . "</strong>. Do you want to continue?";
+				$title = "File For Approval :: " . $salary_deduction_code;
+				$html = "You are about forward the request for approval with Request Code: <strong>" . $salary_deduction_code . "</strong>. Do you want to continue?";
 			}
 
 			if ($listing_action == 'forward to warehouse') {
-				$title = "Forward To Warehouse :: " . $warehouse_claim_code;
-				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $warehouse_claim_code . "</strong>. <br/>							
+				$title = "Forward To Warehouse :: " . $salary_deduction_code;
+				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $salary_deduction_code . "</strong>. <br/>						
 							<br/>
 							Do you want to continue?</p>";
 			}
 
 			if ($listing_action == 'assign mtr') {
-				$title = "Assign MTR Number :: " . $warehouse_claim_code;
-				$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $warehouse_claim_code . "</strong>. <br/>
+				$title = "Assign MTR Number :: " . $salary_deduction_code;
+				$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $salary_deduction_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>P.O. Number:</strong></span></br>
 								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
@@ -391,8 +402,8 @@ class Warehouse_claim extends Admin_Controller {
 			}
 
 			if ($listing_action == 'cancel') {
-				$title = "Cancel Request :: " . $warehouse_claim_code;
-				$html = "<p>You are about to cancel the Warehouse Request with Request Code: <strong>" . $warehouse_claim_code . "</strong>. <br/>
+				$title = "Cancel Request :: " . $salary_deduction_code;
+				$html = "<p>You are about to cancel the Salary Deduction with Request Code: <strong>" . $salary_deduction_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;' maxlength='320' placeholder='Put remarks here...' /><br/>
@@ -401,14 +412,19 @@ class Warehouse_claim extends Admin_Controller {
 							<br/>
 							Do you want to continue?</p>";
 			}	
+
+			if ($listing_action == 'cancel completed') {
+				$title = "For Approval - Cancel Completed Request :: " . $salary_deduction_code;
+				$html = "You are about to request the approval of <b>Cancellation of a Completed Request</b> with Request Code: <strong>" . $salary_deduction_code . "</strong>.<br/><br/>Do you want to continue?";
+			}	
 	
 			$data = array (
-				'warehouse_claim_id' => $warehouse_claim_id,
-				'warehouse_claim_code' => $warehouse_claim_code,
+				'salary_deduction_id' => $salary_deduction_id,
+				'salary_deduction_code' => $salary_deduction_code,
 				'listing_action' => $listing_action
 				);	
 
-			$this->return_json("1","Confirm Action of Warehouse Request.",array("html" => $html, "title" => $title, "data" => $data));
+			$this->return_json("1","Confirm Action of Salary Deduction.",array("html" => $html, "title" => $title, "data" => $data));
 		
 		}
 		
@@ -417,19 +433,19 @@ class Warehouse_claim extends Admin_Controller {
 
 	public function for_listing_proceed()
 	{
-		$warehouse_claim_id = $this->input->post("warehouse_claim_id");
-		$warehouse_claim_code = $this->input->post("warehouse_claim_code");
+		$salary_deduction_id = $this->input->post("salary_deduction_id");
+		$salary_deduction_code = $this->input->post("salary_deduction_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");
 		$mtr_number =  abs($this->input->post("mtr_number"));
 		
-		$warehouse_claim = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);		
+		$salary_deduction = $this->spare_parts_model->get_salary_deduction_by_id($salary_deduction_id);		
 
-		if (empty($warehouse_claim)) {		
-			$html = "<p>There is something wrong with this transaction [Request Code: {$warehouse_claim_code}].</p>";
+		if (empty($salary_deduction)) {		
+			$html = "<p>There is something wrong with this transaction [Request Code: {$salary_deduction_code}].</p>";
 			$title = "Error: Proceed";
 
-			$this->return_json("0","Warehouse Request Code not found in DB", array("html" => $html, "title" => $title));	
+			$this->return_json("0","Salary Deduction Code not found in DB", array("html" => $html, "title" => $title));	
 			
 		} else {
 	
@@ -437,10 +453,9 @@ class Warehouse_claim extends Admin_Controller {
 			$current_datetime = date("Y-m-d H:i:s");
 			
 			if ($listing_action == 'cancel') {
-				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $warehouse_claim->remarks;
+				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $salary_deduction->remarks;
 
-				// from spare_parts helper
-				$return_html = return_reserved_items($warehouse_claim_code, 'CANCELLED', $remarks);
+				$return_html = return_reserved_items($salary_deduction_code, 'CANCELLED', $remarks);
 
 				$data = array(
 					'status' => "CANCELLED",
@@ -449,8 +464,8 @@ class Warehouse_claim extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have cancelled the Warehouse Request Code: <strong>{$warehouse_claim_code}</strong>.";
-				$title = "Cancelled :: " . $warehouse_claim_code;	
+				$html = "You have cancelled the Salary Deduction Code: <strong>{$salary_deduction_code}</strong>.";
+				$title = "Cancelled :: " . $salary_deduction_code;	
 
 			} else if ($listing_action == 'for approval') {
 
@@ -461,8 +476,8 @@ class Warehouse_claim extends Admin_Controller {
 					'approve_timestamp' => $current_datetime
 				);
 
-				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$warehouse_claim_code}</strong>.";
-				$title = "File For Approval :: " . $warehouse_claim_code;
+				$html = "You have successfully filed the request for approval with Salary Deduction Code: <strong>{$salary_deduction_code}</strong>.";
+				$title = "File For Approval :: " . $salary_deduction_code;
 			
 			} else if ($listing_action == 'forward to warehouse') {
 
@@ -471,11 +486,12 @@ class Warehouse_claim extends Admin_Controller {
 					'status' => "FORWARDED",
 					'approved_by' => $this->user->user_id,					
 					'approve_timestamp' => $current_datetime,
-					'mtr_number' => $mtr_number
+					'mtr_number' => $mtr_number,
+
 				);
 
-				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$warehouse_claim_code}</strong>.";
-				$title = "Forward To Warehouse :: " . $warehouse_claim_code;
+				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$salary_deduction_code}</strong>.";
+				$title = "Forward To Warehouse :: " . $salary_deduction_code;
 			
 				// change tr_warehouse_reservation to PENDING
 				$data_reservation = array(
@@ -483,7 +499,7 @@ class Warehouse_claim extends Admin_Controller {
 					'update_timestamp' => $current_datetime
 				);
 
-				$where = "transaction_number = '{$warehouse_claim_code}'";
+				$where = "transaction_number = '{$salary_deduction_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
 			} else if ($listing_action == 'assign mtr') {
@@ -494,17 +510,28 @@ class Warehouse_claim extends Admin_Controller {
 					'mtr_number' => $mtr_number
 				);
 
-				$html = "You have successfully assigned a MTR Number to the request with Request Code: <strong>{$warehouse_claim_code}</strong>.";
-				$title = "Assign MTR Number :: " . $warehouse_claim_code;
+				$html = "You have successfully assigned a MTR Number to the request with Request Code: <strong>{$salary_deduction_code}</strong>.";
+				$title = "Assign MTR Number :: " . $salary_deduction_code;
 			
 			}
+
+			if ($listing_action == 'cancel completed') {
+				$data = array(
+					'status' => "FOR CANCELLATION",
+					'approved_by' => $this->user->user_id,					
+					'approve_timestamp' => $current_datetime
+				);
+
+				$html = "You have successfully filed the request for approval with Salary Deduction Code: <strong>{$salary_deduction_code}</strong>.";
+				$title = "For Approval - Cancel Completed Request :: " . $salary_deduction_code;
+			}
 			
-			$where = "warehouse_claim_id = " . $warehouse_claim_id;
-			$this->spare_parts_model->update_warehouse_claim($data, $where);
+			$where = "salary_deduction_id = " . $salary_deduction_id;
+			$this->spare_parts_model->update_salary_deduction($data, $where);
 	
 		}	
 
-		$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
+		$this->return_json("1","Successful Approval of Salary Deduction.",array("html" => $html, "title" => $title));
 
 		return;	
 	}
@@ -560,7 +587,7 @@ class Warehouse_claim extends Admin_Controller {
 		// check if query will return records to execute
 		$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
 
-		$pending_count = $this->spare_parts_model->get_warehouse_claim($where);
+		$pending_count = $this->spare_parts_model->get_salary_deduction($where);
 
 		if (empty($pending_count))
 		{
@@ -607,9 +634,9 @@ class Warehouse_claim extends Admin_Controller {
 			$worksheet = $objPHPExcel->setActiveSheetIndex(0);
 
 			$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
-			$warehouse_claim_count = $this->spare_parts_model->get_warehouse_claim_count($where);
+			$salary_deduction_count = $this->spare_parts_model->get_salary_deduction_count($where);
 
-			$filename = "warehouse_claims_" . str_replace("-", "", $start_date) . "-" . str_replace("-", "", $end_date) . ".xls";
+			$filename = "salary_deductions_" . str_replace("-", "", $start_date) . "-" . str_replace("-", "", $end_date) . ".xls";
 
 			//set width of first column
 			$worksheet->getColumnDimension('A')->setWidth(12.00);
@@ -648,11 +675,11 @@ class Warehouse_claim extends Admin_Controller {
 
 			$allowed_rows = 5000;
 
-			for($prow = 0;$prow < ceil($warehouse_claim_count/$allowed_rows)+1; $prow++)
+			for($prow = 0;$prow < ceil($salary_deduction_count/$allowed_rows)+1; $prow++)
 			{
-				$warehouse_claims = $this->spare_parts_model->get_warehouse_claim($where, array('rows' => $allowed_rows, 'offset' => $prow*$allowed_rows), 'insert_timestamp ASC');
+				$salary_deductions = $this->spare_parts_model->get_salary_deduction($where, array('rows' => $allowed_rows, 'offset' => $prow*$allowed_rows), 'insert_timestamp ASC');
 
-				foreach ($warehouse_claims as $dr)
+				foreach ($salary_deductions as $dr)
 				{
 
 					$worksheet->setCellValue('A'. $row, $dr->request_code);
@@ -688,20 +715,20 @@ class Warehouse_claim extends Admin_Controller {
 		}
 	}
 
-	public function edit($warehouse_claim_id = 0)
+	public function edit($salary_deduction_id = 0)
 	{
-		$this->add($warehouse_claim_id);
+		$this->add($salary_deduction_id);
 	}
 
-	public function add($warehouse_claim_id = 0) 
+	public function add($salary_deduction_id = 0) 
 	{
 
 		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
 		
-		$warehouse_claim_details = $this->spare_parts_model->get_warehouse_claim_by_id($warehouse_claim_id);
+		$salary_deduction_details = $this->spare_parts_model->get_salary_deduction_by_id($salary_deduction_id);
 
-		if (!empty($warehouse_claim_details)) {
-			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($warehouse_claim_details->id_number);
+		if (!empty($salary_deduction_details)) {
+			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($salary_deduction_details->id_number);
 			
 			$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
 			$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
@@ -711,25 +738,25 @@ class Warehouse_claim extends Admin_Controller {
 			$this->template->position_details = $position_details;
 
 			// get request items
-			$where = "status NOT IN ('CANCELLED', 'DELETED') AND warehouse_claim_id = " . $warehouse_claim_id;
-			$warehouse_claim_detail_details = $this->spare_parts_model->get_warehouse_claim_detail($where);
+			$where = "status NOT IN ('CANCELLED', 'DELETED') AND salary_deduction_id = " . $salary_deduction_id;
+			$salary_deduction_detail_details = $this->spare_parts_model->get_salary_deduction_detail($where);
 
 			$json_items = array();
-			for($k = 0;$k<count($warehouse_claim_detail_details);$k++)
+			for($k = 0;$k<count($salary_deduction_detail_details);$k++)
 			{
-				$warehouse_claim_detail_id = $warehouse_claim_detail_details[$k]->warehouse_claim_detail_id;
+				$salary_deduction_detail_id = $salary_deduction_detail_details[$k]->salary_deduction_detail_id;
 				
 				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
 				$po_items = array(
-						'warehouse_claim_detail_id' => $warehouse_claim_detail_id,
-						'item_id' => $warehouse_claim_detail_details[$k]->item_id,
-						'srp' => $warehouse_claim_detail_details[$k]->srp,
-						'discount' => $warehouse_claim_detail_details[$k]->discount,
-						'discount_amount' => $warehouse_claim_detail_details[$k]->discount_amount,
-						'good_quantity' => $warehouse_claim_detail_details[$k]->good_quantity,
-						'bad_quantity' => $warehouse_claim_detail_details[$k]->bad_quantity,
-						'total_amount' => $warehouse_claim_detail_details[$k]->total_amount,
-						'remarks' => $warehouse_claim_detail_details[$k]->remarks,
+						'salary_deduction_detail_id' => $salary_deduction_detail_id,
+						'item_id' => $salary_deduction_detail_details[$k]->item_id,
+						'srp' => $salary_deduction_detail_details[$k]->srp,
+						'discount' => $salary_deduction_detail_details[$k]->discount,
+						'discount_amount' => $salary_deduction_detail_details[$k]->discount_amount,
+						'good_quantity' => $salary_deduction_detail_details[$k]->good_quantity,
+						'bad_quantity' => $salary_deduction_detail_details[$k]->bad_quantity,
+						'total_amount' => $salary_deduction_detail_details[$k]->total_amount,
+						'remarks' => $salary_deduction_detail_details[$k]->remarks,
 
 				);
 				//creates an array of the items that will be json encoded later
@@ -758,12 +785,12 @@ class Warehouse_claim extends Admin_Controller {
 		$this->template->items = $items_array;
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
-		$this->template->warehouse_claim_details = $warehouse_claim_details;
+		$this->template->salary_deduction_details = $salary_deduction_details;
 		$this->template->department_module_details = $department_module_details;
-		$this->template->view('warehouse_claim/add');
+		$this->template->view('salary_deduction/add');
 	}
 
-	public function get_requester()
+	/*public function get_requester()
 	{
 		$search_key = $this->input->get_post('search_key');
 		$search_key = trim($search_key);
@@ -840,9 +867,9 @@ class Warehouse_claim extends Admin_Controller {
 		$this->return_json("ok","Ok.", array('employees' => $employees, 'keys' => $keys));
 		return;
 		
-	}
+	}*/
 
-	public function search_item()
+	/*public function search_item()
 	{
 		$search_key = $this->input->get_post('search_key');
 		$search_key = trim($search_key);
@@ -929,7 +956,7 @@ class Warehouse_claim extends Admin_Controller {
 		$this->return_json("ok","Ok.", array('items' => $return_items, 'keys' => $keys));
 		return;
 
-	}
+	}*/
 
 	public function create_request()
 	{
@@ -941,10 +968,12 @@ class Warehouse_claim extends Admin_Controller {
 		$good_quantity = abs($this->input->post("good_quantity"));
 		$bad_quantity = abs($this->input->post("bad_quantity"));
 		$remarks = trim($this->input->post("remarks"));
-		$engine = trim($this->input->post("engine"));
-		$chassis = trim($this->input->post("chassis"));
-		$warehouse_id = abs($this->input->post("warehouse_id"));
-		$brandmodel = trim($this->input->post("brandmodel"));
+		$remarks_requester = trim($this->input->post("remarks_requester"));
+		$remarks_requester_new = trim($this->input->post("remarks_requester_new"));
+		//$engine = trim($this->input->post("engine"));
+		//$chassis = trim($this->input->post("chassis"));
+		//$warehouse_id = abs($this->input->post("warehouse_id"));
+		//$brandmodel = trim($this->input->post("brandmodel"));
 		$requester_id = trim($this->input->post("requester_id"));
 
 		$has_error = 0;
@@ -995,10 +1024,18 @@ class Warehouse_claim extends Admin_Controller {
 
 		$module_code = $request_code;
 
+		$current_datetime = date('Y-m-d H:i:s');
+
+		if (strlen($remarks) > 0)
+				$remarks = "[" . $current_datetime . "] " . $remarks;
+
 		if (strlen($request_code) < 10)
 		{
+			// NEW REQUEST
+			if (strlen($remarks_requester) > 0)
+				$remarks_requester = "[" . $current_datetime . "] " . $remarks_requester;
 
-			$manager_id_number = 0;
+			/*$manager_id_number = 0;
 			// get warehouse info from warehouse db
 			$warehouse_details = $this->warehouse_model->get_warehouse_by_id($warehouse_id);
 			if (count($warehouse_details)  > 0) {
@@ -1011,31 +1048,24 @@ class Warehouse_claim extends Admin_Controller {
 			if (count($motorcycle_brandmodel_details)  > 0) {
 				$motorcycle_brand_model_id = $motorcycle_brandmodel_details[0]->motorcycle_brand_model_id;
 			}
+			*/
 
 			$sql = "INSERT INTO 
-						is_warehouse_claim 
+						is_salary_deduction 
 						(
 							`request_series`, 
 							`request_number`, 
-							`id_number`, 
-							`warehouse_approved_by`, 
-							`warehouse_id`, 
-							`motorcycle_brand_model_id`, 
-							`engine`, 
-							`chassis`
+							`id_number`,
+							`remarks`
 						)
                     	(
                     	SELECT 
                     		'{$request_series}', 
                     		IFNULL(MAX(request_number) + 1, 1) AS request_number, 
-                    		'{$requester_id}', 
-                    		'{$manager_id_number}',
-                            '{$warehouse_id}', 
-                            '{$motorcycle_brand_model_id}', 
-                            '{$engine}', 
-                            '{$chassis}'
+                    		'{$requester_id}',
+                    		'{$remarks}'
                     	FROM 
-                    		is_warehouse_claim
+                    		is_salary_deduction
                     	WHERE 
                     		request_series = '{$request_series}' 
 	                    ORDER BY 
@@ -1045,21 +1075,19 @@ class Warehouse_claim extends Admin_Controller {
 			$this->db_spare_parts->query($sql);	
 
 			// get last insert id
-			$sql = "SELECT LAST_INSERT_ID() AS last_id FROM is_warehouse_claim";
+			$sql = "SELECT LAST_INSERT_ID() AS last_id FROM is_salary_deduction";
 			$query = $this->db_spare_parts->query($sql);
-			$warehouse_claim_id = $query->first_row();
+			$salary_deduction_id = $query->first_row();
 
-			$active_warehouse_claim_id = $warehouse_claim_id->last_id;
-
-			//var_dump($warehouse_claim_id->last_id);
+			$active_salary_deduction_id = $salary_deduction_id->last_id;
 
 			// generate request code
 			$sql = "SELECT 
 						CONCAT('{$module_code}', '{$request_series}', '-', LPAD(request_number, 5, 0)) AS gen_code
 					FROM
-						is_warehouse_claim		
+						is_salary_deduction		
                     WHERE 
-                    	warehouse_claim_id = " . $active_warehouse_claim_id;
+                    	salary_deduction_id = " . $active_salary_deduction_id;
 
             $query = $this->db_spare_parts->query($sql);
 			$request_code_details = $query->first_row();  
@@ -1070,14 +1098,14 @@ class Warehouse_claim extends Admin_Controller {
 			$data_update = array(
 					'request_code' => $request_code
 				);
-			$where_update = "warehouse_claim_id = " . $active_warehouse_claim_id;
-			$this->spare_parts_model->update_warehouse_claim($data_update, $where_update);
+			$where_update = "salary_deduction_id = " . $active_salary_deduction_id;
+			$this->spare_parts_model->update_salary_deduction($data_update, $where_update);
 
             //get department module id
             $department_module_details = $this->spare_parts_model->get_department_module_by_code($module_code);        
             
             $data_insert = array (
-        		'branch_id' => 1,
+        		'branch_id' => 1, // hard-coded where 1 = Head Office
         		'department_id' => $department_module_details->department_id,
         		'department_module_id' => $department_module_details->department_module_id,
         		'transaction_number' => $request_code,
@@ -1087,9 +1115,17 @@ class Warehouse_claim extends Admin_Controller {
          	$this->spare_parts_model->insert_warehouse_reservation($data_insert);
 
 		} else {
-			
-			$active_warehouse_claim_details = $this->spare_parts_model->get_warehouse_claim_by_code($request_code);
-			$active_warehouse_claim_id = $active_warehouse_claim_details->warehouse_claim_id;
+			// EXISTING REQUEST
+
+			$active_salary_deduction_details = $this->spare_parts_model->get_salary_deduction_by_code($request_code);
+			$active_salary_deduction_id = $active_salary_deduction_details->salary_deduction_id; 
+
+			if (strlen($remarks_requester_new) > 0)
+				$remarks_requester = "[" . $current_datetime . "] " . $remarks_requester_new . "\n" . $active_salary_deduction_details->remarks;
+
+			// update is_salary_deduction remarks
+			$this->spare_parts_model->update_salary_deduction(array('remarks' => $remarks_requester), "salary_deduction_id = " . $active_salary_deduction_id);
+
 		}	
 
 		// total amount
@@ -1103,7 +1139,7 @@ class Warehouse_claim extends Admin_Controller {
 
 		// add item to details table
 		$data_insert = array(
-				'warehouse_claim_id' => $active_warehouse_claim_id,
+				'salary_deduction_id' => $active_salary_deduction_id,
 				'item_id' => $item_id,
 				'srp' => $srp,
 				'discount' => $discount,
@@ -1114,9 +1150,9 @@ class Warehouse_claim extends Admin_Controller {
 				'remarks' => $remarks
 			);
 
-		$this->spare_parts_model->insert_warehouse_claim_detail($data_insert);
+		$this->spare_parts_model->insert_salary_deduction_detail($data_insert);
 
-		$active_warehouse_claim_detail_id = $this->spare_parts_model->insert_id();
+		$active_salary_deduction_detail_id = $this->spare_parts_model->insert_id();
 
 		// deduct to warehouse
 		$sql = "UPDATE 
@@ -1132,25 +1168,135 @@ class Warehouse_claim extends Admin_Controller {
 		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been added successfully!</p>";
 		$title = "Add Item :: Item Request";
 
-		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, 'active_warehouse_claim_detail_id' => $active_warehouse_claim_detail_id));
+		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, 'active_salary_deduction_detail_id' => $active_salary_deduction_detail_id));
 		return;
-	}	
+	}
+
+	public function proceed_reprocess_item()
+	{
+		$request_code = trim($this->input->post("request_code"));
+		$request_detail_id = abs($this->input->post("request_detail_id"));
+		$srp = abs($this->input->post("srp"));
+		$charge_discount = abs($this->input->post("charge_discount"));
+		$charge_discount_amount = abs($this->input->post("charge_discount_amount"));
+		$good_quantity = abs($this->input->post("good_quantity"));
+		$bad_quantity = abs($this->input->post("bad_quantity"));
+		$remarks = trim($this->input->post("remarks"));		
+		$action_option = trim($this->input->post("action_option"));
+		$id_number = $this->input->post("id_number");
+
+		$has_error = 0;
+		$good_error_message = "";
+		$bad_error_message = "";
+
+		if ($good_quantity == '')
+			$good_quantity = 0;
+
+		if ($bad_quantity == '')
+			$bad_quantity = 0;
+
+		if ($charge_discount_amount == '')
+			$charge_discount_amount = 0.00;
+
+		$recipient_name = "N/A";
+		if ($action_option == "return") {
+			$id_number = NULL;
+		} else {
+			$recipient_details = $this->human_relations_model->get_employment_information_view_by_id($id_number);
+			$recipient_name = $recipient_details->complete_name;
+		}	
+
+		$action = strtoupper($action_option);
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+
+		$salary_deduction_detail_details = $this->spare_parts_model->get_salary_deduction_detail_by_id($request_detail_id);
+
+		if ($salary_deduction_detail_details->good_quantity < $good_quantity) {
+			$has_error = 1;
+			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $salary_deduction_detail_details->good_quantity . "</strong> good quantities available.</p><br/>";
+		}
+
+		if ($salary_deduction_detail_details->bad_quantity < $bad_quantity) {
+			$has_error = 1;
+			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $salary_deduction_detail_details->bad_quantity . "</strong> bad quantities available.</p><br/>";
+		}
+
+		if ($has_error == 1) {
+			$html = $good_error_message . $bad_error_message;
+			$title = "Error :: Not Enough Inventory";
+
+			$this->return_json("0","Not Enough Inventory", array("html" => $html, "title" => $title));
+			return;
+		}
+	
+		// compute the total charge amount		
+		if ($charge_discount_amount == 0) {
+			$total_amount = $good_quantity * ($srp - ($srp * ($charge_discount / 100)));
+			$total_amount = $total_amount + ($bad_quantity  * ($srp - ($srp * ($charge_discount / 100))));
+		} else {
+			$total_amount = $good_quantity * $charge_discount_amount;
+			$total_amount = $total_amount + ($bad_quantity * $charge_discount_amount);
+		}
+
+		$formatted_total_amount = number_format($total_amount, 2);
+
+		$item_remarks_encoded  = "";
+		if (strlen(trim($remarks)) > 0) {
+			$current_datetime = date('Y-m-d H:i:s');
+			$data[] =array(
+					'datetime' => $current_datetime,
+					'message' => $remarks
+				);
+
+			$item_remarks_encoded = json_encode($data);
+			$data_insert['remarks'] = $item_remarks_encoded;
+		}
+
+		// insert to is_reprocessed_item table
+		$data_insert = array(
+				"department_module_id" => $department_module_details->department_module_id,
+				"request_id" => $salary_deduction_detail_details->salary_deduction_id,
+				"request_detail_id" => $request_detail_id,
+				"id_number" => $id_number,
+				"charge_discount" => $charge_discount,
+				"charge_discount_amount" => $charge_discount_amount,
+				"total_amount" => $total_amount,
+				"good_quantity" => $good_quantity,
+				"bad_quantity" => $bad_quantity,
+				"action" => $action,
+				"remarks" => $item_remarks_encoded,				
+			);
+		
+		$this->spare_parts_model->insert_reprocessed_item($data_insert);
+
+		$reprocessed_item_id = $this->spare_parts_model->insert_id();
+
+		// get item details 
+		$item_details = $this->spare_parts_model->get_item_view_by_id($salary_deduction_detail_details->item_id);
+
+		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been reprocessed successfully!</p>";
+		$title = $action . " Item :: Item Request";
+
+		$this->return_json("1","Item Successfully Reprocessed", array("html" => $html, "title" => $title, "item_details" => $item_details, "recipient_name" => $recipient_name, 'item_total_amount' => $formatted_total_amount, 'active_reprocessed_item_id' => $reprocessed_item_id, 'active_salary_deduction_detail_id' => $request_detail_id));		
+			
+		return;
+	}		
 
 	public function confirm_remove_item() {
 		$request_code = $this->input->post("request_code");
-		//$item_id = $this->input->post("item_id");
-		$warehouse_claim_detail_id = $this->input->post("warehouse_claim_detail_id");
+		$salary_deduction_detail_id = $this->input->post("salary_deduction_detail_id");
 
-		// get warehouse_claim_id
-		$warehouse_claim_details = $this->spare_parts_model->get_warehouse_claim_by_code($request_code);
+		// get salary_deduction_id
+		$salary_deduction_details = $this->spare_parts_model->get_salary_deduction_by_code($request_code);
 
-		$warehouse_claim_detail_info = $this->spare_parts_model->get_warehouse_claim_detail_by_id($warehouse_claim_detail_id);
+		$salary_deduction_detail_info = $this->spare_parts_model->get_salary_deduction_detail_by_id($salary_deduction_detail_id);
 
 
-		$item_view_details = $this->spare_parts_model->get_item_view_by_id($warehouse_claim_detail_info->item_id);
+		$item_view_details = $this->spare_parts_model->get_item_view_by_id($salary_deduction_detail_info->item_id);
 		
 		$title = "Delete Item :: [SKU] " . $item_view_details->sku;
-		$html = "<p>You are about to delete an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
+		$html = "<p>You are about to remove an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
 					<label><strong>Model:</strong></label>&nbsp;&nbsp;" . $item_view_details->model_name . "
 					<label><strong>Brand:</strong></label>&nbsp;&nbsp;" . $item_view_details->brand_name . "
 					<label><strong>Description:</strong></label>&nbsp;&nbsp;" . $item_view_details->description . "
@@ -1162,25 +1308,29 @@ class Warehouse_claim extends Admin_Controller {
 					<br/>
 					Do you want to continue?</p>";
 
-		$this->return_json("1","Confirm Remove Item", array("html" => $html, "title" => $title, 'warehouse_claim_id' => $warehouse_claim_details->warehouse_claim_id));
+		$this->return_json("1","Confirm Remove Item", array("html" => $html, "title" => $title, 'salary_deduction_id' => $salary_deduction_details->salary_deduction_id));
 		return;
 	}
 
 	public function proceed_remove_item() {
-		$warehouse_claim_id = $this->input->post("warehouse_claim_id");
-		//$item_id = $this->input->post("item_id");
-		$warehouse_claim_detail_id = $this->input->post("warehouse_claim_detail_id");
+		$salary_deduction_id = $this->input->post("salary_deduction_id");
+		$is_reprocess_item = $this->input->post("is_reprocess_item");
+		$salary_deduction_detail_id = $this->input->post("salary_deduction_detail_id");
 		$remarks = $this->input->post("remarks");
 
-		//$where = "warehouse_claim_id = '{$warehouse_claim_id}' AND item_id = '{$item_id}'";
-		$where = "warehouse_claim_detail_id = " . $warehouse_claim_detail_id;
-		//$warehouse_claim_detail = $this->spare_parts_model->get_warehouse_claim_detail($where);
-		$warehouse_claim_detail_info = $this->spare_parts_model->get_warehouse_claim_detail_by_id($warehouse_claim_detail_id);
-
+		//$where = "salary_deduction_id = '{$salary_deduction_id}' AND item_id = '{$item_id}'";
+		//$salary_deduction_detail = $this->spare_parts_model->get_salary_deduction_detail($where);
+		$where = "salary_deduction_detail_id = " . $salary_deduction_detail_id;
+		$salary_deduction_detail_info = $this->spare_parts_model->get_salary_deduction_detail_by_id($salary_deduction_detail_id);
 
 		$current_datetime = date('Y-m-d H:i:s');
 
-		$complete_remarks = $warehouse_claim_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		// TODO json_encode remarks
+		if ($is_reprocess_item == 0) {			
+			$complete_remarks = $salary_deduction_detail_info->remarks . "[" . $current_datetime . "] " . $remarks . "\n";
+		} else {
+			$complete_remarks = "[" . $current_datetime . "] " . $remarks . "\n";
+		}	
 
 		// update status to DELETED
 		$data = array(
@@ -1189,7 +1339,15 @@ class Warehouse_claim extends Admin_Controller {
 			'update_timestamp' => $current_datetime
 			);
 
-		$this->spare_parts_model->update_warehouse_claim_detail($data, $where);
+		if ($is_reprocess_item == 0) {			
+			$this->spare_parts_model->update_salary_deduction_detail($data, $where);
+		} else {
+			
+			$request_item_id = $this->input->post("request_item_id");
+		
+			$where = "reprocessed_item_id = " . $request_item_id;
+			$this->spare_parts_model->update_reprocessed_item($data, $where);
+		}	
 
 		$html = "Item is now successfully removed from request.";
 		$title = "Delete An Item :: Item Request";
@@ -1199,6 +1357,122 @@ class Warehouse_claim extends Admin_Controller {
 
 	}
 
+	public function reprocess_items($salary_deduction_id = 0)
+	{
+
+
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+		
+		$salary_deduction_details = $this->spare_parts_model->get_salary_deduction_by_id($salary_deduction_id);
+
+		if (!empty($salary_deduction_details)) {
+			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($salary_deduction_details->id_number);
+			
+			$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
+			$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
+
+			$this->template->requester_details = $requester_details;
+			$this->template->department_details = $department_details;
+			$this->template->position_details = $position_details;
+
+			$request_item_amount_total = get_items_total_amount($salary_deduction_details->request_code);		
+			$this->template->request_item_amount_total = $request_item_amount_total;
+
+			// get request items
+			$where = "status NOT IN ('CANCELLED', 'DELETED') AND salary_deduction_id = " . $salary_deduction_id;
+			$salary_deduction_detail_details = $this->spare_parts_model->get_salary_deduction_detail($where);
+
+			$json_items = array();
+			for($k = 0;$k<count($salary_deduction_detail_details);$k++)
+			{
+				$salary_deduction_detail_id = $salary_deduction_detail_details[$k]->salary_deduction_detail_id;
+				
+				//$total_amount = $total_amount + ($item_qty[$k]*$item_price[$k]);
+				$po_items = array(
+						'salary_deduction_detail_id' => $salary_deduction_detail_id,
+						'item_id' => $salary_deduction_detail_details[$k]->item_id,
+						'srp' => $salary_deduction_detail_details[$k]->srp,
+						'discount' => $salary_deduction_detail_details[$k]->discount,
+						'discount_amount' => $salary_deduction_detail_details[$k]->discount_amount,
+						'good_quantity' => $salary_deduction_detail_details[$k]->good_quantity,
+						'bad_quantity' => $salary_deduction_detail_details[$k]->bad_quantity,
+						'total_amount' => $salary_deduction_detail_details[$k]->total_amount,
+						'remarks' => $salary_deduction_detail_details[$k]->remarks,
+
+				);
+				//creates an array of the items that will be json encoded later
+				array_push($json_items, $po_items);
+
+			}
+
+			$this->template->json_items = json_encode($json_items);
+
+			$json_reprocessed_items = array();			
+			$where = "action IN ('RETURN', 'CHARGE') AND status NOT IN ('CANCELLED', 'DELETED') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $salary_deduction_id;
+			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);			
+
+			for($l = 0;$l<count($reprocessed_item_details);$l++)
+			{				
+
+				$salary_deduction_detail_details = $this->spare_parts_model->get_salary_deduction_detail_by_id($reprocessed_item_details[$l]->request_detail_id);
+
+				$ri_items = array(
+						'request_item_id' => $reprocessed_item_details[$l]->reprocessed_item_id,
+						'salary_deduction_detail_id' => $reprocessed_item_details[$l]->request_detail_id,
+						'item_id' => $salary_deduction_detail_details->item_id,
+						'srp' => $salary_deduction_detail_details->srp,
+						'id_number' => $reprocessed_item_details[$l]->id_number,
+						'discount' => $reprocessed_item_details[$l]->charge_discount,
+						'discount_amount' => $reprocessed_item_details[$l]->charge_discount_amount,
+						'good_quantity' => $reprocessed_item_details[$l]->good_quantity,
+						'bad_quantity' => $reprocessed_item_details[$l]->bad_quantity,
+						'total_amount' => $reprocessed_item_details[$l]->total_amount,
+						'status' => $reprocessed_item_details[$l]->status,
+						'action' => $reprocessed_item_details[$l]->action,
+						'remarks' => $reprocessed_item_details[$l]->remarks,
+				);
+
+				//creates an array of the items that will be json encoded later
+				array_push($json_reprocessed_items, $ri_items);
+
+			}
+			
+			$this->template->json_reprocessed_items = json_encode($json_reprocessed_items);
+
+		}
+
+		$where = "status IN ('FORWARDED') AND department_module_id = " . $department_module_details->department_module_id . " AND request_id = " . $salary_deduction_id;
+		$forwarded_to_wh = $this->spare_parts_model->get_reprocessed_item($where);			
+
+		$is_forwarded = 0;
+		if (count($forwarded_to_wh) > 0) {
+			$is_forwarded = 1;
+		}
+
+
+		$items = $this->spare_parts_model->get_item(null,null,"sku ASC");
+		$items_array = array();
+		
+		foreach($items as $i)
+		{
+			$items_array[$i->item_id] = $i;
+		}
+
+		$motorcycle_brandmodel_details = $this->warehouse_model->get_motorcycle_brand_model_class_view('','', 'brand_name', 'motorcycle_brand_model_id, brand_name, model_name');
+		
+		$warehouse_details = $this->warehouse_model->get_warehouse("is_active = 1", '', '', 'warehouse_id, warehouse_name, description, manager_id_number, encoder_id_number');	
+
+		//$this->template->return_url = $return_url;
+		$this->template->items = $items_array;
+		$this->template->is_forwarded = $is_forwarded;
+		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
+		$this->template->warehouse_details = $warehouse_details;
+		$this->template->salary_deduction_details = $salary_deduction_details;
+		$this->template->department_module_details = $department_module_details;				
+		$this->template->view("salary_deduction/reprocess_items");
+
+
+	}
 
 	public function reports()
 	{
@@ -1254,7 +1528,7 @@ class Warehouse_claim extends Admin_Controller {
 	      	$this->template->from_date = $from_date;
 	      	$this->template->to_date = $to_date;
 	      	$this->template->display_data = $display_data;
-	      	$this->template->view('warehouse_claim/reports');
+	      	$this->template->view('salary_deduction/reports');
 	    }
 	}
 
@@ -1265,16 +1539,16 @@ class Warehouse_claim extends Admin_Controller {
 	    $where = $data->where;
 	    $current_date = date('Y-m-d');
     
-		$total_records = $this->spare_parts_model->get_warehouse_claim_count($where);
+		$total_records = $this->spare_parts_model->get_salary_deduction_count($where);
 
 		$config = array(
-			'pagination_url' => '/spare_parts/warehouse_claim/generate_report',
+			'pagination_url' => '/spare_parts/salary_deduction/generate_report',
 			'total_items' => $total_records,
 			'per_page' => 10,
 			'uri_segment' => 4,
 		);
 		$this->pager->set_config($config);
-		$warehouse_claim_details = $this->spare_parts_model->get_warehouse_claim($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");
+		$salary_deduction_details = $this->spare_parts_model->get_salary_deduction($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");
 
 		$html = "<table class='table table-bordered table-condensed'>
 			<thead>
@@ -1291,11 +1565,11 @@ class Warehouse_claim extends Admin_Controller {
 			</thead>
 			<tbody>";
 		
-		if(empty($warehouse_claim_details))
+		if(empty($salary_deduction_details))
 		{
 			$html .= "<tr><td colspan='7' style='text-align:center'>No records found.</td></tr>";
 		}
-		foreach($warehouse_claim_details as $wrd)
+		foreach($salary_deduction_details as $wrd)
 		{
 			
 			$html .= "<tr>
@@ -1334,15 +1608,15 @@ class Warehouse_claim extends Admin_Controller {
 	    $this->load->library('PHPExcel/IOFactory');
 	    $objPHPExcel = new PHPExcel();
 
-	    $warehouse_claim_details = $this->spare_parts_model->get_warehouse_claim($where, null, "insert_timestamp DESC");
+	    $salary_deduction_details = $this->spare_parts_model->get_salary_deduction($where, null, "insert_timestamp DESC");
 
-	    if (!empty($warehouse_claim_details))
+	    if (!empty($salary_deduction_details))
 	    {
 	      	$objPHPExcel->getProperties()->setTitle("export")->setDescription("none");
 	      	$start_column_num = 4;
       	
 	      	$objPHPExcel->setActiveSheetIndex(0);
-	      	$objPHPExcel->getActiveSheet()->setTitle("Warehouse Request List");
+	      	$objPHPExcel->getActiveSheet()->setTitle("Salary Deduction List");
       
 	      	// auto resize columns
 	      	$objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
@@ -1363,7 +1637,7 @@ class Warehouse_claim extends Admin_Controller {
 	      	$objPHPExcel->getActiveSheet()->getStyle('A' . $start_column_num . ':J' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
       
 	      	$header = "SPARE PARTS SYSTEM";
-			$header2 = "Warehouse Request List";
+			$header2 = "Salary Deduction List";
 			$header3 = "From " . $from_date . " to " . $to_date;
 			$print_date = date('M d, Y H:i:s');
 			$print_date_header = " (Printed On: {$print_date})";
@@ -1399,7 +1673,7 @@ class Warehouse_claim extends Admin_Controller {
       
 	      	$row = $start_column_num + 1;
 	      	$current_item_date = 0;
-	      	foreach ($warehouse_claim_details as $wrd)
+	      	foreach ($salary_deduction_details as $wrd)
 	      	{
 	        	$objPHPExcel->getActiveSheet()->getStyle('A' . $row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 	        	$objPHPExcel->getActiveSheet()->getStyle('B' . $row)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -1429,7 +1703,7 @@ class Warehouse_claim extends Admin_Controller {
 	    	$filename_date = $from_date . '_to_' . $to_date;
     
 	    header('Content-Type: application/vnd.ms-excel');
-	    header('Content-Disposition: attachment;filename="warehouse_claims_'.$filename_date.'.xls"');
+	    header('Content-Disposition: attachment;filename="salary_deductions_'.$filename_date.'.xls"');
 	    header('Cache-Control: max-age=0');   
 	    $objWriter = IOFactory::createWriter($objPHPExcel, 'Excel5');
 	    $objWriter->save('php://output');   

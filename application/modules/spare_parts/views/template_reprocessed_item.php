@@ -2,25 +2,26 @@
 <table class="table table-condensed table-bordered">
 	<thead>
 		<tr>
-			<th colspan="10" style="color:blue;font-size:16px">Reprocessed Items</th>
+			<th colspan="11" style="color:blue;font-size:16px">Reprocessed Items</th>
 			</tr>
 		<tr>
 			<th style=''>Action</th>			
-			<th style=''>Description</th>						
-			<th style='width:100px;'>Good Qty</th>
-			<th style='width:100px;'>Bad Qty</th>
-			<th style='width:100px;'>Recipient</th>
-			<th style='width:100px;'>Charge Discount</th>
-			<th style='width:100px;'>Charge Amount</th>			
-			<th style='width:120px;'>Total Amount</th>			
-			<th style='width:70px;'>Status</th>			
+			<th style='width:80em;'>Description</th>						
+			<th style=''>Good Qty</th>
+			<th style=''>Bad Qty</th>
+			<th style=''>Total Qty</th>
+			<th style=''>Recipient</th>
+			<th style=''>Charge Discount</th>
+			<th style=''>Charge Amount</th>			
+			<th style=''>Total Amount</th>			
+			<th style=''>Status</th>			
 			<th style=''>Remarks</th>
 		</tr>
 	</thead>
 	<tbody>
 		<?php 
 		if(empty($reprocessed_item_details)):?>
-			<tr><td colspan='10' style='text-align:center;'><strong>No Record Found</strong></td></tr>
+			<tr><td colspan='11' style='text-align:center;'><strong>No Record Found</strong></td></tr>
 		<?php else: ?>
 		<?php foreach ($reprocessed_item_details as $rid): 
 
@@ -36,7 +37,7 @@
 
 			$item_view_details = $this->spare_parts_model->get_item_view_by_id($request_detail_details->item_id);
 
-			$complete_description = "[" . $item_view_details->model_name . " / " . $item_view_details->brand_name . "] " . $item_view_details->description;
+			$complete_description = "[" . $item_view_details->sku . "][" . $item_view_details->model_name . " / " . $item_view_details->brand_name . "] " . $item_view_details->description;
 
 			$status_class = strtolower(trim($rid->status));			
 			$status_class = str_replace(" ", "-", $status_class);		
@@ -53,6 +54,7 @@
 			<td><?= $complete_description; ?></td>
 			<td style="text-align:right;"><?= number_format($rid->good_quantity, 2); ?></td>
 			<td style="text-align:right;"><?= number_format($rid->bad_quantity, 2); ?></td>
+			<td style="text-align:right;"><?= number_format(($rid->good_quantity + $rid->bad_quantity), 2)  ?></td>
 			<td style="text-align:right;"><?= $recipient_name; ?></td>
 			<td style="text-align:right;"><?= $rid->charge_discount; ?></td>
 			<td style="text-align:right;"><?= number_format($rid->charge_discount_amount, 2); ?></td>

@@ -1,7 +1,7 @@
 <?php
 
 	//echo css('inventory.css');
-	echo js('apps/spareparts.js');
+	//echo js('apps/spareparts.js');
 
 ?>
 <style type="text/css">
@@ -306,6 +306,7 @@ else
 						<th class="unit">Unit</th>
 						<th class="qty">Good Qty</th>
 						<th class="qty">Bad Qty</th>
+						<th class="qty">Total Qty</th>
 						<th class="price">SRP</th>
 						<th class="discount">Disc.(%)</th>
 						<th class="discount_price">Disc. Price</th>
@@ -334,8 +335,9 @@ else
 								?>
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->description)?></td>
 						<td class="item"><?=set_value('temp_item['.$i.']',$itemInfo->unit)?></td>
-						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']))?></td>
-						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']))?></td>
+						<td class="qty"><?=number_format(set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']), 2)?></td>
+						<td class="qty"><?=number_format(set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity']), 2)?></td>
+						<td class="qty"><?=number_format((set_value('item_good_qty['.$i.']',$temp[$i]['good_quantity']) + set_value('item_bad_qty['.$i.']',$temp[$i]['bad_quantity'])), 2)?></td>
 						<td class="price"><?=number_format(set_value('item_price['.$i.']',$temp[$i]['srp']),2)?></td>
 						<td class="discount"><?=number_format(set_value('discount['.$i.']',$temp[$i]['discount']))?></td>
 						<td class="discount_price"><?=number_format(set_value('discount_price['.$i.']',$temp[$i]['discount_amount']),2)?></td>
@@ -398,6 +400,7 @@ else
 		<td class="unit"><%= item_unit_name %></td>\n\
 		<td class="qty"><%= item_good_qty %></td>\n\
 		<td class="qty"><%= item_bad_qty %></td>\n\
+		<td class="qty"><%= item_total_qty %></td>\n\
 		<td class="price"><%= item_price %></td>\n\
 		<td class="qty"><%= item_discount %></td>\n\
 		<td class="qty"><%= item_discount_price %></td>\n\
@@ -605,7 +608,59 @@ else
 			return;				
 		}
 
-		if ((($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) ||
+		var _hasError = 0;
+		var input_errors = "";
+		var item_name = "";
+
+		if (($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) {
+			_hasError = 1;
+			input_errors += "The Quantity fields are required. "			
+		}
+		
+		if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1)) {
+			_hasError = 1;
+			input_errors += "The Good Quantity field must contain an integer. "
+		}
+
+		if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1)) {
+			_hasError = 1;
+			input_errors += "The Bad Quantity field must contain an integer. "
+		}
+
+		if (($('input[name="add_item_good_qty"]').val() <= 0) && ($('input[name="add_item_bad_qty"]').val() <= 0)) {
+			_hasError = 1;
+			input_errors += "The Quantity fields should be greater than 0. "			
+		}
+		
+		if($('input[name="add_item_name"]').val() == '' || $('input[name="add_item_name"]').val() == 'new') {
+			_hasError = 1;
+			input_errors += "The Item field is required. ";
+		}			
+
+		$('#input_errors').html('<p>'+input_errors+'</p>');
+
+		if (_hasError == 1) {
+			return false;
+		} else {
+
+			var item_name = "";
+			if($('#search_item').val() == 'add[]')
+			{
+				item_name = $('input[name="new_item_name"]').val();
+			}
+			else
+			{
+				item_name = $('#search_item').val();
+			}
+			$('#input_errors').html('');
+
+			var good_qty = $('input[name="add_item_good_qty"]').val();
+			var bad_qty = $('input[name="add_item_bad_qty"]').val();
+
+			good_qty = good_qty.replace(new RegExp('[,]', 'gi'), '');
+			bad_qty = bad_qty.replace(new RegExp('[,]', 'gi'), '');
+
+		/*if ((($('input[name="add_item_good_qty"]').val() == '') && ($('input[name="add_item_bad_qty"]').val() == '')) ||
 			$('select[name="add_item_unit"]').val() == '' ||
 			$('input[name="add_item_name"]').val() == '' ||
 			$('input[name="add_item_price"]').val() == '')
@@ -616,11 +671,13 @@ else
 			{
 				input_errors += "The Quantity fields are required. ";
 			}
-			else if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1))
+			
+			if(!(_.isNumber($('input[name="add_item_good_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_good_qty"]').val() * 1))
 			{
 				input_errors += "The Good Quantity field must contain an integer. "
 			}
-			else if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1))
+			
+			if(!(_.isNumber($('input[name="add_item_bad_qty"]').val() * 1)) || _.isNaN($('input[name="add_item_bad_qty"]').val() * 1))
 			{
 				input_errors += "The Bad Quantity field must contain an integer. "
 			}
@@ -670,19 +727,34 @@ else
 				});
 				item_error_modal.show();
 				return;
-			}
+			} else {
+
+				var _hasError = 0;
 			
-			if ((good_qty == '0') && (bad_qty == '0')) 
-			{
-				input_errors = "One of the Quantity fields must be greater than zero. ";
-				var item_error_modal = b.modal.create({
-					title: "Error :: Item Request",
-					width: 450,
-					html: "<p>There was an error in your request.</p><p>"+input_errors+"</p>"
-				});
-				item_error_modal.show();
-				return;				
-			}
+				if ((good_qty <= 0) && (bad_qty <= 0)) {
+					// both
+					input_errors = "Quantity fields must be greater than zero. ";
+					_hasError = 1;
+				} else if ((good_qty < 0) && (bad_qty > 0)) {
+					// good only
+					input_errors = "Good Quantity field must be greater than zero. ";
+					_hasError = 1;
+				} else if ((good_qty > 0) && (bad_qty < 0)) {
+					// bad only
+					input_errors = "Bad Quantity field must be greater than zero. ";
+					_hasError = 1;
+				}
+				
+				if (_hasError == 1) {
+					var item_error_modal = b.modal.create({
+						title: "Error :: Item Request",
+						width: 450,
+						html: "<p>There was an error in your request.</p><p>"+input_errors+"</p>"
+					});
+					item_error_modal.show();
+					return;				
+				}			
+			}*/
 
 			$('input[name="add_item_good_qty"]').val(good_qty);
 			$('input[name="add_item_bad_qty"]').val(bad_qty);
@@ -729,6 +801,7 @@ else
 							item_price: numberFormat($('input[name="add_item_price"]').val(),2),
 							item_good_qty: numberFormat($('input[name="add_item_good_qty"]').val(),2),
 							item_bad_qty: numberFormat($('input[name="add_item_bad_qty"]').val(),2),
+							item_total_qty: numberFormat(($('input[name="add_item_good_qty"]').val() + $('input[name="add_item_bad_qty"]').val()),2),
 							item_discount: numberFormat($('select[name="add_item_discount"]>option:selected').text()) + '%',
 							item_discount_price: numberFormat($('input[name="add_item_discount_price"]').val(),2),
 							item_total_amount: data.data.item_total_amount,
@@ -758,8 +831,7 @@ else
 
 						errorCreateRequestModal = b.modal.new({
 							title: data.data.title,
-							width:450,
-							//disableClose: true,
+							width:450,							
 							html: data.data.html,
 						});
 						errorCreateRequestModal.show();	
@@ -770,8 +842,7 @@ else
 			})
 		}
 	});
-	
-
+		
 	$(".rmv_wr_item").live('click',function(){
 
 		var warehouse_request_detail_id = $(this).parent().attr("data");

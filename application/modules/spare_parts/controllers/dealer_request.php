@@ -11,9 +11,9 @@ class Dealer_request extends Admin_Controller {
 		$this->load->model('spare_parts_model');
 		$this->load->model('human_relations_model');
 		$this->load->model('warehouse_model');
-		$this->load->library('pager');	
+		$this->load->library('pager');		
 		$this->load->helper("spare_parts_helper");
-		$this->load->helper("breadcrumb_helper");	
+		$this->load->helper("breadcrumb_helper");
 
 		$this->db_spare_parts = $this->load->database('spare_parts', TRUE);
 
@@ -22,14 +22,7 @@ class Dealer_request extends Admin_Controller {
 	public $segment_name = "dealer_request";
 
 	public function index()
-	{
-		//$test_id = abs($this->input->get('test_id'));		
-
-		//$db_spare_parts = $this->load->database('spare_parts', TRUE);
-
-		//$query = $db_spare_parts->select('sku, good_quantity, bad_quantity')->get('is_item');
-  		//var_dump($query);			
-
+	{		
 		$this->template->view('dealer_request/dashboard');
 	}
 
@@ -75,11 +68,13 @@ class Dealer_request extends Admin_Controller {
 		}
 
 		if (empty($search_status)) {
-			$where = "status IN ('FOR APPROVAL', 'APPROVED')";
+			$where = "status IN ('FOR APPROVAL', 'APPROVED', 'DENIED', 'CANCELLATION-FOR APPROVAL', 'CANCELLATION-APPROVED', 'CANCELLATION-DENIED')";
+			//$where = "";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('FOR APPROVAL', 'APPROVED')";
+				$where = "status IN ('FOR APPROVAL', 'APPROVED', 'DENIED', 'CANCELLATION-FOR APPROVAL', 'CANCELLATION-APPROVED', 'CANCELLATION-DENIED')";
+				//$where = "";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}			
@@ -114,11 +109,9 @@ class Dealer_request extends Admin_Controller {
 		$this->template->search_by = $search_by;
 		$this->template->search_text = $search_text;
 		$this->template->search_url = $search_url;
-		$this->template->transfers = $transfers;
-		
+		$this->template->transfers = $transfers;		
 		$this->template->view('dealer_request/approval');	
 		
-
 	}	
 
 
@@ -138,11 +131,11 @@ class Dealer_request extends Admin_Controller {
 
 		} else {
 
-			if ($is_approved == 'yes') {
-
-				$html = "You are about to approve the Dealer Request with Request Code: <strong>" . $dealer_request_code . "</strong>. Do you want to continue?";
+			if ($is_approved == 'yes') {							
+				$html = "You are about to approve the <b>" . $dealer_request->status . "</b> Dealer Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/><br/>Do you want to continue?";
+				$title = "Confirm Approval :: " . $dealer_request_code;
 			} else {
-				$html = "<p>You are about to deny the Dealer Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
+				$html = "<p>You are about to deny the <b>" . $dealer_request->status . "</b> Dealer Request with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
 								<span><strong>Reason/Remarks:</strong></span></br>
 								<input id='txt-remarks' style='width:400px;'/><br/>
@@ -150,9 +143,8 @@ class Dealer_request extends Admin_Controller {
 							</div>	
 							<br/>
 							Do you want to continue?</p>";
-			}	
-
-			$title = "Confirm Approval :: " . $dealer_request_code;
+				$title = "Confirm Disapproval :: " . $dealer_request_code;			
+			}			
 				
 			$data = array (
 				'dealer_request_id' => $dealer_request_id,
@@ -190,11 +182,11 @@ class Dealer_request extends Admin_Controller {
 			if ($is_approved == 'no') {
 				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $dealer_request->remarks;
 
-				$data = array(					
+				$data = array(				
 					'approved_by' => $this->user->user_id,
 					'remarks' => $new_remarks,
 					'approve_timestamp' => $current_datetime
-				);
+				);			
 
 				if ($dealer_request->status == 'FOR APPROVAL') {
 
@@ -202,32 +194,30 @@ class Dealer_request extends Admin_Controller {
 					$return_html = return_reserved_items($dealer_request_code, 'DENIED', $remarks);
 					$data['status'] = "DENIED";
 
-				} else if ($dealer_request->status == 'FOR CANCELLATION') {
+				} else if ($dealer_request->status == 'CANCELLATION-FOR APPROVAL') {
 					
-					$return_html = return_reserved_items($dealer_request_code, 'DENIED (COMPLETED)', $remarks);
-					$data['status'] = "DENIED (COMPLETED)";					
+					$return_html = return_reserved_items($dealer_request_code, 'CANCELLATION-DENIED', $remarks);
+					$data['status'] = "CANCELLATION-DENIED";					
 				
 				}
 
-				$html = "You have denied the <b>" . $dealer_request->status . "</b> Warehouse Request with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$html = "You have denied the <b>" . $dealer_request->status . "</b> Dealer Request with Request Code: <strong>{$dealer_request_code}</strong>.";
 				$title = "Request Denied :: " . $dealer_request_code;			
-				
-				$this->return_json("1","Denied Dealer Request.",array("html" => $html, "title" => $title));		
 
 			} else {
-				// change status to APPROVED
-				$data = array(					
+
+				$data = array(						
 					'approved_by' => $this->user->user_id,					
 					'approve_timestamp' => $current_datetime
 				);
 
 				if ($dealer_request->status == 'FOR APPROVAL') {
 					$data['status'] = "APPROVED";
-				} else if ($dealer_request->status == 'FOR CANCELLATION') {
-					$data['status'] = "CANCELLED (COMPLETED)";
+				} else if ($dealer_request->status == 'CANCELLATION-FOR APPROVAL') {
+					$data['status'] = "CANCELLATION-APPROVED";
 				}
 				
-				$html = "You have successfully approved the <b>" . $dealer_request->status . "</b> Warehouse Request with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$html = "You have successfully approved the <b>" . $dealer_request->status . "</b> Dealer Request with Request Code: <strong>{$dealer_request_code}</strong>.";
 				$title = "Request Approved :: " . $dealer_request_code;
 			}
 			
@@ -246,7 +236,7 @@ class Dealer_request extends Admin_Controller {
 		$dealer_request_id = $this->input->post("dealer_request_id");
 		$dealer_request_code = $this->input->post("dealer_request_code");
 		$listing_action = $this->input->post("listing_action");
-			
+		
 		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);		
 
 		if (empty($dealer_request)) {		
@@ -266,7 +256,8 @@ class Dealer_request extends Admin_Controller {
 			$where = "department_module_id = ". $department_module_details->department_module_id ." AND request_id = ". $dealer_request_id ." AND status NOT IN ('CANCELLED')";		
 			$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where);
 
-			$data = array(				
+			$data = array(
+				//'dealer_request' => $dealer_request,
 				'segment_request_summary' => $dealer_request,
 				'segment_request_details' =>$dealer_request_details,
 				'listing_action' => $listing_action,
@@ -275,7 +266,7 @@ class Dealer_request extends Admin_Controller {
 				'reprocessed_item_details' => $reprocessed_item_details,
 				'department_module_details' => $department_module_details,
 			);
-		
+
 			$html = $this->load->view("template_view_details",$data,true);
 			 
 			$title = "View Details :: " . $dealer_request_code;
@@ -304,13 +295,13 @@ class Dealer_request extends Admin_Controller {
 
 			// get all personal_information_id in pm_personal_information
 			$where = "complete_name LIKE '%" . $search_text . "%'";
-			$dealer_details = $this->spare_parts_model->get_dealer($where, NULL, NULL, "old_dealer_code, complete_name");
+			$personal_information_details = $this->human_relations_model->get_personal_information($where, NULL, NULL, "personal_information_id, complete_name");
 
-			/*$where_id_numbers = "";
+			$where_id_numbers = "";
 			$count_id_num = 0;
 			// get the id_numbers within the personal_information_id results above
-			if (count($dealer_details) > 0) {
-				foreach ($dealer_details as $dd) {
+			if (count($personal_information_details) > 0) {
+				foreach ($personal_information_details as $pid) {
 					
 					$employment_information_details = $this->human_relations_model->get_employment_information("personal_information_id = ". $pid->personal_information_id);
 					
@@ -325,32 +316,33 @@ class Dealer_request extends Admin_Controller {
 						}
 					}
 				}	
-			}*/
+			}
 		} 
 
 		if (empty($search_status)) {
-			$where = "status IN ('PENDING', 'FOR APPROVAL', 'APPROVED', 'DENIED', 'PROCESSING', 'COMPLETED', 'CANCELLED', 'FORWARDED')";
+			//$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+			$where = "";
 		} else {
 
 			if ($search_status == 'ALL') {
-				$where = "status IN ('PENDING', 'FOR APPROVAL', 'APPROVED', 'DENIED', 'PROCESSING', 'COMPLETED', 'CANCELLED', 'FORWARDED')";
+				//$where = "status IN ('PENDING', 'FOR APPROVAL', 'FOR CANCELLATION', 'APPROVED', 'DENIED', 'DENIED (COMPLETED)', 'PROCESSING', 'ON PROCESS', 'COMPLETED', 'CANCELLED', 'CANCELLED (COMPLETED)', 'FORWARDED')";
+				$where = "";
 			} else {
 				$where = "status = '". $search_status ."'";
 			}
 				
 			if ($where != NULL) {
-				//if ($search_by == 'name')
-				//	$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
-				//else
+				if ($search_by == 'name')
+					$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
+				else
 					$where = $where . " AND ". $search_by ." LIKE '%" . $search_text . "%'";
 			} else {
-				//if ($search_by == 'name')
-				//	$where = $request_search_by ." IN (" . $where_id_numbers . ")";
-				//else
+				if ($search_by == 'name')
+					$where = $request_search_by ." IN (" . $where_id_numbers . ")";
+				else
 					$where = $search_by ." LIKE '%" . $search_text . "%'";
 			}
 		}	
-		
 
 		// set pagination data
 		$config = array(
@@ -393,21 +385,21 @@ class Dealer_request extends Admin_Controller {
 
 			if ($listing_action == 'for approval') {
 				$title = "File For Approval :: " . $dealer_request_code;
-				$html = "You are about forward the request for approval with Request Code: <strong>" . $dealer_request_code . "</strong>. Do you want to continue?";
+				$html = "You are about to forward the request for approval with Request Code: <strong>" . $dealer_request_code . "</strong>. Do you want to continue?";
 			}
 
-			if ($listing_action == 'forward to warehouse') {
+			if (($listing_action == 'forward to warehouse') || ($listing_action == 'cancellation-forward to warehouse')) {
 				$title = "Forward To Warehouse :: " . $dealer_request_code;
 				$html = "<p>You are about to forward the request to Warehouse with Request Code: <strong>" . $dealer_request_code . "</strong>. <br/>							
 							<br/>
 							Do you want to continue?</p>";
 			}
 
-			if ($listing_action == 'assign po') {
-				$title = "Assign P.O. Number :: " . $dealer_request_code;
+			if ($listing_action == 'assign mtr') {
+				$title = "Assign MTR Number :: " . $dealer_request_code;
 				$html = "<p>Enter a Purchase Order Number for Request Code : <strong>" . $dealer_request_code . "</strong>. <br/>
 							<div id='reasonremarks-container'>
-								<span><strong>P.O. Number:</strong></span></br>
+								<span><strong>MTR Number:</strong></span></br>
 								<input id='txt-mtrnumber' style='width:100px;' maxlength='10' placeholder='1234567890' /><br/>
 								<span id='error-mtrnumber' style='color:red;display:none'>P.O. Number is required.</span>
 							</div>	
@@ -425,7 +417,7 @@ class Dealer_request extends Admin_Controller {
 							</div>	
 							<br/>
 							Do you want to continue?</p>";
-			}	
+			}
 
 			if ($listing_action == 'cancel completed') {
 				$title = "For Approval - Cancel Completed Request :: " . $dealer_request_code;
@@ -451,7 +443,7 @@ class Dealer_request extends Admin_Controller {
 		$dealer_request_code = $this->input->post("dealer_request_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");
-		$purchase_order_number =  abs($this->input->post("purchase_order_number"));
+		$mtr_number =  abs($this->input->post("mtr_number"));
 		
 		$dealer_request = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);		
 
@@ -469,6 +461,7 @@ class Dealer_request extends Admin_Controller {
 			if ($listing_action == 'cancel') {
 				$new_remarks = "[" . $current_datetime . "] " . $remarks . "\n" . $dealer_request->remarks;
 
+				// from spare_parts helper
 				$return_html = return_reserved_items($dealer_request_code, 'CANCELLED', $remarks);
 
 				$data = array(
@@ -479,7 +472,7 @@ class Dealer_request extends Admin_Controller {
 				);
 
 				$html = "You have cancelled the Dealer Request Code: <strong>{$dealer_request_code}</strong>.";
-				$title = "Cancelled :: " . $dealer_request_code;
+				$title = "Cancelled :: " . $dealer_request_code;	
 
 			} else if ($listing_action == 'for approval') {
 
@@ -498,8 +491,9 @@ class Dealer_request extends Admin_Controller {
 				// change status to FORWARDED
 				$data = array(
 					'status' => "FORWARDED",
-					'approved_by' => $this->user->user_id,
-					'approve_timestamp' => $current_datetime
+					'approved_by' => $this->user->user_id,					
+					'approve_timestamp' => $current_datetime,
+					'purchase_order_number' =>	 $mtr_number
 				);
 
 				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$dealer_request_code}</strong>.";
@@ -514,22 +508,47 @@ class Dealer_request extends Admin_Controller {
 				$where = "transaction_number = '{$dealer_request_code}'";
 				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);
 
-			} else if ($listing_action == 'assign po') {
+			} else if ($listing_action == 'cancellation-forward to warehouse') {
+
+				// change status to FORWARDED
+				$data = array(
+					'status' => "CANCELLATION-FORWARDED",
+					'approved_by' => $this->user->user_id,					
+					'approve_timestamp' => $current_datetime,
+					'purchase_order_number' =>	 $mtr_number
+				);
+
+				$html = "You have successfully forwaded the request to warehouse with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Forward To Warehouse :: " . $dealer_request_code;
+
+				//spare_parts_helper
+				$return_val = return_items_to_process($dealer_request_id, $dealer_request_code);
+
+				/*$data_reservation = array(
+					'status' => "PENDING",				
+					'update_timestamp' => $current_datetime
+				);
+
+				$where = "transaction_number = '{$dealer_request_code}'";
+				$this->spare_parts_model->update_warehouse_reservation($data_reservation, $where);	
+				*/
+
+			} else if ($listing_action == 'assign mtr') {
 
 				// change status to FOR APPROVAL
 				$data = array(					
 					'update_timestamp' => $current_datetime,
-					'purchase_order_number' => $purchase_order_number
+					'purchase_order_number' => $mtr_number
 				);
 
-				$html = "You have successfully assigned a P.O. Number to the request with Request Code: <strong>{$dealer_request_code}</strong>.";
-				$title = "Assign P.O. Number :: " . $dealer_request_code;
+				$html = "You have successfully assigned a MTR Number to the request with Request Code: <strong>{$dealer_request_code}</strong>.";
+				$title = "Assign MTR Number :: " . $dealer_request_code;
 			
 			}
 
 			if ($listing_action == 'cancel completed') {
 				$data = array(
-					'status' => "FOR CANCELLATION",
+					'status' => "CANCELLATION-FOR APPROVAL",
 					'approved_by' => $this->user->user_id,					
 					'approve_timestamp' => $current_datetime
 				);
@@ -547,6 +566,9 @@ class Dealer_request extends Admin_Controller {
 
 		return;	
 	}
+
+
+
 
 	
 	public function download_check()
@@ -615,7 +637,7 @@ class Dealer_request extends Admin_Controller {
 	{
 		$start_date = trim($this->input->post("start_date"));
 		$end_date = trim($this->input->post("end_date"));
-		
+
 		$current_timestamp = date('Y-m-d H:i:s');
 
 		$return_html = "<span>Request Completed.<br/><br/>You may now download the generated spreadsheet file.</span>";
@@ -625,7 +647,7 @@ class Dealer_request extends Admin_Controller {
 
 	}
 
-	function export_xls($start_date,$end_date)
+	function export_xls($start_date,$end_date, $search_status = NULL, $search_by = NULL, $search_text = NULL)
 	{
 		$this->load->library('PHPExcel');
         $this->load->library('PHPExcel/IOFactory');
@@ -642,7 +664,64 @@ class Dealer_request extends Admin_Controller {
 
 			$worksheet = $objPHPExcel->setActiveSheetIndex(0);
 
-			$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
+			//$where = "insert_timestamp BETWEEN '$start_date' AND '$end_date'";
+
+			if ($search_by == 'name') {
+				$request_search_by = "id_number";
+
+				// get all personal_information_id in pm_personal_information
+				$where = "complete_name LIKE '%" . $search_text . "%'";
+				$personal_information_details = $this->human_relations_model->get_personal_information($where, NULL, NULL, "personal_information_id, complete_name");
+
+				$where_id_numbers = "";
+				$count_id_num = 0;
+				// get the id_numbers within the personal_information_id results above
+				if (count($personal_information_details) > 0) {
+					foreach ($personal_information_details as $pid) {
+						
+						$employment_information_details = $this->human_relations_model->get_employment_information("personal_information_id = ". $pid->personal_information_id);
+						
+						if (count($employment_information_details) > 0) {
+							foreach ($employment_information_details as $eid) {
+								if ($count_id_num == 0)
+									$where_id_numbers = "'" . $eid->id_number . "'";
+								else 		
+									$where_id_numbers = $where_id_numbers . ", '" . $eid->id_number . "'";
+
+								$count_id_num++;
+							}
+						}
+					}	
+				}
+			}
+
+			if (empty($search_status)) {
+				//$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+				$where = "";
+			} else {
+
+				if ($search_status == 'ALL') {
+					//$where = "status IN ('PENDING','FOR APPROVAL', 'APPROVED', 'FORWARDED', FOR CANCELLATION', 'CANCELLED', 'CANCELLED (COMPLETED)', 'DENIED', 'DENIED (COMPLETED)', 'COMPLETED')";
+					$where = "";
+				} else {
+					$where = "status = '". $search_status ."'";
+				}			
+			
+				if ($where != NULL) {
+					if ($search_by == 'name')
+						$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
+					else
+						$where = $where . " AND ". $search_by ." LIKE '%" . $search_text . "%'";
+				} else {
+					if ($search_by == 'name')
+						$where = $request_search_by ." IN (" . $where_id_numbers . ")";
+					else
+						$where = $search_by ." LIKE '%" . $search_text . "%'";
+				} 	
+			}	
+
+			$where .= " AND insert_timestamp BETWEEN '{$start_date}' AND '{$end_date}'";
+
 			$dealer_request_count = $this->spare_parts_model->get_dealer_request_count($where);
 
 			$filename = "dealer_requests_" . str_replace("-", "", $start_date) . "-" . str_replace("-", "", $end_date) . ".xls";
@@ -659,6 +738,7 @@ class Dealer_request extends Admin_Controller {
 			$worksheet->getStyle('E' . $start_column_num)->getFont()->setBold(true);
 			$worksheet->getStyle('F' . $start_column_num)->getFont()->setBold(true);
 			$worksheet->getStyle('G' . $start_column_num)->getFont()->setBold(true);
+			$worksheet->getStyle('H' . $start_column_num)->getFont()->setBold(true);
 
 			//center column names
 			$worksheet->getStyle('A' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
@@ -667,17 +747,19 @@ class Dealer_request extends Admin_Controller {
 			$worksheet->getStyle('D' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			$worksheet->getStyle('E' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			$worksheet->getStyle('F' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-			$worksheet->getStyle('G' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);			
+			$worksheet->getStyle('G' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+			$worksheet->getStyle('H' . $start_column_num)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
 			
 			//set column names
 			$worksheet->setCellValue('A1', "Dealer Requests from {$start_date} to {$end_date}");
 			$worksheet->setCellValue('A' . $start_column_num, 'Request Code');
 			$worksheet->setCellValue('B' . $start_column_num, 'Status');
-			$worksheet->setCellValue('C' . $start_column_num, 'Dealer ID');
-			$worksheet->setCellValue('D' . $start_column_num, 'Agent ID');
-			$worksheet->setCellValue('E' . $start_column_num, 'PO Number');
-			$worksheet->setCellValue('F' . $start_column_num, 'Remarks');
-			$worksheet->setCellValue('G' . $start_column_num, 'Date Created');
+			$worksheet->setCellValue('C' . $start_column_num, 'Requested By');
+			$worksheet->setCellValue('D' . $start_column_num, 'Motor Brand/Model');
+			$worksheet->setCellValue('E' . $start_column_num, 'Number of Items');
+			$worksheet->setCellValue('F' . $start_column_num, 'Warehouse');
+			$worksheet->setCellValue('G' . $start_column_num, 'Warehouse Approved By');
+			$worksheet->setCellValue('H' . $start_column_num, 'Date Created');
 			
 
 			$row = 4;
@@ -692,12 +774,13 @@ class Dealer_request extends Admin_Controller {
 				{
 
 					$worksheet->setCellValue('A'. $row, $dr->request_code);
-					$worksheet->setCellValue('A'. $row, $dr->status);
-					$worksheet->setCellValue('C'. $row, $dr->dealer_id);
-					$worksheet->setCellValue('D'. $row, $dr->agent_id);
-					$worksheet->setCellValue('E'. $row, $dr->purchase_order_number);
-					$worksheet->setCellValue('F'. $row, $dr->remarks);
-					$worksheet->setCellValue('G'. $row, $dr->insert_timestamp);
+					$worksheet->setCellValue('B'. $row, $dr->status);
+					$worksheet->setCellValue('C'. $row, $dr->id_number);
+					$worksheet->setCellValue('D'. $row, $dr->motorcycle_brand_model_id);
+					$worksheet->setCellValue('E'. $row, $dr->mtr_number);
+					$worksheet->setCellValue('F'. $row, $dr->warehouse_id);
+					$worksheet->setCellValue('G'. $row, $dr->id_number);
+					$worksheet->setCellValue('H'. $row, $dr->insert_timestamp);
 					
 					// auto resize columns
 					$worksheet->getColumnDimension('A')->setAutoSize(false);
@@ -707,6 +790,7 @@ class Dealer_request extends Admin_Controller {
 					$worksheet->getColumnDimension('E')->setAutoSize(true);
 					$worksheet->getColumnDimension('F')->setAutoSize(true);
 					$worksheet->getColumnDimension('G')->setAutoSize(true);
+					$worksheet->getColumnDimension('H')->setAutoSize(true);
 					$row++;
 				}
 			}
@@ -737,14 +821,14 @@ class Dealer_request extends Admin_Controller {
 		$dealer_request_details = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);
 
 		if (!empty($dealer_request_details)) {
-			$requester_details = $this->human_relations_model->get_employment_information_view_by_id($dealer_request_details->id_number);
+			$requester_details = $this->spare_parts_model->get_dealer_by_id($dealer_request_details->dealer_id);
 			
-			$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
-			$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
+			//$department_details = $this->human_relations_model->get_department_by_id($requester_details->department_id);
+			//$position_details = $this->human_relations_model->get_position_by_id($requester_details->position_id);
 
 			$this->template->requester_details = $requester_details;
-			$this->template->department_details = $department_details;
-			$this->template->position_details = $position_details;
+			//$this->template->department_details = $department_details;
+			//$this->template->position_details = $position_details;
 
 			// get request items
 			$where = "status NOT IN ('CANCELLED', 'DELETED') AND dealer_request_id = " . $dealer_request_id;
@@ -864,7 +948,7 @@ class Dealer_request extends Admin_Controller {
 		return;
 		
 	}
-
+	/*
 	public function search_item()
 	{
 		$search_key = $this->input->get_post('search_key');
@@ -952,7 +1036,7 @@ class Dealer_request extends Admin_Controller {
 		$this->return_json("ok","Ok.", array('items' => $return_items, 'keys' => $keys));
 		return;
 
-	}
+	}*/
 
 	public function create_request()
 	{
@@ -1124,6 +1208,8 @@ class Dealer_request extends Admin_Controller {
 			$total_amount = $total_amount + ($bad_quantity * $discount_amount);
 		}
 
+		$formatted_total_amount = number_format($total_amount, 2);
+
 		// add item to details table
 		$data_insert = array(
 				'dealer_request_id' => $active_dealer_request_id,
@@ -1152,12 +1238,15 @@ class Dealer_request extends Admin_Controller {
 
 		$this->db_spare_parts->query($sql);
 
+		$request_item_amount_total = get_items_total_amount($request_code);
+
 		$html = "<p>Item with SKU <strong>" . $item_details->sku . "</strong> has been added successfully!</p>";
 		$title = "Add Item :: Item Request";
 
-		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, 'active_dealer_request_detail_id' => $active_dealer_request_detail_id));
+		$this->return_json("1","Item Successfully Added", array("html" => $html, "title" => $title, "request_code" => $request_code, "overall_total_amount" => $request_item_amount_total->total_amount, 'active_dealer_request_detail_id' => $active_dealer_request_detail_id, 'item_total_amount' => $formatted_total_amount));
 		return;
 	}	
+
 
 	public function proceed_reprocess_item()
 	{
@@ -1199,14 +1288,25 @@ class Dealer_request extends Admin_Controller {
 
 		$dealer_request_detail_details = $this->spare_parts_model->get_dealer_request_detail_by_id($request_detail_id);
 
-		if ($dealer_request_detail_details->good_quantity < $good_quantity) {
+		// get remaining number of items available
+		$where = "request_detail_id = {$request_detail_id} AND department_module_id = {$department_module_details->department_module_id}
+		AND status NOT IN ('CANCELLED', 'DELETED')";
+		$reprocessed_item_details = $this->spare_parts_model->get_reprocessed_item($where, NULL, NULL, "SUM(good_quantity) AS good_quantity, SUM(bad_quantity) AS bad_quantity");
+		$reprocessed_item_details = $reprocessed_item_details[0];
+
+		$available_good_quantity = $dealer_request_detail_details->good_quantity - $reprocessed_item_details->good_quantity;
+		$available_bad_quantity = $dealer_request_detail_details->bad_quantity - $reprocessed_item_details->bad_quantity;
+
+		//var_dump($available_good_quantity . '|' .$available_bad_quantity);
+
+		if ($available_good_quantity < $good_quantity) {
 			$has_error = 1;
-			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $dealer_request_detail_details->good_quantity . "</strong> good quantities available.</p><br/>";
+			$good_error_message = "<p>The Good Quantity is greater than the actual request Good Items count. There are <strong>" . $available_good_quantity . "</strong> good quantities available.</p><br/>";
 		}
 
-		if ($dealer_request_detail_details->bad_quantity < $bad_quantity) {
+		if ($available_bad_quantity < $bad_quantity) {
 			$has_error = 1;
-			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $dealer_request_detail_details->bad_quantity . "</strong> bad quantities available.</p><br/>";
+			$bad_error_message = "<p>The Bad Quantity is greater than the actual request Bad Items count. There are <strong>" . $available_bad_quantity . "</strong> bad quantities available.</p><br/>";
 		}
 
 		if ($has_error == 1) {
@@ -1259,6 +1359,55 @@ class Dealer_request extends Admin_Controller {
 
 		$reprocessed_item_id = $this->spare_parts_model->insert_id();
 
+		$status_sql = "SELECT DISTINCT(action) 
+						FROM 
+							is_reprocessed_item 
+						WHERE 
+							department_module_id = {$department_module_details->department_module_id} 
+						AND 
+							request_id = {$dealer_request_detail_details->dealer_request_id} 
+						AND 
+							status NOT IN ('CANCELLED', 'DELETED') 
+						ORDER BY 
+							action DESC";
+
+		$tmp_status = array();
+		$has_charge = 0;
+		$has_return = 0;
+		
+		$query = $this->db_spare_parts->query($status_sql);
+		if(count($query->result_array()) > 0) {
+			$tmp_status = $query->result_object();			
+		}					
+
+		if (count($tmp_status) > 0) {
+			foreach ($tmp_status as $ts) {
+				//$new_status = $new_status . substr($ts->action, 0, 1);
+				if ($ts->action == 'RETURN')
+					$has_return = 1;
+				if ($ts->action == 'CHARGE')
+					$has_charge = 1; 
+			}
+		}
+		
+		if (($has_return == 0) && ($has_charge == 0)) {
+			$new_status = "COMPLETED";
+		} else if (($has_return == 0) && ($has_charge == 1)) {
+			$new_status = "COMPLETED-C";
+		} else if (($has_return == 1) && ($has_charge == 0)) {	
+			$new_status = "COMPLETED-R";
+		} else {
+			$new_status = "COMPLETED-RC";
+		}	
+
+		$current_datetime = date('Y-m-d H:i:s');		
+		$data_update  = array(
+				"update_timestamp" => $current_datetime,
+				"status" => $new_status,
+			);
+
+		$this->spare_parts_model->update_dealer_request($data_update, "dealer_request_id = " . $dealer_request_detail_details->dealer_request_id);
+
 		// get item details 
 		$item_details = $this->spare_parts_model->get_item_view_by_id($dealer_request_detail_details->item_id);
 
@@ -1271,6 +1420,7 @@ class Dealer_request extends Admin_Controller {
 		return;
 	}	
 
+
 	public function confirm_remove_item() {
 		$request_code = $this->input->post("request_code");		
 		$dealer_request_detail_id = $this->input->post("dealer_request_detail_id");
@@ -1282,7 +1432,7 @@ class Dealer_request extends Admin_Controller {
 
 		$item_view_details = $this->spare_parts_model->get_item_view_by_id($dealer_request_detail_info->item_id);
 		
-		$title = "Delete Item :: [SKU] " . $item_view_details->sku;
+		$title = "Remove Item :: [SKU] " . $item_view_details->sku;
 		$html = "<p>You are about to remove an item from Request Code: <strong>" . $request_code . "</strong>. <br/>
 					<label><strong>Model:</strong></label>&nbsp;&nbsp;" . $item_view_details->model_name . "
 					<label><strong>Brand:</strong></label>&nbsp;&nbsp;" . $item_view_details->brand_name . "
@@ -1303,14 +1453,17 @@ class Dealer_request extends Admin_Controller {
 		$dealer_request_id = $this->input->post("dealer_request_id");
 		$is_reprocess_item = $this->input->post("is_reprocess_item");
 		$dealer_request_detail_id = $this->input->post("dealer_request_detail_id");
-		$remarks = $this->input->post("remarks");
+		$remarks = $this->input->post("remarks");		
 
 		//$where = "dealer_request_id = '{$dealer_request_id}' AND item_id = '{$item_id}'";
 		//$dealer_request_detail = $this->spare_parts_model->get_dealer_request_detail($where);
+
+		$dealer_request_details = $this->spare_parts_model->get_dealer_request_by_id($dealer_request_id);
+
 		$where = "dealer_request_detail_id = " . $dealer_request_detail_id;		
 		$dealer_request_detail_info = $this->spare_parts_model->get_dealer_request_detail_by_id($dealer_request_detail_id);
 
-		$current_datetime = date('Y-m-d H:i:s');
+		$current_datetime = date('Y-m-d H:i:s');		
 
 		// TODO json_encode remarks
 		if ($is_reprocess_item == 0) {			
@@ -1318,22 +1471,79 @@ class Dealer_request extends Admin_Controller {
 		} else {
 			$complete_remarks = "[" . $current_datetime . "] " . $remarks . "\n";
 		}	
-
-		// update status to DELETED
-		$data = array(
-			'status' => 'DELETED',
-			'remarks' => $complete_remarks,
-			'update_timestamp' => $current_datetime
-			);
-
+		
 		if ($is_reprocess_item == 0) {			
-			$this->spare_parts_model->update_dealer_request_detail($data, $where);
+			
+			// from spare_parts_helper			
+			$return_html = return_reserved_items($dealer_request_details->request_code, 'DELETED', $remarks, $dealer_request_detail_id);			
+
 		} else {
+
+			// update status to DELETED
+			$data = array(
+				'status' => 'DELETED',
+				'remarks' => $complete_remarks,
+				'update_timestamp' => $current_datetime
+			);
 			
 			$request_item_id = $this->input->post("request_item_id");
 		
 			$where = "reprocessed_item_id = " . $request_item_id;
 			$this->spare_parts_model->update_reprocessed_item($data, $where);
+		}
+
+		// get department_module datails
+		$department_module_details = $this->spare_parts_model->get_department_module_by_segment_name($this->segment_name);
+
+		if ($is_reprocess_item == 1) {
+			// check status of Dealer Request
+			$status_sql = "SELECT DISTINCT(action) 
+							FROM 
+								is_reprocessed_item 
+							WHERE 
+								department_module_id = {$department_module_details->department_module_id} 
+							AND 
+								request_id = {$dealer_request_id} 
+							AND 
+								status NOT IN ('CANCELLED', 'DELETED') 
+							ORDER BY 
+								action DESC";
+
+			$tmp_status = array();
+			$has_charge = 0;
+			$has_return = 0;
+			
+			$query = $this->db_spare_parts->query($status_sql);
+			if(count($query->result_array()) > 0) {
+				$tmp_status = $query->result_object();			
+			}					
+
+			if (count($tmp_status) > 0) {
+				foreach ($tmp_status as $ts) {					
+					if ($ts->action == 'RETURN')
+						$has_return = 1;
+					if ($ts->action == 'CHARGE')
+						$has_charge = 1; 
+				}
+			}
+			
+			if (($has_return == 0) && ($has_charge == 0)) {
+				$new_status = "COMPLETED";
+			} else if (($has_return == 0) && ($has_charge == 1)) {
+				$new_status = "COMPLETED-C";
+			} else if (($has_return == 1) && ($has_charge == 0)) {	
+				$new_status = "COMPLETED-R";
+			} else {
+				$new_status = "COMPLETED-RC";
+			}	
+
+			$current_datetime = date('Y-m-d H:i:s');		
+			$data_update  = array(
+					"update_timestamp" => $current_datetime,
+					"status" => $new_status,
+				);
+
+			$this->spare_parts_model->update_dealer_request($data_update, "dealer_request_id = " . $dealer_request_id);
 		}	
 
 		$html = "Item is now successfully removed from request.";
@@ -1344,6 +1554,7 @@ class Dealer_request extends Admin_Controller {
 
 	}
 
+	
 	public function reprocess_items($dealer_request_id = 0)
 	{
 
@@ -1455,12 +1666,10 @@ class Dealer_request extends Admin_Controller {
 		$this->template->motorcycle_brandmodel_details = $motorcycle_brandmodel_details;
 		$this->template->warehouse_details = $warehouse_details;
 		$this->template->dealer_request_details = $dealer_request_details;
-		$this->template->department_module_details = $department_module_details;				
+		$this->template->department_module_details = $department_module_details;
+		$this->template->segment_name = $this->segment_name;
 		$this->template->view("dealer_request/reprocess_items");
-
-
 	}
-
 
 	public function reports()
 	{
