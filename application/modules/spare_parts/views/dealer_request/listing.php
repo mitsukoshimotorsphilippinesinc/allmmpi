@@ -3,7 +3,7 @@
 ?>
 
 <?= $breadcrumb_container; ?>
-<div class='alert alert-danger'><h2>Request List<a href='/spare_parts/dealer_request/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;display:none;" title='Download'><i class='icon-download' disabled="disabled"></i>&nbsp;Download Result</a></h2></div>
+<div class='alert alert-danger'><h2>Request List<a href='/spare_parts/dealer_request/add' class='btn btn-small btn-default'id="add-btn" style="float:right;margin-right:-30px;margin-top:5px;" title='Add New'><i class='icon-plus'></i>&nbsp;Add New</a>&nbsp;&nbsp;<a class='btn btn-small btn-default'id="download-btn" style="float:right;margin-top:5px;" title='Download' disabled="disabled"><i class='icon-download'></i>&nbsp;Download Result</a></h2></div>
 
 <br>
 
@@ -11,30 +11,24 @@
 	<form id='search_details' method='get' action =''>
 
 		<strong>Status:&nbsp;</strong>
-		<select name="search_status" id="search_status" style="width:250px;margin-left:20px" value="<?= $search_status ?>">
+		<select name="search_status" id="search_status" style="width:150px;margin-left:20px" value="<?= $search_status ?>">
 			<option value="ALL">ALL</option>						
 			<option value="APPROVED">APPROVED</option>
 			<option value="CANCELLED">CANCELLED</option>
-			<option value="CANCELLATION-APPROVED">CANCELLATION-APPROVED</option>
-			<option value="CANCELLATION-DENIED">CANCELLATION-DENIED</option>
-			<option value="CANCELLATION-COMPLETED">CANCELLATION-COMPLETED</option>
-			<option value="CANCELLATION-FORWARDED">CANCELLATION-FORWARDED</option>
-			<option value="CANCELLATION-FOR APPROVAL">CANCELLATION-FOR APPROVAL</option>
+			<option value="CANCELLED (COMPLETED">CANCELLED (COMPLETED)</option>
 			<option value="COMPLETED">COMPLETED</option>
-			<option value="COMPLETED-C">COMPLETED W/ CHARGE</option>
-			<option value="COMPLETED-R">COMPLETED W/ RETURN</option>
-			<option value="COMPLETED-RC">COMPLETED W/ RETURN AND CHARGE</option>
-			<option value="DENIED">DENIED</option>			
+			<option value="DENIED">DENIED</option>
+			<option value="DENIED (COMPLETED)">DENIED (COMPLETED)</option>			
 			<option value="FORWARDED">FORWARDED</option>
 			<option value="FOR APPROVAL">FOR APPROVAL</option>
 			<option value="PENDING">PENDING</option>
-			<option value="PROCESSING">PROCESSING</option>			
+			<option value="PROCESSING">PROCESSING</option>					
 		</select>  
 	
 		<br/>
 
 		<strong>Search By:&nbsp;</strong>
-		<select name="search_option" id="search_option" style="width:250px;" value="<?= $search_by ?>">
+		<select name="search_option" id="search_option" style="width:150px;" value="<?= $search_by ?>">
 			<option value="request_code">Code</option>
 			<option value="name">Name</option>
 		</select>                 
@@ -72,35 +66,38 @@
 		<tr>			
 			<th style=''>Request Code</th>
 			<th>Status</th>
-			<th style='width:;'>Requested By</th>
-			<th style='width:;'>Total Items</th>
-			<th style='width:;'>Total Amount</th>
-			<th style='width:200px;'>Agent Name</th>
+			<th style='width:200px;'>Requested By</th>
+			<th style='width:50px;'>Number of Items</th>
+			<th style='width:100px;'>Total Amount</th>
+			<th style=''>Agent Name</th>			
 			<th style='width:70px;'>Date Created</th>			
-			<th style='width:118px;'>Action</th>
+			<th style='width:150px;'>Action</th>
 		</tr>
 	</thead>
 	<tbody>
 	<?php if(empty($transfers)):?>
-		<tr><td colspan='8' style='text-align:center;'><strong>No Records Found</strong></td></tr>
+		<tr><td colspan='9' style='text-align:center;'><strong>No Records Found</strong></td></tr>
 	<?php else: ?>
 	<?php foreach ($transfers as $t): ?>
 		<tr>
 									
 			<td><?= $t->request_code; ?></td>
 			
-			<?php									
+			<?php
 			$status_class = strtolower(trim($t->status));			
-
-			if (substr($status_class, 0, 12) == "cancellation") {
-				$status_class = substr($status_class, 13);
-			}
-
 			$status_class = str_replace(" ", "-", $status_class);
 		
 			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
+			//if ($t->status == 'PENDING') {
+			//	echo "<td><span class='label label-important' >{$t->status}</span></td>";
+			//} else if ($t->status == 'FORWARDED') {
+			//	echo "<td><span class='label label-info' >{$t->status}</span></td>";
+			//} else if ($t->status == 'FOR APPROVAL') {
+			//	echo "<td><span class='label label-warning' >{$t->status}</span></td>";
+			//} else {
+			//	echo "<td><span class='label label-success' >{$t->status}</span></td>";
+			//}			
 
-			// get requestor details
 			// get requestor details
 			$requestor_details = $this->spare_parts_model->get_dealer_by_id($t->dealer_id);
 
@@ -117,17 +114,6 @@
 				$agent_name = $agent_details->complete_name;
 			}	
 
-			// total amount
-			$where = "status NOT IN ('CANCELLED', 'DELETED') AND dealer_request_id = " . $t->dealer_request_id;
-			$dealer_request_details = $this->spare_parts_model->get_dealer_request_detail($where);
-
-			$total_amount = 0;
-			if (count($dealer_request_details) > 0) {
-				foreach ($dealer_request_details as $sdd) {
-					$total_amount = $total_amount + $sdd->total_amount;
-				}
-			}		
-
 			// get number of items
 			$where = "dealer_request_id = " . $t->dealer_request_id . " AND status IN ('PENDING', 'COMPLETED')";
 			$dealer_request_detail_info = $this->spare_parts_model->get_dealer_request_detail($where);
@@ -140,10 +126,22 @@
 
 			echo "<td  style='text-align:right;'>{$total_items}</td>";
 
-			?>				
+			// total amount
+			$where = "status IN ('PENDING') AND dealer_request_id = " . $t->dealer_request_id;
+			$dealer_request_details = $this->spare_parts_model->get_dealer_request_detail($where);
+
+			$total_amount = 0;
+			if (count($dealer_request_details) > 0) {
+				foreach ($dealer_request_details as $sdd) {
+					$total_amount = $total_amount + $sdd->total_amount;
+				}
+			}
+			?>	
 			<td style='text-align:right'><?= number_format($total_amount, 2); ?></td>
-			<td><?= $agent_name; ?></td>
+			<td><?= $agent_name; ?></td>		
 			<td><?= $t->insert_timestamp; ?></td>
+
+			
 
 			<td data1="<?= $t->dealer_request_id ?>" data2="<?= $t->request_code ?>">				
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
@@ -158,21 +156,18 @@
 					echo "<a class='btn btn-small btn-success process-btn' data='forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
 				}
 
-				if ($t->status == 'CANCELLATION-APPROVED') {
-					echo "<a class='btn btn-small btn-success process-btn' data='cancellation-forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
+				if ($t->status == 'COMPLETED') {
+					
+					if (($t->purchase_order_number == 0) || ($t->purchase_order_number == NULL)) {
+						echo "<a class='btn btn-small btn-primary process-btn' data='assign po' title='Assign P.O. Number'><i class='icon-white icon-pencil'></i></a>						
+								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
+
+					} else {
+						echo "<a href='/spare_parts/display_po/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print P.O.' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>
+								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
+					}
 				}
 
-				if ($t->status == 'COMPLETED') {
-					if (($t->purchase_order_number == 0) || ($t->purchase_order_number == NULL)) {
-						echo "<a class='btn btn-small btn-primary assign-mtr' data='assign mtr' title='Assign P.O. Number'><i class='icon-white icon-pencil'></i></a>
-								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
-					} else {
-						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print P.O.' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>
-								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
-					}						
-
-
-				}					
 				?>
 			</td>
 		</tr>
@@ -195,118 +190,11 @@
 
 	});
 
-	$(".assign-mtr").click(function(){
-
-		var _request_id = $(this).parent().attr("data1");
-		var _request_code = $(this).parent().attr("data2")
-
-		b.request({
-			url: "/spare_parts/load_assign_po",
-			data: {
-				'request_id' : _request_id,
-				'request_code' : _request_code,				
-			},
-			on_success: function(data){
-
-				if (data.status == "1")	{
-					
-					// show add form modal					
-					confirmAssignMTRModal = b.modal.new({
-						title: data.data.title,
-						width:450,
-						disableClose: true,
-						html: data.data.html,
-						buttons: {
-							'Cancel' : function() {
-								confirmAssignMTRModal.hide();								
-							},
-							'Proceed' : function() {
-								if ($.trim($("#txt-mtrnumber").val()) == "") {
-									$("#error-mtrnumber").show();
-									return;
-								
-								} else {									
-									b.request({
-										url : '/spare_parts/check_po',
-										data : {
-											'request_id' : _request_id,
-											'request_code' : _request_code,																
-											'mtr_number' : $("#txt-mtrnumber").val(),
-										},
-										on_success : function(data) {
-											if (data.status == "1")	{													
-												b.request({
-													url : '/spare_parts/proceed_assign_po',
-													data : {
-														'request_id' : _request_id,
-														'request_code' : _request_code,																
-														'mtr_number' : $("#txt-mtrnumber").val(),
-													},
-													on_success : function(data) {
-														if (data.status == "1")	{													
-															// show add form modal
-															confirmAssignMTRModal.hide();					
-															proceedAssignMTRModal = b.modal.new({
-																title: data.data.title,
-																width:450,	
-																html: data.data.html,
-																buttons: {
-																	'Ok' : function() {
-																		proceedAssignMTRModal.hide();
-																		redirect('spare_parts/dealer_request/listing');
-																	}
-																}
-															});
-															proceedAssignMTRModal.show();
-														} else {
-															confirmAssignMTRModal.hide();					
-															errorAssignMTRModal = b.modal.new({
-																title: data.data.title,
-																width:450,	
-																html: data.data.html,
-															});
-															errorAssignMTRModal.show();
-														}												
-													} 
-												})
-											} else {
-												$("#error-mtrnumber").text(data.data.html);
-												$("#error-mtrnumber").show();												
-												return;
-											}												
-										} 
-									})
-
-								}
-							}
-						}
-					});
-					confirmAssignMTRModal.show();
-
-					
-				} else {
-					// show add form modal
-					approveRequestModal.hide();					
-					errorApproveRequestModal = b.modal.new({
-						title: data.data.title,
-						width:450,	
-						html: data.data.html,
-					});
-					errorApproveRequestModal.show();	
-
-				}		
-			}	
-				
-		})
-		return false;
-		
-	});
-	
-
-
 
 	$(".process-btn").click(function(){
-		processButtonAction($(this).parent().attr("data1"), $(this).parent().attr("data2"), $(this).attr("data"));	
+
+		processButtonAction($(this).parent().attr("data1"), $(this).parent().attr("data2"), $(this).attr("data"));
+	
 	});
 
 	var processButtonAction = function(dealer_request_id, dealer_request_code, listing_action) {
@@ -334,9 +222,6 @@
 							},
 							'Proceed' : function() {
 
-								$("#error-reasonremarks").hide();
-
-
 								if (listing_action == 'cancel') {
 									
 									if ($.trim($("#txt-remarks").val()) == "") {
@@ -345,7 +230,16 @@
 									}
 								}	
 								$("#error-reasonremarks").hide();
-								
+
+								if (listing_action == 'assign po') {
+									
+									if ($.trim($("#txt-mtrnumber").val()) == "") {
+										$("#error-mtrnumber").show();
+										return;
+									}
+								}	
+								$("#error-reasonremarks").hide();
+
 								// ajax request
 								b.request({
 									url : '/spare_parts/dealer_request/for_listing_proceed',
@@ -354,7 +248,7 @@
 										'dealer_request_code' : dealer_request_code,
 										'listing_action' : listing_action,
 										'remarks' : $("#txt-remarks").val(),
-										//'mtr_number' : $("#txt-mtrnumber").val(),
+										'purchase_order_number' : $("#txt-mtrnumber").val(),
 									},
 									on_success : function(data) {
 										
@@ -392,7 +286,6 @@
 
 								})
 								return false;
-								
 							}									
 						}
 					});
@@ -419,6 +312,7 @@
 		return false;
 	}
 	
+	
 	$(".view-details").click(function(){
 		var dealer_request_id = $(this).parent().attr("data1");
 		var dealer_request_code = $(this).parent().attr("data2");
@@ -429,7 +323,7 @@
 			data: {
 				"dealer_request_id" : dealer_request_id,
 				"dealer_request_code" : dealer_request_code,
-				"listing_action" : listing_action,				
+				"listing_action" : listing_action,
 			},
 			on_success: function(data){
 				if (data.status == "1")	{
@@ -447,17 +341,18 @@
 								},
 								'For Approval' : function() {
 									processButtonAction(dealer_request_id, dealer_request_code, 'for approval');
-								},
-								'Edit' : function() {
-									//processButtonAction(dealer_request_id, dealer_request_code, 'edit');
-									redirect("/spare_parts/dealer_request/edit/" + dealer_request_id);
-								}									
+								}
+								//'Edit' : function() {
+								//	//processButtonAction(dealer_request_id, dealer_request_code, 'edit');
+								//	redirect("/spare_parts/dealer_request/edit/" + dealer_request_id);
+								//}									
 							}
 						});			
 					} else if (data.data.request_status == "APPROVED") {
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,
-							width:800,							
+							width:800,
+							//disableClose: true,
 							html: data.data.html,
 							buttons: {
 								'Forward To Warehouse' : function() {
@@ -465,7 +360,7 @@
 								}									
 							}
 						});
-					} else if (((data.data.request_status).substr(0, 9)) == "COMPLETED") {
+					} else if (data.data.request_status == "COMPLETED") {						
 						viewDetailsModal = b.modal.new({
 							title: data.data.title,
 							width:800,							
@@ -513,13 +408,9 @@
 		var months = "";
 		var days = "";
 
-		var _search_status = '<?= $search_status ?>';
-		var _search_by = '<?= $search_by ?>';
-		var _search_text = '<?= $search_text ?>';
-
 		download_modal.init({
 
-			title: "Download Dealer Requests",
+			title: "Download Warehouse Requests",
 			width: 350,
 			html: '<label for="start_date">Start Date: </label>\n<div class="form-inline wc-date">\n<div class="input-append"><input type="text" class="input-medium" id="pp_start_date" name="pp_start_date" readonly="readonly" style="cursor:pointer;z-index:2050" /><span id="pp_start_date_icon" class="add-on" style="cursor:pointer;"><i class="icon-calendar"></i></span></div>\n</div>\n\
 			<br>\n\
@@ -577,7 +468,7 @@
 														url: "/spare_parts/dealer_request/download_proceed",
 														data: {
 															"start_date": start_date,
-															"end_date": end_date,															
+															"end_date": end_date
 														},
 														on_success: function(data){
 															var download_xls_modal = b.modal.new({});
@@ -604,7 +495,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/dealer_request/export_xls/'+ start_date +'/' + end_date +'/' + _search_status +'/' + _search_by +'/' + _search_text);
+																			redirect('/spare_parts/dealer_request/export_xls/'+ start_date +'/' + end_date);
 																
 																			
 																		}
