@@ -31,6 +31,45 @@
 			</div>
 		</div>
 
+		<div class="control-group <?= $this->form_validation->error_class('agent_name') ?>">
+			<label class="control-label" for="agent_name">Agent Name <em>*</em></label>
+			<div class="controls">
+				<?php
+
+				$where = "is_active = 1";
+				$agent_details = $this->spare_parts_model->get_agent($where, NULL, "complete_name");
+
+
+
+				$agent_options = array();
+				$agent_options = array('0' => 'None');
+				foreach ($agent_details as $ad) {
+				 	$agent_options[$ad->agent_id] = $ad->complete_name;
+				}				
+				?>
+
+				<?= form_dropdown('agent_id',$agent_options, NULL,'id="agent_id"') ?>
+				
+				
+				<p class="help-block"><?= $this->form_validation->error('agent_name'); ?></p>
+			</div>
+		</div>
+
+		<div class="control-group <?= $this->form_validation->error_class('discount') ?>">
+			<label class="control-label" for="agent_name">Discount <em>*</em></label>
+			<div class="controls">
+			<?php
+
+			$discount_options = array();
+			for ($i=0; $i<=100; $i++) {
+				array_push($discount_options, $i);	
+			}
+			?>
+			
+			<?=  form_dropdown('discount',$discount_options, NULL,'id="discount" style="width:auto;"'); ?></p>
+			</div>
+		</div>	
+
 		<div class="control-group <?= $this->form_validation->error_class('is_active') ?>">
 			<label class="control-label" for="is_active">Active? <em>*</em></label>
 			<div class="controls">

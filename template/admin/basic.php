@@ -26,9 +26,16 @@
 </head>
 <body data-spy="scroll" data-target=".subnav" data-offset="50">
 
-	<div id="loading_overlay">
+	<!--div id="loading_overlay">
 	    <div class="loading_message round_bottom">Loading...</div>
-	</div>
+	</div-->
+
+	<div id="loading_overlay">
+	    <div class="loading_message well clearfix">
+		<img src='/assets/img/loading_red.gif' class='pull-left' style='height: 55px;' alt='' />
+		<p>Processing your request...</p>
+		</div>
+	</div>	
 	
 	<?php echo js('libs/jquery-1.8.3.min.js'); ?>
 	<?php echo js('libs/jquery-ui-1.9.1.min.js'); ?>

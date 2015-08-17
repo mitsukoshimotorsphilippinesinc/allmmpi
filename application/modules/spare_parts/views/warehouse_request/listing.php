@@ -429,7 +429,7 @@
 		var warehouse_request_id = $(this).parent().attr("data1");
 		var warehouse_request_code = $(this).parent().attr("data2");
 		var listing_action = $(this).attr("data");
-	
+		showLoading();
 		b.request({
 			url: "/spare_parts/warehouse_request/view_details",
 			data: {
@@ -440,6 +440,8 @@
 			on_success: function(data){
 				if (data.status == "1")	{
 				
+					hideLoading();
+
 					// show add form modal
 					if (data.data.request_status == "PENDING")	{	
 						viewDetailsModal = b.modal.new({
@@ -493,6 +495,7 @@
 
 					viewDetailsModal.show();
 				} else {
+					hideLoading();
 					// show add form modal					
 					var errorViewDetailsModal = b.modal.new({
 						title: data.data.title,
@@ -507,9 +510,10 @@
 					});
 					errorViewDetailsModal.show();		
 				}
-			}	
-				
-		})
+			}, on_error: function() {
+				hideLoading();
+			}					
+		});
 		return false;			
 	});
 	

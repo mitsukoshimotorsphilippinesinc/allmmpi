@@ -52,9 +52,16 @@ body > .container > #content {
 		var base_url = "<?=$this->config->item('base_url');?>";
 	</script>
 
-	<div id="loading_overlay">
+	<!--div id="loading_overlay">
 	    <div class="loading_message round_bottom">Loading...</div>
-	</div>
+	</div-->
+
+	<div id="loading_overlay">
+	    <div class="loading_message well clearfix">
+		<img src='/assets/img/loading_red.gif' class='pull-left' style='height: 55px;' alt='' />
+		<p>Processing your request...</p>
+		</div>
+	</div>	
 	
 	<div id="header" class='navbar navbar-fixed-top cleafix'>
 		<div class="navbar-inner">
