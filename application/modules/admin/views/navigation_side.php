@@ -1,6 +1,7 @@
 <?php
 	
-	$this->load->model("spare_parts_model");
+	//$this->load->model("spare_parts_model");
+	//$this->load->model("dpr_model");
 	// get all department modules excluding current segment (alphabetically)
 	$where = "is_active = 1 AND segment_name <> '{$segment_name}'";
 	$department_module_details = $this->spare_parts_model->get_department_module($where);

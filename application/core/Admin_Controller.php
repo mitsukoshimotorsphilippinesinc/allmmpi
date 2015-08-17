@@ -26,8 +26,8 @@ class Admin_Controller extends Base_Controller {
 		$this->authenticate->initialize($auth_config);
 		
 		// 20150609 - LOGIN
-		//// load the systems
-		//$this->load->model(array('systems_model', 'users_model', 'facilities_model','logs_model','members_model','tracking_model'));
+		// load the systems
+		$this->load->model(array('human_relations_model', 'warehouse_model', 'spare_parts_model','dpr_model'));
 		//ci()->systems = $this->systems = $this->systems_model->get_systems(null, null, "ordering ASC");
 		//ci()->current_system = $this->current_system = '';
 
