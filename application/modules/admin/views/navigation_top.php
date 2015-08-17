@@ -3,7 +3,20 @@
 		<li class=""><a href="/human_relations">Human Relations</a><li>
 		<li class=""><a href="/accounting">Accounting</a><li>
 		<li class=""><a href="/customer_service">Customer Service/CSD</a><li>
-		<li class=""><a href="">DPR</a><li>		
+		<li  class="dropdown dropdown-auto">
+			<a href="/dpr" class="dropdown-toggle" data-toggle="dropdown">DPR<b class="caret"></b></a>
+			 <ul class="dropdown-menu">
+	        <?php							
+				// get all department modules excluding current segment (alphabetically)
+				$where = "is_active = 1";
+				$department_module_details = $this->dpr_model->get_department_module($where);
+
+				foreach ($department_module_details as $dmd) {
+					echo "<li class='dropdown dropdown-auto'><a href='/dpr/{$dmd->segment_name}' style='margin-top:5px'>{$dmd->module_name}</a></li>";
+				}
+			?>			 
+	        </ul>
+		</li>	
 	    <li class="dropdown dropdown-auto">
 	        <a href="/spare_parts" class="dropdown-toggle" data-toggle="dropdown">Spare Parts<b class="caret"></b></a>
 	        <ul class="dropdown-menu">
@@ -13,12 +26,6 @@
 				// get all department modules excluding current segment (alphabetically)
 				$where = "is_active = 1";
 				$department_module_details = $this->spare_parts_model->get_department_module($where);
-
-				//$active_segment = $this->spare_parts_model->get_department_module_by_segment($segment_name);
-
-				//// get all submodules of current segment
-				//$where = "department_module_id = " . $active_segment->department_module_id;
-				//$module_submodule_details = $this->spare_parts_model->get_department_module_submodule($where, NULL,'priority_order');
 
 				foreach ($department_module_details as $dmd) {
 					echo "<li class='dropdown dropdown-auto'><a href='/spare_parts/{$dmd->segment_name}' style='margin-top:5px'>{$dmd->module_name}</a></li>";

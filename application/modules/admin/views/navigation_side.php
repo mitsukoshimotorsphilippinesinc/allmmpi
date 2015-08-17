@@ -1,15 +1,27 @@
 <?php
 	
-	$this->load->model("spare_parts_model");
+	//$this->load->model("spare_parts_model");
+	//$this->load->model("dpr_model");
 	// get all department modules excluding current segment (alphabetically)
-	$where = "is_active = 1 AND segment_name <> '{$segment_name}'";
-	$department_module_details = $this->spare_parts_model->get_department_module($where);
+	if ($this->uri->segment(2) == "spare_parts") {
+		$where = "is_active = 1 AND segment_name <> '{$segment_name}'";
+		$department_module_details = $this->spare_parts_model->get_department_module($where);
 
-	$active_segment = $this->spare_parts_model->get_department_module_by_segment($segment_name);
+		$active_segment = $this->spare_parts_model->get_department_module_by_segment($segment_name);
 
-	// get all submodules of current segment
-	$where = "department_module_id = " . $active_segment->department_module_id;
-	$module_submodule_details = $this->spare_parts_model->get_department_module_submodule($where, NULL,'priority_order');
+		// get all submodules of current segment
+		$where = "department_module_id = " . $active_segment->department_module_id;
+		$module_submodule_details = $this->spare_parts_model->get_department_module_submodule($where, NULL,'priority_order');
+	} else {
+		$where = "is_active = 1 AND segment_name <> '{$segment_name}'";
+		$department_module_details = $this->dpr_model->get_department_module($where);
+
+		$active_segment = $this->dpr_model->get_department_module_by_segment($segment_name);
+
+		// get all submodules of current segment
+		$where = "department_module_id = " . $active_segment->department_module_id;
+		$module_submodule_details = $this->dpr_model->get_department_module_submodule($where, NULL,'priority_order');
+	}
 
 ?>
 
