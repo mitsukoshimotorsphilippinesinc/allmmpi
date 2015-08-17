@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `rf_printing_press`;
 CREATE TABLE `rf_printing_press` (
   `printing_presS_id` 			int(11) NOT NULL AUTO_INCREMENT,
   `complete_name` 				varchar(150) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `address` 					varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `complete_address` 					varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
   `contact_number` 				int(2) NOT NULL DEFAULT 0,  
   `is_active`					tinyint(2) NOT NULL DEFAULT 0,  
   `is_deleted`					tinyint(2) NOT NULL DEFAULT 0,  
@@ -10,12 +10,12 @@ CREATE TABLE `rf_printing_press` (
   `update_timestamp` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (printing_presS_id),
-  KEY `name` (`name`)  
+  KEY `complete_name` (`complete_name`)  
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-INSERT INTO rf_printing_press`(complete_name, complete_address, contact_number)
+INSERT INTO `rf_printing_press`(complete_name, complete_address, contact_number)
 VALUES ('PRINTING PRESS ONE', '123 BLUMENTRITT COR. ESPANA MANILA', '(02)123-4567');
-INSERT INTO rf_printing_press`(complete_name, complete_address, contact_number)
+INSERT INTO `rf_printing_press`(complete_name, complete_address, contact_number)
 VALUES ('PRINTING PRESS TWO', '123 QUEZON AVE QUEZON CITY', '(02)321-1111');
 
 DROP TABLE IF EXISTS `rf_form`;
@@ -32,10 +32,10 @@ CREATE TABLE `rf_form` (
   `update_timestamp` 			timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `insert_timestamp` 			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (form_id),
-  KEY `form_name` (`form_name`),
-  KEY `form_code` (`form_code`),
+  KEY `name` (`name`),
+  KEY `code` (`code`),
   KEY `bir_required` (`bir_required`),
-  KEY `parent_form_id` (`parent_form_id`),
+  KEY `parent_form_id` (`parent_form_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -54,7 +54,7 @@ VALUES ('CHARGE SALES INVOICE', 'CHARGE SI', 'CHARGE SALES INVOICE', '1');
 INSERT INTO rf_form(name, code, description, bir_required)
 VALUES ('CASH INVOICE', 'CI', 'CASH INVOICE', '1');
 INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('', 'SISP', '', '1');
+VALUES ('SISP', 'SISP', 'SISP', '1');
 
 DROP TABLE `rf_department_module`;
 CREATE TABLE `rf_department_module` (
