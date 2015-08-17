@@ -13,6 +13,7 @@ class Dpr_model extends Base_Model
 		// assign the table for this model
 		$this->_TABLES = array(			
 			'department_module' => 'rf_department_module',
+			'department_module_submodule' => 'rf_department_module_submodule',
 		);
 
 	}
@@ -91,4 +92,57 @@ class Dpr_model extends Base_Model
 	}
 
 	// ========================================================================
+	// ===========================================================================
+	// department_module_submodule
+	function get_department_module_submodule($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('department_module_submodule', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_department_module_submodule($data) 
+	{
+		return $this->insert('department_module_submodule', $data);
+	}
+
+	function update_department_module_submodule($data, $where) 
+	{
+		return $this->update('department_module_submodule', $data, $where);
+	}
+
+	function delete_department_module_submodule($where) 
+	{
+		return $this->delete('department_module_submodule', $where);
+	}
+
+	function get_department_module_submodule_by_id($department_module_submodule_id) 
+	{
+		$result = $this->get_department_module_submodule(array('department_module_submodule_id' => $department_module_submodule_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_department_module_submodule_by_submodule_url($submodule_url) 
+	{
+		$result = $this->get_department_module_submodule(array('submodule_url' => '/' . $submodule_url));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+		
+	function get_department_module_submodule_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('department_module_submodule', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+	// ===========================================================================
 }

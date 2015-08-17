@@ -52,11 +52,11 @@ VALUES ('CASH SALES INVOICE', 'CASH SI', 'CASH SALES INVOICE', '1');
 INSERT INTO rf_form(name, code, description, bir_required)
 VALUES ('CHARGE SALES INVOICE', 'CHARGE SI', 'CHARGE SALES INVOICE', '1');
 INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('', 'CI', '', '1');
+VALUES ('CASH INVOICE', 'CI', 'CASH INVOICE', '1');
 INSERT INTO rf_form(name, code, description, bir_required)
 VALUES ('', 'SISP', '', '1');
 
-DROP TABLE `rf_department_module`
+DROP TABLE `rf_department_module`;
 CREATE TABLE `rf_department_module` (
   `department_module_id` int(11) NOT NULL AUTO_INCREMENT,
   `module_name` varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N/A',
@@ -74,4 +74,39 @@ CREATE TABLE `rf_department_module` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO `rf_department_module`(module_name, department_id, segment_name, is_active)
-VALUES('Booklet Monitoring', '33', 'booklet_monitoring', '1');
+VALUES('Form Request', '33', 'form_request', '1');
+INSERT INTO `rf_department_module`(module_name, department_id, segment_name, is_active)
+VALUES('Delivery', '33', 'delivery', '1');
+INSERT INTO `rf_department_module`(module_name, department_id, segment_name, is_active)
+VALUES('Inventory', '33', 'inventory', '1');
+INSERT INTO `rf_department_module`(module_name, department_id, segment_name, is_active)
+VALUES('Branch Transactions', '33', 'branch_transactions', '1');
+INSERT INTO `rf_department_module`(module_name, department_id, segment_name, is_active)
+VALUES('Reports', '33', 'reports', '1');
+INSERT INTO `rf_department_module`(module_name, department_id, segment_name, is_active)
+VALUES('Maintenance', '33', 'maintenance', '1');
+
+CREATE TABLE `rf_department_module_submodule` (
+  `department_module_submodule_id` int(11) NOT NULL AUTO_INCREMENT,
+  `department_module_id` int(11) NOT NULL DEFAULT '0',
+  `submodule_name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `submodule_url` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `priority_order` int(2) NOT NULL DEFAULT '0',
+  `is_active` tinyint(2) NOT NULL DEFAULT '0',
+  `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`department_module_submodule_id`),
+  KEY `department_module_id` (`department_module_id`),
+  KEY `submodule_name` (`submodule_name`),
+  KEY `submodule_url` (`submodule_url`),
+  KEY `priority_order` (`priority_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
+VALUES ('1', 'Accountable Forms', '/accountables', '1', '1');
+INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
+VALUES ('1', 'Non-Accountable Forms', '/non_accountables', '2', '1');
+
+INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
+VALUES ('1', 'Accountable Forms', '/accountables', '1', '1');
+INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
+VALUES ('1', 'Non-Accountable Forms', '/non_accountables', '2', '1');

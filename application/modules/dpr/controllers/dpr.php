@@ -8,4 +8,10 @@ class Dpr extends Admin_Controller {
 
 		$this->template->view('dashboard');
 	}
+
+	public function form_request()
+	{
+
+		$this->template->view('form_request/dashboard');
+	}
 }
