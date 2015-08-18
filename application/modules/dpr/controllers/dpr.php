@@ -14,4 +14,9 @@ class Dpr extends Admin_Controller {
 
 		$this->template->view('form_request/dashboard');
 	}
+
+	public function accountables()
+	{
+		$this->template->view('form_request/request_accountable_form');	
+	}
 }
