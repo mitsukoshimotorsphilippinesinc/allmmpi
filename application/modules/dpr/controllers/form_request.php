@@ -2,6 +2,11 @@
 
 class Form_request extends Admin_Controller {
 
+	function __construct()
+	{
+		parent::__construct();
+		$this->load->model('human_relations_model');
+	}
 
 	public function index()
 	{

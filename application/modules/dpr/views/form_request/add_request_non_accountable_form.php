@@ -31,7 +31,7 @@
 	<option>All</option>
 	</Select>
 	<br>
-	<a class = 'btn' >Add New</a>
+	<a class = 'btn' >Add</a>
 	<br>
 	<br>
 	<table class='table table-striped table-bordered'>

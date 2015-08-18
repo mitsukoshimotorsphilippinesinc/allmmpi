@@ -14,6 +14,9 @@ class Dpr_model extends Base_Model
 		$this->_TABLES = array(			
 			'department_module' => 'rf_department_module',
 			'department_module_submodule' => 'rf_department_module_submodule',
+			'form' => 'rf_form_type',
+			'printing_press' => 'rf_printing_press'
+			'request_detail' => 'tr_request_detail'
 		);
 
 	}
@@ -143,6 +146,24 @@ class Dpr_model extends Base_Model
 		$row = $query->first_row();
 		$query->free_result();
 		return $row->cnt;
+	}
+
+	function get_form_type($where = null, $limit = null, $orderby = null, $fields = null) {
+		$query = $this->fetch('form', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function get_press_name($where = null, $limit = null, $orderby = null, $fields = null) {
+		$query = $this->fetch('printing_press', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function insert_new_request($data){
+		return $this->insert('request_detail', $data);
 	}
 	// ===========================================================================
 }

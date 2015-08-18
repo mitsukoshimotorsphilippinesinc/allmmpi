@@ -20,6 +20,7 @@ class Human_relations_model extends Base_Model
 			'position' => 'rf_position',
 			'company' => 'rf_company',
 			'department' => 'rf_department',
+			'branch' => 'rf_branch',
 		);
 
 	}
@@ -330,6 +331,14 @@ class Human_relations_model extends Base_Model
 			$row = $result[0];
 		}
 		return $row;
+	}
+
+	function get_branch($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('branch', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
 	}
 	// ==============================================================
 
