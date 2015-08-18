@@ -11,6 +11,7 @@ class Form_request extends Admin_Controller {
 
 	public function accountables()
 	{
+
 		$this->template->view('form_request/request_accountable_form');	
 	}
 
