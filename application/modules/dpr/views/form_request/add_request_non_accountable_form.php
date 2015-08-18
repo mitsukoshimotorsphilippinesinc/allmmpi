@@ -1,6 +1,6 @@
 
 
-<div class='alert alert-danger'><h2>Add New Request(Accountable Forms) <a class = 'btn' style = "float:right;">Save Request</a></div>
+<div class='alert alert-danger'><h2>Add New Request(Non-Accountable Forms) <a class = 'btn' style = "float:right;">Save Request</a></div>
 
 <body>
 
@@ -37,8 +37,6 @@
 	<table class='table table-striped table-bordered'>
 	<thead>
 		<tr>			
-			<th>Branch</th>
-			<th>TIN</th>
 			<th>Type Of Form</th>
 			<th>Last Series No.</th>
 			<th>Pcs. Per Booklet</th>

@@ -23,4 +23,9 @@ class Form_request extends Admin_Controller {
 	{
 		$this->template->view('form_request/add_request_accountable_form');	
 	}
+
+	public function add_new_non_accountables()
+	{
+		$this->template->view('form_request/add_request_non_accountable_form');	
+	}
 }

@@ -6,6 +6,9 @@ body {
 	background-color: #ffffff;
 }
 
+html{
+	overflow-y:scroll;
+}
 /* float clearing for IE6 */
 * html .clearfix{
   height: 1%;
