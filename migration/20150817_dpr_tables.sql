@@ -18,43 +18,45 @@ VALUES ('PRINTING PRESS ONE', '123 BLUMENTRITT COR. ESPANA MANILA', '(02)123-456
 INSERT INTO `rf_printing_press`(complete_name, complete_address, contact_number)
 VALUES ('PRINTING PRESS TWO', '123 QUEZON AVE QUEZON CITY', '(02)321-1111');
 
-DROP TABLE IF EXISTS `rf_form`;
-CREATE TABLE `rf_form` (
-	`form_id`					int(11) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `rf_form_type`;
+CREATE TABLE `rf_form_type` (
+	`form_type_id`				int(11) NOT NULL AUTO_INCREMENT,
 	`name`						varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`code`						varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`description`				varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`parent_form_id`			int(11) NOT NULL DEFAULT 0,
-	`bir_required`				tinyint(2) NOT NULL DEFAULT 0,  
+	`is_accountable`			tinyint(2) NOT NULL DEFAULT 0, 
+	`pieces_per_booklet`		tinyint(2) NOT NULL DEFAULT 0, 
 	`is_active`					tinyint(2) NOT NULL DEFAULT 0,  
 	`is_deleted`				tinyint(2) NOT NULL DEFAULT 0,  
 	`remarks` 					text COLLATE utf8_unicode_ci,
   `update_timestamp` 			timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   `insert_timestamp` 			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (form_id),
+  PRIMARY KEY (form_type_id),
   KEY `name` (`name`),
   KEY `code` (`code`),
-  KEY `bir_required` (`bir_required`),
+  KEY `is_accountable` (`is_accountable`),
+  KEY `pieces_per_booklet` (`pieces_per_booklet`),
   KEY `parent_form_id` (`parent_form_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('OFFICIAL RECEIPT', 'OR', 'OFFICIAL RECIPT', '1');
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('COLLECTION RECEIPT', 'CR', 'COLLECTION RECIPT', '1');
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('DELIVERY RECEIPT', 'DR', 'DELIVERY RECIPT', '1');
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('SALES INVOICE', 'SI', 'SALES INVOICE', '1');
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('CASH SALES INVOICE', 'CASH SI', 'CASH SALES INVOICE', '1');
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('CHARGE SALES INVOICE', 'CHARGE SI', 'CHARGE SALES INVOICE', '1');
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('CASH INVOICE', 'CI', 'CASH INVOICE', '1');
-INSERT INTO rf_form(name, code, description, bir_required)
-VALUES ('SISP', 'SISP', 'SISP', '1');
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('OFFICIAL RECEIPT', 'OR', 'OFFICIAL RECIPT', '1', 4);
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('COLLECTION RECEIPT', 'CR', 'COLLECTION RECIPT', '1', 4);
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('DELIVERY RECEIPT', 'DR', 'DELIVERY RECIPT', '1', 4);
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('SALES INVOICE', 'SI', 'SALES INVOICE', '1', 5);
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('CASH SALES INVOICE', 'CASH SI', 'CASH SALES INVOICE', '1', 4);
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('CHARGE SALES INVOICE', 'CHARGE SI', 'CHARGE SALES INVOICE', '1', 4);
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('CASH INVOICE', 'CI', 'CASH INVOICE', '1', 4);
+INSERT INTO rf_form_type(name, code, description, is_accountable, pieces_per_booklet)
+VALUES ('SISP', 'SISP', 'SISP', '1', 4);
 
 DROP TABLE `rf_department_module`;
 CREATE TABLE `rf_department_module` (
@@ -86,14 +88,15 @@ VALUES('Reports', '33', 'reports', '1');
 INSERT INTO `rf_department_module`(module_name, department_id, segment_name, is_active)
 VALUES('Maintenance', '33', 'maintenance', '1');
 
+DROP TABLE IF EXISTS `rf_department_module_submodule` (
 CREATE TABLE `rf_department_module_submodule` (
-  `department_module_submodule_id` int(11) NOT NULL AUTO_INCREMENT,
-  `department_module_id` int(11) NOT NULL DEFAULT '0',
-  `submodule_name` varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `submodule_url` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `priority_order` int(2) NOT NULL DEFAULT '0',
-  `is_active` tinyint(2) NOT NULL DEFAULT '0',
-  `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `department_module_submodule_id` 	int(11) NOT NULL AUTO_INCREMENT,
+  `department_module_id` 			int(11) NOT NULL DEFAULT '0',
+  `submodule_name` 					varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `submodule_url` 					varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `priority_order` 					int(2) NOT NULL DEFAULT '0',
+  `is_active` 						tinyint(2) NOT NULL DEFAULT '0',
+  `insert_timestamp` 				timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`department_module_submodule_id`),
   KEY `department_module_id` (`department_module_id`),
   KEY `submodule_name` (`submodule_name`),
@@ -110,3 +113,44 @@ INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_nam
 VALUES ('1', 'Accountable Forms', '/accountables', '1', '1');
 INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
 VALUES ('1', 'Non-Accountable Forms', '/non_accountables', '2', '1');
+
+DROP TABLE IF EXISTS `rf_branch_box_location`;
+CREATE TABLE `rf_branch_box_location` (
+	`branch_box_location_id`	int(11) NOT NULL AUTO_INCREMENT,
+	`branch_id`					int(11) NOT NULL DEFAULT 0,
+	`box_location`				varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`is_active`					tinyint(2) NOT NULL DEFAULT 0,
+	`remarks`					text COLLATE utf8_unicode_ci,
+	`update_timetamp`			timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`insert_timestamp`			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`box_location_id`),
+	KEY `branch_id` (`branch_id`),
+	KEY `box_location` (`box_location`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+CREATE TABLE is_booklet (
+	`branch_box_location_id
+	`request_detail_id
+	`booklet_number
+	`series_from
+	`series_to
+	`receive_timestamp
+	`receive_remarks
+	`scan_timestamp
+	`scan_remarks
+	`storage_timestamp
+	`storage_remarks
+	`insert_timestamp
+);
+
+
+release_timestamp
+status
+
+
+
+DROP TABLE IF EXISTS `is_booklet` (
+CREATE TABLE `is_booklet` (
+	
+);

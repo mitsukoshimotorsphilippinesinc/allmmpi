@@ -1,27 +1,27 @@
 <?php
 	
-	//$this->load->model("spare_parts_model");
-	//$this->load->model("dpr_model");
-	// get all department modules excluding current segment (alphabetically)
-	if ($this->uri->segment(2) == "spare_parts") {
-		$where = "is_active = 1 AND segment_name <> '{$segment_name}'";
-		$department_module_details = $this->spare_parts_model->get_department_module($where);
+	$ci = ci();	
+	$ci->db_gen = $ci->load->database($this->uri->segment(1), TRUE);
 
-		$active_segment = $this->spare_parts_model->get_department_module_by_segment($segment_name);
+	$module_title = str_replace("_", " ", $this->uri->segment(1));
+	$module_title = strtoupper($module_title);
 
-		// get all submodules of current segment
-		$where = "department_module_id = " . $active_segment->department_module_id;
-		$module_submodule_details = $this->spare_parts_model->get_department_module_submodule($where, NULL,'priority_order');
-	} else {
-		$where = "is_active = 1 AND segment_name <> '{$segment_name}'";
-		$department_module_details = $this->dpr_model->get_department_module($where);
+	$where = "is_active = 1 AND segment_name <> '{$segment_name}'";
 
-		$active_segment = $this->dpr_model->get_department_module_by_segment($segment_name);
+	$department_module_details_sql = "SELECT * FROM rf_department_module WHERE {$where}";
+	$department_module_details = $ci->db_gen->query($department_module_details_sql);
+	$department_module_details = $department_module_details->result();		
+	
+	$active_segment_sql = "SELECT * FROM rf_department_module WHERE segment_name = '{$segment_name}'";
+	$active_segment = $ci->db_gen->query($active_segment_sql);
+	$active_segment = $active_segment->result();		
+	$active_segment = $active_segment[0];				
 
-		// get all submodules of current segment
-		$where = "department_module_id = " . $active_segment->department_module_id;
-		$module_submodule_details = $this->dpr_model->get_department_module_submodule($where, NULL,'priority_order');
-	}
+	// get all submodules
+	$where = "department_module_id = " . $active_segment->department_module_id;
+	$module_submodule_details_sql = "SELECT * FROM rf_department_module_submodule WHERE {$where}";
+	$module_submodule_details = $ci->db_gen->query($module_submodule_details_sql);
+	$module_submodule_details = $module_submodule_details->result();		
 
 ?>
 
@@ -30,7 +30,7 @@
 	<div id="sidebar-wrapper" style="background-color:#6D6E71;margin-top: -15px;font-family:Tahoma">
 		<ul class="sidebar-nav">
 			<li class="sidebar-brand">
-				<a href="#"><strong>Spare Parts</strong></a>
+				<a href="#"><strong><?= $module_title ?></strong></a>
 			</li>	
 			<li>
 				<a class="collapsed" data-target="#dealer-menu" data-toggle="collapse" href="javascript:;" aria-expanded="false">		
