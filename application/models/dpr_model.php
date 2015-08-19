@@ -15,8 +15,9 @@ class Dpr_model extends Base_Model
 			'department_module' => 'rf_department_module',
 			'department_module_submodule' => 'rf_department_module_submodule',
 			'form' => 'rf_form_type',
-			'printing_press' => 'rf_printing_press'
-			'request_detail' => 'tr_request_detail'
+			'printing_press' => 'rf_printing_press',
+			'request_detail' => 'tr_request_detail',
+			'request_summary' => 'tr_request_summary'
 		);
 
 	}
@@ -162,8 +163,50 @@ class Dpr_model extends Base_Model
 		return $row;	
 	}
 
-	function insert_new_request($data){
+	function insert_request_detail($data){
 		return $this->insert('request_detail', $data);
 	}
-	// ===========================================================================
+
+	function get_request_summary($where = null, $limit = null, $orderby = null, $fields = null){
+		$query = $this->fetch('request_summary', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function insert_request_summary($data){
+		return $this->insert('request_summary', $data);
+	}
+
+	function get_request_detail($where = null, $limit = null, $orderby = null, $fields = null){
+		$query = $this->fetch('request_detail', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function get_form_by_id($form_type_id) 
+	{
+		$result = $this->get_form_type(array('form_type_id' => $form_type_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_printing_press_by_id($printing_press_id) 
+	{
+		$result = $this->get_press_name(array('printing_press_id' => $printing_press_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function delete_request_detail($where) 
+	{
+		return $this->delete('request_detail', $where);
+	}
 }
