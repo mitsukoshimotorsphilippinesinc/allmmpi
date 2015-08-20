@@ -1,31 +1,25 @@
 
 
-<div class='alert alert-danger'><h2>Add New Request(Non-Accountable Forms) <a class = 'btn' style = "float:right;">Save Request</a></div>
+<div class='alert alert-danger'><h2>Add New Request(Non-Accountable Forms) <a class = 'btn' style = "float:right;">New Request</a></div>
 
 <body>
 
 	<span>Reference No.</span>
 	<input TYPE = "TEXT" disabled = "disabled">
-	<Label>Branch</Label>
-	<Select>
-	<option>All</option>
-	</Select>
 	<br>
-	<Label style = "position:absolute";>TIN</Label>
-	<Label style = "position:absolute; left:500px;">Address</Label>
+	<span>Form Type</span>
+	<span style = "position:absolute; left:500px;">Last Series No.</span>
+	<span style = "position:absolute; left:730px;">Pcs. Per Booklet</span>
+	<span style = "position:absolute; left:955px;">Quantity</span>
 	<br>
-	<input placeholder="TIN"  TYPE = "TEXT" disabled = "disabled">
-	<Label style = "position:absolute; left:500px;">Last Series No.</Label>
-	<Label style = "position:absolute; left:730px;">Pcs. Per Booklet</Label>
-	<input placeholder="Address" style = "width:500px;" TYPE = "TEXT" disabled = "disabled">
-	<br>
-	<Label>Form Type</Label>
 	<Select>
 	<option>All</option>
 	</Select>
 	<input placeholder="Last Series Number" TYPE = "TEXT" disabled = "disabled">
 	<input placeholder="Pcs. Per Booklet" TYPE = "TEXT" disabled = "disabled">
+	<input placeholder="0" TYPE = "TEXT" style = "text-align:right;">
 	<br>
+
 	<Label>Select Printing Press</Label>
 	<Select style = "width:450px;">
 	<option>All</option>
