@@ -209,4 +209,12 @@ class Dpr_model extends Base_Model
 	{
 		return $this->delete('request_detail', $where);
 	}
+
+	function get_request_summary_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('request_summary', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
 }

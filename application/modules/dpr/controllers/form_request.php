@@ -6,6 +6,7 @@ class Form_request extends Admin_Controller {
 	{
 		parent::__construct();
 		$this->load->model('human_relations_model');
+		$this->load->library('pager');
 	}
 
 	public function index()
@@ -14,10 +15,48 @@ class Form_request extends Admin_Controller {
 		$this->template->view('dashboard');
 	}
 
+
 	public function accountables()
 	{
 
+		$all_record = "";
+		$where = "";
+		$search_url = "";
+		$search_status = trim($this->input->get("status_option"));
+		$search_by = trim($this->input->get("txtsearch"));
+
+		if (($search_status == "All") || ($search_status == "")){
+			if (!($search_by) == ""){
+				$where="request_code = '{$search_by}'";	
+			}
+		}else{
+
+			if (($search_by) == "") {
+				$where="status = '{$search_status}'";	
+			}else{
+				$where="status = '{$search_status}' and request_code = '{$search_by}'";
+			}
+		}
+		$config = array(
+				'pagination_url' => "/dpr/form_request/accountables/",
+				'total_items' => $this->dpr_model->get_request_summary_count($where),
+				'per_page' => 10,
+				'uri_segment' => 4,);
+		
+		$this->pager->set_config($config);
+		
+		$all_record = $this->dpr_model->get_request_summary($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
+
+		
+		$this->template->all_record = $all_record;
+
+		$this->template->search_status = $search_status;
+		$this->template->search_by = $search_by;
+		$this->template->search_url = $search_url;
+
 		$this->template->view('form_request/request_accountable_form');	
+
+
 	}
 
 	public function non_accountables()
@@ -65,7 +104,8 @@ class Form_request extends Admin_Controller {
 			$data_summary=array(
 			'request_year' => $current_year,
 			'request_series' => $request_series,
-			'request_code' => $request_code
+			'request_code' => $request_code,
+			'is_accountable' => "1"
 			);
 			$this->dpr_model->insert_request_summary($data_summary);
 			$last_insert_id = $this->dpr_model->insert_id();
@@ -144,4 +184,5 @@ class Form_request extends Admin_Controller {
 
 		$this->return_json("1","Delete Item Successfully.");
 	}
+
 }	

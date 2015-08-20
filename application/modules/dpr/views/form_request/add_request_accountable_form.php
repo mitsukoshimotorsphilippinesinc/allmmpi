@@ -101,6 +101,12 @@
  
 <SCRIPT TYPE = "text/javascript">
 
+	$("#txtqty").keypress(function (e) {
+	if( e.which!=8 && e.which!=0 && (e.which<48 || e.which>57)) {
+	return false;
+	}
+	});
+
 	$('#branch_option').change(function(){
 		//alert ($('#branch_option').val());
 		$('#txttin').val( $(this).find(':selected').data('tin'));
@@ -141,10 +147,6 @@
 			return;
 		}
 		if ($('#txtqty').val() <= 0){
-			$('#Error_Message_QTY').show();
-			return;
-		}
-		if (_.isNumber($('#txtqty').val() * 1)){
 			$('#Error_Message_QTY').show();
 			return;
 		}
