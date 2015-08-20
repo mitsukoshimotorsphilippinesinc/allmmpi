@@ -3,8 +3,7 @@
 ?>
 
 <?= $breadcrumb_container; ?>
-<div class='alert alert-danger'><h2>For Approval<a class='btn btn-small btn-default'id="download-btn" style="float:right;" title='Download'><i class='icon-download'></i>&nbsp;Download</a></h2></div>
-
+<div class='alert alert-danger'><h2>Delivery</h2></div>
 <br>
 
 <div >
@@ -12,14 +11,10 @@
 
 		<strong>Status:&nbsp;</strong>
 		<select name="search_status" id="search_status" style="width:250px;margin-left:20px" value="<?= $search_status ?>">
-			<option value="ALL">ALL</option>
-			<option value="FOR APPROVAL">FOR APPROVAL</option>
-			<option value="APPROVED">APPROVED</option>
-			<option value="DENIED">DENIED</option>			
-			<option value="CANCELLATION-FOR APPROVAL">CANCELLATION-FOR APPROVAL</option>
-			<option value="CANCELLATION-APPROVED">CANCELLATION-APPROVED</option>
-			<option value="CANCELLATION-DENIED">CANCELLATION-DENIED</option>			
-		</select>                 
+			<option value="ALL">ALL</option>						
+			<option value="APPROVED">RECEIVED</option>
+			<option value="CANCELLED">REJECTED</option>			
+		</select>  
 	
 		<br/>
 
@@ -59,94 +54,62 @@
 
 <table class='table table-striped table-bordered'>
 	<thead>
-		<tr>						
-			<th style=''>Request Code</th>
+		<tr>			
+			<th style='width:80px;'>Request Code</th>
 			<th>Status</th>
-			<th style='width:100px;'>Requested By</th>
-			<th style='width:100px;'>Motor Brand/Model</th>
-			<th style='width:100px;'>Total Items</th>
-			<th style='width:100px;'>Warehouse</th>
-			<th style='width:100px;'>Approved By (Warehouse)</th>			
+			<th style=''>Branch</th>
+			<th style=''>Last Serial Number</th>
+			<th style=''>Form</th>			
+			<th style=''>Quantity</th>			
 			<th style='width:70px;'>Date Created</th>
-			<th style='width:118px;'>Action</th>		
+			<th style='width:118px;'>Action</th>
 		</tr>
 	</thead>
 	<tbody>
-	<?php if(empty($transfers)):?>
+	<?php if(empty($request_detail)):?>
 		<tr><td colspan='9' style='text-align:center;'><strong>No Records Found</strong></td></tr>
 	<?php else: ?>
-	<?php foreach ($transfers as $t): ?>
-		<tr>
-									
-			<td style='text-align:center;'><?= $t->request_code; ?></td>
+	<?php foreach ($request_detail as $rd): 
+		
+		$request_summary_detail = $this->dpr_model->get_request_summary_by_id($rd->request_summary_id);
+
+		$branch_details = $this->human_relations_model->get_branch_by_id($rd->branch_id);
+
+		if (empty($branch_details)) {
+			$branch_name = "N/A"; 
+		} else {
+			$branch_name = $branch_details->branch_name;
+		}
+	?>
+		<tr>									
+			<td><?= $request_summary_detail->request_code; ?></td>
 			
-			<?php
-			$status_class = strtolower(trim($t->status));			
+			<?php								
+
+			$status_class = strtolower(trim($rd->status));			
 			$status_class = str_replace(" ", "-", $status_class);
 		
-			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
+			echo "<td><span class='label label-" . $status_class . "' >{$rd->status}</span></td>";
 
-			// get requestor details
-			$id = str_pad($t->id_number, 7, '0', STR_PAD_LEFT);
-			$requestor_details = $this->human_relations_model->get_employment_information_by_id($id);			
+			// get form details
+			$form_type_details = $this->dpr_model->get_form_type_by_id($rd->form_type_id);
 
-			if (count($requestor_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$requestor_details->complete_name}</td>"; 
-			}			
 
-			// brand and model
-			$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($t->motorcycle_brand_model_id);				
-			if (count($motor_brand_model_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$motor_brand_model_details->brand_name}" . " - " . "{$motor_brand_model_details->model_name}</td>"; 
-			}				
+			?>				
+			<td><?= $branch_name; ?></td>
+			<td style='text-align:right;'><?= $rd->last_serial_number; ?></td>
+			<td><?= $form_type_details->name; ?></td>
+			<td style='text-align:right;'><?= $rd->quantity; ?></td>
+			<td><?= $rd->insert_timestamp; ?></td>
 
-			// number of items
-			$where = "warehouse_request_id = " . $t->warehouse_request_id . " AND status IN ('PENDING', 'COMPLETED')";
-			$warehouse_request_detail_info = $this->spare_parts_model->get_warehouse_request_detail($where);
-
-			$total_items = 0;
-			foreach ($warehouse_request_detail_info as $wrdi) {
-				$total_items = $total_items + ($wrdi->good_quantity + $wrdi->bad_quantity);
-			}
-			$total_items = number_format($total_items);
-
-			echo "<td  style='text-align:right;'>{$total_items}</td>";
-
-			// get warehouse detail			
-			$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($t->warehouse_id);
-
-			if (count($warehouse_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$warehouse_details->warehouse_name}</td>"; 
-			}
-
-			if (($t->warehouse_approved_by == 0) || ($t->warehouse_approved_by == '0')) {
-				echo "<td>N/A</td>";
-			} else {
-				$id = str_pad($t->warehouse_approved_by, 7, '0', STR_PAD_LEFT);
-				$warehouse_signatory_details = $this->human_relations_model->get_employment_information_view_by_id($id);
-				echo "<td>{$warehouse_signatory_details->complete_name}</td>";
-			}
-
-			?>	
-			
-			<td><?= $t->insert_timestamp; ?></td>
-
-			
-
-			<td data1="<?= $t->warehouse_request_id ?>" data2="<?= $t->request_code ?>">				
+			<td data1="<?= $rd->request_detail_id ?>" data2="<?= $request_summary_detail->request_code ?>">				
 				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
-				<?php
-				if (($t->status == 'FOR APPROVAL') || ($t->status == 'CANCELLATION-FOR APPROVAL')) {
-					echo "<a class='btn btn-small btn-success process-btn' data='yes' title='Yes'><i class='icon-white icon-ok'></i></a>
-						<a class='btn btn-small btn-danger process-btn' data='no' title='No'><i class='icon-white icon-remove'></i></a>
-						";
-				}
+				<?php				
+				
+				if (($rd->status == 'COMPLETED') || ($rd->status == 'RETURNED')) {
+					echo "<a class='btn btn-small btn-success process-btn' data='receive delivery' title='Receive to Inventory'><i class='icon-white icon-ok'></i></a>
+							<a class='btn btn-small btn-danger process-btn' data='return delivery' title='Return to Dealer'><i class='icon-white icon-remove'></i></a>";
+				}					
 
 				?>
 			</td>
@@ -170,24 +133,70 @@
 
 	});
 
+	$(".view-details").click(function(){
+		var request_detail_id = $(this).parent().attr("data1");
+		var request_code = $(this).parent().attr("data2");
+		var listing_action = $(this).attr("data");
+		showLoading();
+		b.request({
+			url: "/dpr/view_details",
+			data: {
+				"request_detail_id" : request_detail_id,
+				"request_code" : request_code,				
+			},
+			on_success: function(data){
+				hideLoading();
+				if (data.status == "1")	{
+					viewDetailsModal = b.modal.new({
+						title: data.data.title,
+						width:800,
+						//disableClose: true,
+						html: data.data.html,  
+					});
+				
+					viewDetailsModal.show();
+				} else {					
+					// show add form modal					
+					var errorViewDetailsModal = b.modal.new({
+						title: data.data.title,
+						width:450,
+						disableClose: true,
+						html: data.data.html,
+						buttons: {
+							'Close' : function() {
+								errorViewDetailsModal.hide();								 							
+							}
+						}
+					});
+					errorViewDetailsModal.show();		
+				}
+			}, on_error: function() {
+				hideLoading();
+			}					
+		});
+		return false;			
+	});
+	
 
 	$(".process-btn").click(function(){
+		processButtonAction($(this).parent().attr("data1"), $(this).parent().attr("data2"), $(this).attr("data"));	
+	});
 
-		var warehouse_request_id = $(this).parent().attr("data1");
-		var warehouse_request_code = $(this).parent().attr("data2");
-		var is_approved = $(this).attr("data");
+	var processButtonAction = function(_request_detail_id, _request_code, _listing_action) {
 
+		showLoading();
 		b.request({
-			url: "/spare_parts/warehouse_request/for_approval_confirm",
+			url: "/dpr/delivery/for_listing_confirm",
 			data: {
-				'warehouse_request_id' : warehouse_request_id,
-				'warehouse_request_code' : warehouse_request_code,
-				'is_approved' : is_approved,
+				'request_detail_id' : _request_detail_id,
+				'request_code' : _request_code,
+				'listing_action' : _listing_action,
 			},
 			on_success: function(data){
 
+				hideLoading();
 				if (data.status == "1")	{
-				
+									
 					// show add form modal					
 					approveRequestModal = b.modal.new({
 						title: data.data.title,
@@ -200,27 +209,31 @@
 							},
 							'Proceed' : function() {
 
-								if (is_approved == 'no') {
+								$("#error-reasonremarks").hide();
+
+
+								if (listing_action == 'cancel') {
 									
 									if ($.trim($("#txt-remarks").val()) == "") {
 										$("#error-reasonremarks").show();
 										return;
 									}
 								}	
-
 								$("#error-reasonremarks").hide();
-
+								
+								showLoading();
 								// ajax request
 								b.request({
-									url : '/spare_parts/warehouse_request/for_approval_proceed',
+									url : '/dpr/delivery/for_listing_proceed',
 									data : {				
-										'warehouse_request_id' : warehouse_request_id,
-										'warehouse_request_code' : warehouse_request_code,
-										'is_approved' : is_approved,
+										'request_detail_id' : _request_detail_id,
+										'request_code' : _request_code,
+										'listing_action' : _listing_action,
 										'remarks' : $("#txt-remarks").val(),
 									},
 									on_success : function(data) {
 										
+										hideLoading();
 										if (data.status == "1")	{
 											approveRequestModal.hide();
 											
@@ -233,7 +246,7 @@
 												buttons: {
 													'Ok' : function() {
 														proceedApproveRequestModal.hide();
-														redirect('spare_parts/warehouse_request/approval');
+														redirect('dpr/delivery/listing');
 													}
 												}
 											});
@@ -241,18 +254,13 @@
 
 											
 										} else {
+											hideLoading();
 											// show add form modal
 											approveRequestModal.hide();					
 											errorApproveRequestModal = b.modal.new({
 												title: data.data.title,
-												width:450,
-												disableClose: true,
+												width:450,	
 												html: data.data.html,
-												buttons: {						
-													'Close' : function() {
-														errorApproveRequestModal.hide();								 							
-													}
-												}
 											});
 											errorApproveRequestModal.show();	
 
@@ -261,6 +269,7 @@
 
 								})
 								return false;
+								
 							}									
 						}
 					});
@@ -284,61 +293,178 @@
 			}	
 				
 		})
-		return false;			
-	});
+		return false;
+	}
 	
-	$(".view-details").click(function(){
-		var warehouse_request_id = $(this).parent().attr("data1");
-		var warehouse_request_code = $(this).parent().attr("data2");
-	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	$(".assign-mtr").click(function(){
+
+		var _request_id = $(this).parent().attr("data1");
+		var _request_code = $(this).parent().attr("data2")
+
 		b.request({
-			url: "/spare_parts/warehouse_request/view_details",
+			url: "/spare_parts/load_assign_mtr",
 			data: {
-				"warehouse_request_id" : warehouse_request_id,
-				"warehouse_request_code" : warehouse_request_code,
+				'request_id' : _request_id,
+				'request_code' : _request_code,				
 			},
 			on_success: function(data){
+
 				if (data.status == "1")	{
-				
+					
 					// show add form modal					
-					viewDetailsModal = b.modal.new({
-						title: data.data.title,
-						width:800,
-						disableClose: true,
-						html: data.data.html,
-						buttons: {
-							'Close' : function() {
-								viewDetailsModal.hide();								 							
-							}									
-						}
-					});
-					viewDetailsModal.show();
-				} else {
-					// show add form modal					
-					var errorViewDetailsModal = b.modal.new({
+					confirmAssignMTRModal = b.modal.new({
 						title: data.data.title,
 						width:450,
 						disableClose: true,
 						html: data.data.html,
 						buttons: {
-							'Close' : function() {
-								errorViewDetailsModal.hide();								 							
+							'Cancel' : function() {
+								confirmAssignMTRModal.hide();								
+							},
+							'Proceed' : function() {
+								if ($.trim($("#txt-mtrnumber").val()) == "") {
+									$("#error-mtrnumber").show();
+									return;
+								
+								} else {									
+									b.request({
+										url : '/spare_parts/check_mtr',
+										data : {
+											'request_id' : _request_id,
+											'request_code' : _request_code,																
+											'mtr_number' : $("#txt-mtrnumber").val(),
+										},
+										on_success : function(data) {
+											if (data.status == "1")	{													
+												b.request({
+													url : '/spare_parts/proceed_assign_mtr',
+													data : {
+														'request_id' : _request_id,
+														'request_code' : _request_code,																
+														'mtr_number' : $("#txt-mtrnumber").val(),
+													},
+													on_success : function(data) {
+														if (data.status == "1")	{													
+															// show add form modal
+															confirmAssignMTRModal.hide();					
+															proceedAssignMTRModal = b.modal.new({
+																title: data.data.title,
+																width:450,	
+																html: data.data.html,
+																buttons: {
+																	'Ok' : function() {
+																		proceedAssignMTRModal.hide();
+																		redirect('spare_parts/warehouse_request/listing');
+																	}
+																}
+															});
+															proceedAssignMTRModal.show();
+														} else {
+															confirmAssignMTRModal.hide();					
+															errorAssignMTRModal = b.modal.new({
+																title: data.data.title,
+																width:450,	
+																html: data.data.html,
+															});
+															errorAssignMTRModal.show();
+														}												
+													} 
+												})
+											} else {
+												$("#error-mtrnumber").text(data.data.html);
+												$("#error-mtrnumber").show();												
+												return;
+											}												
+										} 
+									})
+
+								}
 							}
 						}
 					});
-					errorViewDetailsModal.show();		
-				}
+					confirmAssignMTRModal.show();
+
+					
+				} else {
+					// show add form modal
+					approveRequestModal.hide();					
+					errorApproveRequestModal = b.modal.new({
+						title: data.data.title,
+						width:450,	
+						html: data.data.html,
+					});
+					errorApproveRequestModal.show();	
+
+				}		
 			}	
 				
 		})
-		return false;			
+		return false;
+		
 	});
 	
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	$("#download-btn").click(function(){
 		var download_modal = b.modal.new({});
 		var years = "";
 		var months = "";
 		var days = "";
+
+		var _search_status = '<?= $search_status ?>';
+		var _search_by = '<?= $search_by ?>';
+		var _search_text = '<?= $search_text ?>';
 
 		download_modal.init({
 
@@ -400,7 +526,7 @@
 														url: "/spare_parts/warehouse_request/download_proceed",
 														data: {
 															"start_date": start_date,
-															"end_date": end_date
+															"end_date": end_date,															
 														},
 														on_success: function(data){
 															var download_xls_modal = b.modal.new({});
@@ -427,7 +553,7 @@
 																		"Download": function(){
 																			download_xls_modal.hide();
 																																		
-																			redirect('/spare_parts/warehouse_request/export_xls/'+ start_date +'/' + end_date);
+																			redirect('/spare_parts/warehouse_request/export_xls/'+ start_date +'/' + end_date +'/' + _search_status +'/' + _search_by +'/' + _search_text);
 																
 																			
 																		}
@@ -436,10 +562,10 @@
 
 																download_xls_modal.show();
 															}
-															$(this_button).removeClass("no_clicking");
+															$(this_button).removeClass("no_clicking")
 														},
 														on_error: function(){
-															$(this_button).removeClass("no_clicking");
+															$(this_button).removeClass("no_clicking")
 														}
 													});
 												}

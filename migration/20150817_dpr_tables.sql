@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `rf_printing_press`;
 CREATE TABLE `rf_printing_press` (
   `printing_presS_id` 			int(11) NOT NULL AUTO_INCREMENT,
   `complete_name` 				varchar(150) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `complete_address` 					varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `complete_address` 			varchar(250) COLLATE utf8_unicode_ci DEFAULT NULL,
   `contact_number` 				int(2) NOT NULL DEFAULT 0,  
   `is_active`					tinyint(2) NOT NULL DEFAULT 0,  
   `is_deleted`					tinyint(2) NOT NULL DEFAULT 0,  
