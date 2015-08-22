@@ -40,7 +40,16 @@ class Delivery extends Admin_Controller {
 			} else {
 				$where = "status = '". $search_status ."'";
 			}
-				
+			
+
+			if ($search_by == 'code')	{
+				$request_summary_details = $this->dpr_model->get_request_summary_by_request_code($search_text);
+
+				// TODO:::!!!
+
+			}
+
+
 			if ($where != NULL) {
 				if ($search_by == 'name')
 					$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
@@ -58,7 +67,7 @@ class Delivery extends Admin_Controller {
 		$config = array(
 				'pagination_url' => "/dpr/delivery/listing/",
 				'total_items' => $this->dpr_model->get_request_detail_count($where),
-				'per_page' => 1,
+				'per_page' => 5,
 				'uri_segment' => 4,
 		);
 
@@ -146,13 +155,10 @@ class Delivery extends Admin_Controller {
 			if ($listing_action == 'return delivery') {
 				$new_remarks = "[" . $current_datetime . "][" . $this->user->user_id . "] " .$remarks . "\n" . $request_detail_details->remarks;
 
-				// from spare_parts helper
-				$return_html = return_reserved_items($warehouse_request_code, 'CANCELLED', $remarks);
-
 				$data = array(
 					'status' => "RETURNED",					
 					'remarks' => $new_remarks,
-					'approve_timestamp' => $current_datetime
+					'update_timestamp' => $current_datetime
 				);
 
 				$html = "You have returned the form under Request Code: <strong>{$request_code}</strong>.";
@@ -162,26 +168,37 @@ class Delivery extends Admin_Controller {
 
 				// change status to FOR APPROVAL
 				$data = array(
-					'status' => "RECEIVED",
-					'approved_by' => $this->user->user_id,					
-					'approve_timestamp' => $current_datetime
+					'status' => "RECEIVED",					
+					'update_timestamp' => $current_datetime
 				);
 
 				// TODO: insert into inventory
 
+				// check if all forms in request are all RECEIVED
+				$where = "status IN ('COMPLETED', 'RETURNED')";
+				$request_detail_count = $this->dpr_model->get_request_detail_count($where);
 
-				$html = "You have successfully filed the request for approval with Warehouse Request Code: <strong>{$warehouse_request_code}</strong>.";
-				$title = "File For Approval :: " . $warehouse_request_code;
+				if ($request_detail_count == 0) {
+					// update overall status
+					$data_update = array(
+							'status' => 'RECEIVED',
+							'update_timestamp' => date("Y-m-d H:i:s")
+						);
+					$this->dpr_model->update_request_summary($data, $where);
+				}
+
+				$html = "You have successfully processed a form request under Request Code: <strong>{$request_code}</strong>.";
+				$title = "Form Recieved :: " . $request_code;
 			
 			}
 
-			$where = "warehouse_request_id = " . $warehouse_request_id;
-			$this->spare_parts_model->update_warehouse_request($data, $where);	
+			$where = "request_detail_id = " . $request_detail_id;
+			$this->dpr_model->update_request_detail($data, $where);	
 		}	
 
-		$this->return_json("1","Successful Approval of Warehouse Request.",array("html" => $html, "title" => $title));
+		$this->return_json("1","Processed Form Request.",array("html" => $html, "title" => $title));
 
 		return;	
-	}
+	}	
 	
 }

@@ -13,7 +13,8 @@
 		<select name="search_status" id="search_status" style="width:250px;margin-left:20px" value="<?= $search_status ?>">
 			<option value="ALL">ALL</option>						
 			<option value="APPROVED">RECEIVED</option>
-			<option value="CANCELLED">REJECTED</option>			
+			<option value="CANCELLED">REJECTED</option>
+			<option value="RETURNED">RETURNED</option>
 		</select>  
 	
 		<br/>
@@ -212,7 +213,7 @@
 								$("#error-reasonremarks").hide();
 
 
-								if (listing_action == 'cancel') {
+								if (_listing_action == 'cancel') {
 									
 									if ($.trim($("#txt-remarks").val()) == "") {
 										$("#error-reasonremarks").show();

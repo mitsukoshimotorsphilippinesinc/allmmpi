@@ -129,20 +129,31 @@ CREATE TABLE `rf_branch_box_location` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
-CREATE TABLE is_booklet (
-	`branch_box_location_id
-	`request_detail_id
-	`booklet_number
-	`series_from
-	`series_to
-	`receive_timestamp
-	`receive_remarks
-	`scan_timestamp
-	`scan_remarks
-	`storage_timestamp
-	`storage_remarks
-	`insert_timestamp
-);
+DROP TABLE IF EXISTS `is_booklet`;
+CREATE TABLE `is_booklet` (
+	`booklet_id`				int(11) NOT NULL AUTO_INCREMENT,
+	`branch_id`					int(11) NOT NULL DEFAULT 0,
+	`request_detail_id`			int(11) NOT NULL AUTO_INCREMENT,
+	`branch_id`					int(11) NOT NULL DEFAULT 0,
+	`location_id`				int(11) NOT NULL DEFAULT 0,
+	`booklet_number`			varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`series_from`				int(11) NOT NULL DEFAULT 0,
+	`series_to`				  	int(11) NOT NULL DEFAULT 0,
+	`status`					varchar(30) COLLATE utf8_unicode_ci DEFAULT 'IN',
+	`receive_timestamp`			timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`receive_remarks`			text COLLATE utf8_unicode_ci,
+	`update_timestamp`			timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`insert_timestamp`			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`booklet_id`),
+	KEY `branch_id` (`branch_id`),
+	KEY `location_id` (`location_id`),
+	KEY `booklet_number` (`booklet_number`),
+	KEY `series_from` (`series_from`),
+	KEY `series_to` (`series_to`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+
 
 
 release_timestamp
