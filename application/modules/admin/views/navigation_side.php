@@ -25,18 +25,19 @@
 
 ?>
 
-
 <div id="wrapper">
-	<div id="sidebar-wrapper" style="background-color:#6D6E71;margin-top: -15px;font-family:Tahoma">
+	<div id="sidebar-wrapper" style="background-color:#0C0C0C	;margin-top: -15px;font-family:Tahoma">
+	<!--div id="sidebar-wrapper"-->
 		<ul class="sidebar-nav">
 			<li class="sidebar-brand">
 				<a href="#"><strong><?= $module_title ?></strong></a>
 			</li>	
 			<li>
 				<a class="collapsed" data-target="#dealer-menu" data-toggle="collapse" href="javascript:;" aria-expanded="false">		
-					<strong><span style="font-size:13px;color:black;"> <?= $active_segment->module_name ?> </span><i class='icon-arrow-down'></i></strong>
+					<strong><span style="font-size:13px;color:white;"> <?= $active_segment->module_name ?> </span><i class='icon-arrow-down'></i></strong>
 				</a>
 				<ul id="dealer-menu" class="collapse" aria-expanded="true" style="">
+					<!--ul id="menu-toggle" class="collapse" aria-expanded="true" style=""-->
 					<?php
 						foreach ($module_submodule_details as $msd) {
 							$url = '/' . $system_name . '/' . $segment_name . $msd->submodule_url;
@@ -66,3 +67,38 @@
 		$('#sidebar-wrapper').removeClass('hidden-xs');     
 	});
 </script-->
+
+
+<script type="text/javascript">
+
+$("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+ $("#menu-toggle-2").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled-2");
+    $('#menu ul').hide();
+});
+
+ function initMenu() {
+  $('#menu ul').hide();
+  $('#menu ul').children('.current').parent().show();
+  //$('#menu ul:first').show();
+  $('#menu li a').click(
+    function() {
+      var checkElement = $(this).next();
+      if((checkElement.is('ul')) && (checkElement.is(':visible'))) {
+        return false;
+        }
+      if((checkElement.is('ul')) && (!checkElement.is(':visible'))) {
+        $('#menu ul:visible').slideUp('normal');
+        checkElement.slideDown('normal');
+        return false;
+        }
+      }
+    );
+  }
+$(document).ready(function() {initMenu();});
+
+</script>

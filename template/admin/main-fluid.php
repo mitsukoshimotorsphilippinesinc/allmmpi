@@ -18,7 +18,9 @@
 	
 	<?php echo css('base.css');?>
 	<?php echo css('main.css');?>
-	<?php echo css('google-code-prettify/prettify.css');?>
+	<?php echo css('google-code-prettify/prettify.css');?>	
+	<?php echo css('simple-sidebar/css/simple-sidebar.css');?>	
+	<?php echo css('font-awesome-4.4.0/css/font-awesome.min.css');?>		
 	<!--?php echo css('switcherMenu.css');?-->
 
 	<?php echo css('tablesorter.css'); ?>
@@ -57,7 +59,7 @@ body > .container > #content {
 	</script>
 
 	<div id="loading_overlay">
-	    <div class="loading_message round_bottom">Loading...</div>
+	    <div class="loading_message round_bottom">Processing yout request...</div>
 	</div>
 	
 	<div id="header" class='navbar navbar-fixed-top cleafix'>
@@ -65,31 +67,51 @@ body > .container > #content {
 			<div class="container" style='width:95%;'>
 				<a class="brand" href="/admin">Mitsukoshi Motors Philippines Inc.<br/>Administration</a>
 				
-				<div class='pull-right admin-login-profile'>
+				<div class='pull-right admin-login-profile'>					
 					<span class='admin-login-profile-name'>Hi <?= ucfirst($this->user->first_name).' '.ucfirst($this->user->last_name) ?></span>
-					<a href='/admin/signin/signout' class='btn'><span>Logout</span></a>
-				</div>
-								
+					<a href='/admin/signin/signout' class='btn'><span>Logout</span></a>					
+				
+					<button style="margin-top:-2px;width:30px;height:30px;" class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">
+						<span class="icon-th-large" aria-hidden="true"/>
+					</button>
+				</div>	
 			</div>
 			<?= $this->load->view('navigation_top', null, TRUE, 'admin');  ?>
 		</div>
 	</div>
 	
-	<div class="container-fluid">
-		<div class="row-fluid">
-		    <div class="span12">
+	<?php
+	if ($this->uri->segment(2) == NULL) {
+		echo "<div class='container-full'>";	
+	} else {
+
+		$data = array(
+			'system_name' => $this->uri->segment(1),
+			'segment_name' => $this->uri->segment(2)
+		);
+
+	?>	
+	<?= $this->load->view('navigation_side', $data, TRUE, 'admin'); ?>
+	<?php		
+		echo "<div class='container'>";	
+	}
+	?>	
+		<div style="margin-top:40px;width:1000px;" class='content-wrapper'>
+			<div id='content'>
 		      <?php
 					//if (!$this->users_model->is_user_allowed($this->uri->uri_string())) 
 					//	echo "<div class='alert alert-error'>You do not have access to this module. Please contact your administrator if you require accesss to this module</div>";
-					//else
+					//else 
 			      		echo $content;						
 			  ?>
-		    </div>
-		  </div>
+			</div>
+		</div>		
+		<div style="clear:both;"></div>
 		<footer>
 			<p class="pull-right"></p>
 			<p></p>
 		</footer>
 	</div>
+
 </body>
 </html>

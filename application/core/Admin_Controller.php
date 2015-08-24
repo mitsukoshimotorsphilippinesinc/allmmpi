@@ -6,8 +6,9 @@ class Admin_Controller extends Base_Controller {
 	
 	public function __construct() 
 	{
-		parent::__construct();
+		parent::__construct();		
 		$this->template->theme = 'admin';
+		$this->template->name = 'main-fluid';
 		$this->template->title = $this->config->item('title').' : Admin';
 		
 		//$this->load->config('asset_admin');

@@ -18,6 +18,7 @@
 	<?php echo css('main.css');?>
 	<?php echo css('google-code-prettify/prettify.css');?>
 	<?php echo css('simple-sidebar/css/simple-sidebar.css');?>	
+	<?php echo css('font-awesome-4.4.0/css/font-awesome.min.css');?>		
 	<!--?php echo css('switcherMenu.css');?>
 	<!--?php echo css('keyboard.css');?>
 	
@@ -68,11 +69,14 @@ body > .container > #content {
 			<div class="container" style='width:95%;'>
 				<a class="brand" href="/admin">Mitsukoshi Motors Philippines Inc.<br/>Administration</a>
 				
-				<div class='pull-right admin-login-profile'>
+				<div class='pull-right admin-login-profile'>					
 					<span class='admin-login-profile-name'>Hi <?= ucfirst($this->user->first_name).' '.ucfirst($this->user->last_name) ?></span>
-					<a href='/admin/signin/signout' class='btn'><span>Logout</span></a>
-				</div>
-								
+					<a href='/admin/signin/signout' class='btn'><span>Logout</span></a>					
+				
+					<button style="margin-top:-2px;width:30px;height:30px;" class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">
+						<span class="icon-th-large" aria-hidden="true"/>
+					</button>
+				</div>	
 			</div>
 			<?= $this->load->view('navigation_top', null, TRUE, 'admin');  ?>
 		</div>

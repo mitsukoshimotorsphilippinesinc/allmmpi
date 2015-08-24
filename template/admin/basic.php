@@ -17,6 +17,7 @@
 	<?php echo css('main.css');?>
 	<?php echo css('google-code-prettify/prettify.css');?>
 	<?php echo css('simple-sidebar/css/simple-sidebar.css');?>	
+	<?php echo css('font-awesome-4.4.0/css/font-awesome.min.css');?>		
 	<?php echo css('/assets/css/tablesorter.css');?>	
 	
 	<!--[if lt IE 9]>
