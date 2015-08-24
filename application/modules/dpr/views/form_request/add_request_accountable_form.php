@@ -38,7 +38,7 @@
 	<Select id = "form_option">
 		<option value = '0'>Select Form</option>
 	<?php
-		$where = "is_accountable = 1";
+		$where = "is_accountable = 1 and is_active = 1";
 		$form_list=$this->dpr_model->get_form_type($where,null,'name ASC');
 		foreach($form_list as $fl){
 			$form_name = $fl->name;
