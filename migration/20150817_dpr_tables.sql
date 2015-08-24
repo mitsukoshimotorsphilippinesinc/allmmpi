@@ -114,27 +114,25 @@ VALUES ('1', 'Accountable Forms', '/accountables', '1', '1');
 INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
 VALUES ('1', 'Non-Accountable Forms', '/non_accountables', '2', '1');
 
-DROP TABLE IF EXISTS `rf_branch_box_location`;
-CREATE TABLE `rf_branch_box_location` (
-	`branch_box_location_id`	int(11) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `rf_branch_rack_location`;
+CREATE TABLE `rf_branch_rack_location` (
+	`branch_rack_location_id`	int(11) NOT NULL AUTO_INCREMENT,
 	`branch_id`					int(11) NOT NULL DEFAULT 0,
-	`box_location`				varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`rack_location`				varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`is_active`					tinyint(2) NOT NULL DEFAULT 0,
 	`remarks`					text COLLATE utf8_unicode_ci,
 	`update_timetamp`			timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`insert_timestamp`			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`box_location_id`),
+	PRIMARY KEY (`branch_rack_location_id`),
 	KEY `branch_id` (`branch_id`),
-	KEY `box_location` (`box_location`)
+	KEY `rack_location` (`rack_location`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 DROP TABLE IF EXISTS `is_booklet`;
 CREATE TABLE `is_booklet` (
 	`booklet_id`				int(11) NOT NULL AUTO_INCREMENT,
-	`branch_id`					int(11) NOT NULL DEFAULT 0,
-	`request_detail_id`			int(11) NOT NULL AUTO_INCREMENT,
-	`branch_id`					int(11) NOT NULL DEFAULT 0,
+	`branch_id`					int(11) NOT NULL DEFAULT 0,	
 	`location_id`				int(11) NOT NULL DEFAULT 0,
 	`booklet_number`			varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`series_from`				int(11) NOT NULL DEFAULT 0,
@@ -152,16 +150,8 @@ CREATE TABLE `is_booklet` (
 	KEY `series_to` (`series_to`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-
-
-
-
-release_timestamp
-status
-
-
-
-DROP TABLE IF EXISTS `is_booklet` (
-CREATE TABLE `is_booklet` (
-	
-);
+-- ADD INVENTORY SUBMODULES FOR INVENTORY
+INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
+VALUES('3', 'Main', '/main', '1', '1');
+INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
+VALUES('3', 'Branch', '/branch', '2', '1');
