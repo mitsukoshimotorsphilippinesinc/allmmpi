@@ -20,6 +20,7 @@ class Human_relations_model extends Base_Model
 			'position' => 'rf_position',
 			'company' => 'rf_company',
 			'department' => 'rf_department',
+			'branch' => 'rf_branch',
 		);
 
 	}
@@ -325,6 +326,39 @@ class Human_relations_model extends Base_Model
 	function get_department_by_url($url) 
 	{
 		$result = $this->get_department(array('url' => $url));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_branch($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('branch', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function insert_branch($data) 
+	{
+		return $this->insert('branch', $data);
+	}
+
+	function update_branch($data, $where) 
+	{
+		return $this->update('branch', $data, $where);
+	}
+
+	function delete_branch($where) 
+	{
+		return $this->delete('branch', $where);
+	}
+
+	function get_branch_by_id($branch_id) 
+	{
+		$result = $this->get_branch(array('branch_id' => $branch_id));
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];

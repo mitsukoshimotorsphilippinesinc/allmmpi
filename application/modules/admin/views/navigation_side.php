@@ -1,6 +1,6 @@
 <?php
-	
-	$ci = ci();	
+
+		$ci = ci();	
 	$ci->db_gen = $ci->load->database($this->uri->segment(1), TRUE);
 
 	$module_title = str_replace("_", " ", $this->uri->segment(1));

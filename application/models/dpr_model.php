@@ -14,6 +14,10 @@ class Dpr_model extends Base_Model
 		$this->_TABLES = array(			
 			'department_module' => 'rf_department_module',
 			'department_module_submodule' => 'rf_department_module_submodule',
+			'form' => 'rf_form_type',
+			'printing_press' => 'rf_printing_press',
+			'request_summary' => 'tr_request_summary',
+			'request_detail' => 'tr_request_detail'
 		);
 
 	}
@@ -92,7 +96,7 @@ class Dpr_model extends Base_Model
 	}
 
 	// ========================================================================
-	// ===========================================================================
+	// ========================================================================
 	// department_module_submodule
 	function get_department_module_submodule($where = null, $limit = null, $orderby = null, $fields = null) 
 	{
@@ -144,5 +148,191 @@ class Dpr_model extends Base_Model
 		$query->free_result();
 		return $row->cnt;
 	}
-	// ===========================================================================
+
+	// ========================================================================
+	// ========================================================================
+	// rf_form_type
+	function get_form_type($where = null, $limit = null, $orderby = null, $fields = null) {
+		$query = $this->fetch('form', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function get_form_type_by_id($form_type_id) 
+	{
+		$result = $this->get_form_type(array('form_type_id' => $form_type_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	// ========================================================================
+	// ========================================================================
+	// rf_printing_press
+	function get_press_name($where = null, $limit = null, $orderby = null, $fields = null) {
+		$query = $this->fetch('printing_press', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function get_printing_press($where = null, $limit = null, $orderby = null, $fields = null) {
+		$query = $this->fetch('printing_press', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;	
+	}
+
+	function insert_printing_press($data) 
+	{
+		return $this->insert('printing_press', $data);
+	}
+
+	function update_printing_press($data, $where) 
+	{
+		return $this->update('printing_press', $data, $where);
+	}
+
+	function delete_printing_press($where) 
+	{
+		return $this->delete('printing_press', $where);
+	}
+
+	function get_printing_press_by_id($printing_press_id) 
+	{
+		$result = $this->get_printing_press(array('printing_press_id' => $printing_press_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_printing_press_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('printing_press', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+
+	// ========================================================================
+	// ========================================================================
+
+
+	function insert_new_request($data){
+		return $this->insert('request_detail', $data);
+	}
+
+	// ========================================================================
+	// ========================================================================
+	// tr_request_summary
+	function get_request_summary($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('request_summary', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_request_summary($data) 
+	{
+		return $this->insert('request_summary', $data);
+	}
+
+	function update_request_summary($data, $where) 
+	{
+		return $this->update('request_summary', $data, $where);
+	}
+
+	function delete_request_summary($where) 
+	{
+		return $this->delete('request_summary', $where);
+	}
+
+	function get_request_summary_by_id($request_summary_id) 
+	{
+		$result = $this->get_request_summary(array('request_summary_id' => $request_summary_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_request_summary_by_request_code($request_code) 
+	{
+		$result = $this->get_request_summary(array('request_code' => $request_code));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_request_summary_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('request_summary', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}	
+
+	// ========================================================================
+	// ========================================================================
+	// tr_request_detail
+	function get_request_detail($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('request_detail', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_request_detail($data) 
+	{
+		return $this->insert('request_detail', $data);
+	}
+
+	function update_request_detail($data, $where) 
+	{
+		return $this->update('request_detail', $data, $where);
+	}
+
+	function delete_request_detail($where) 
+	{
+		return $this->delete('request_detail', $where);
+	}
+
+	function get_request_detail_by_id($request_detail_id) 
+	{
+		$result = $this->get_request_detail(array('request_detail_id' => $request_detail_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_request_detail_by_request_code($request_code) 
+	{
+		$result = $this->get_request_detail(array('request_code' => $request_code));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_request_detail_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('request_detail', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}	
+
+	// ========================================================================
 }
