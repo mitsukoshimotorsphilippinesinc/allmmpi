@@ -217,4 +217,9 @@ class Dpr_model extends Base_Model
 		$query->free_result();
 		return $row->cnt;
 	}
+
+	function update_request_detail($data, $where) 
+	{
+		return $this->update('request_detail', $data, $where);
+	}
 }

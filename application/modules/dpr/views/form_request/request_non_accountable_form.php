@@ -48,10 +48,14 @@
        					 	 echo "<tr>			
 								<td>{$date_request}</td>
 								<td>{$reference_no}</td>
-								<td>{$status}</td>
-								<td><a class = 'btn delete_item' data = '{$request_summary_id}'>Delete</a> <a class = 'btn update_record' data = '{$request_summary_id}'>Update</a> <a class = 'btn view_details' data = '{$request_summary_id}'>View Details</a></td>
-				  			</tr>";			
-
+								<td>{$status}</td>";
+								if (($status == "COMPLETED") || ($status == "CANCELLED") || ($status == "RECEIVED") || ($status == "RETURNED")){
+								echo 	
+								"<td><a href = 'view_non_accountable_details/{$request_summary_id}' class = 'btn view_details' data = '{$request_summary_id}'>View Details</a> <a disabled = 'disabled' class = 'btn delete_item' data = '{$request_summary_id}'>Cancel</a> <a disabled = 'disabled' class = 'btn update_record' data = '{$request_summary_id}'>Update</a></td></tr>";
+								}else{
+								echo 	
+								"<td><a href = 'view_non_accountable_details/{$request_summary_id}' class = 'btn view_details' data = '{$request_summary_id}'>View Details</a> <a class = 'btn delete_item' data = '{$request_summary_id}'>Cancel</a> <a class = 'btn update_record' data = '{$request_summary_id}'>Update</a></td></tr>";	
+				  			}
        					};
 			}
 		?>

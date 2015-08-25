@@ -2,7 +2,6 @@
 <head>
 
 <?PHP
-	//var_dump($all_record);
 ?>
 <div class='alert alert-danger'><h2>Request List(Accountable Forms)</div>
 </head>
@@ -51,9 +50,14 @@
 								<td>{$date_request}</td>
 								<td>{$reference_no}</td>
 								<td>{$status}</td>
-								<td><a class = 'btn delete_item' data = '{$request_summary_id}'>Delete</a> <a class = 'btn update_record' data = '{$request_summary_id}'>Update</a> <a class = 'btn view_details' data = '{$request_summary_id}'>View Details</a></td>
-				  			</tr>";			
-
+								";
+								if (($status == "COMPLETED") || ($status == "CANCELLED") || ($status == "RECEIVED") || ($status == "RETURNED")){
+								echo 	
+								"<td><a href='{$this->config->item('base_url')}/dpr/form_request/view_accountable_details/{$request_summary_id}' class = 'btn view_details' data = '{$request_summary_id}'>View Details</a> <a disabled = 'disabled' class = 'btn delete_item' data = '{$request_summary_id}'>Cancel</a></td></tr>";
+								}else{
+								echo 	
+								"<td><a href='{$this->config->item('base_url')}/dpr/form_request/view_accountable_details/{$request_summary_id}' class = 'btn view_details' data = '{$request_summary_id}'>View Details</a> <a class = 'btn delete_item' data = '{$request_summary_id}'>Cancel</a></td></tr>";	
+								}			
        					};
 			}
 		?>
@@ -73,5 +77,6 @@
 </html>
  
 <SCRIPT TYPE = "text/javascript">
+
 
 </SCRIPT>

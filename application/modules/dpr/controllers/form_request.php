@@ -7,6 +7,7 @@ class Form_request extends Admin_Controller {
 		parent::__construct();
 		$this->load->model('human_relations_model');
 		$this->load->library('pager');
+		$this->db_dpr = $this->load->database('dpr', TRUE);
 	}
 
 	public function index()
@@ -15,6 +16,33 @@ class Form_request extends Admin_Controller {
 		$this->template->view('dashboard');
 	}
 
+	public function view_accountable_details($request_summary_id = 0)
+	{
+		$where = "request_summary_id = {$request_summary_id}";
+		$record_summary = $this ->dpr_model->get_request_summary($where);
+		$this->template->record_summary = $record_summary;
+		$this->template->request_code = $record_summary[0]->request_code;
+		
+		$record_detail = $this ->dpr_model->get_request_detail($where,null,'request_detail_id DESC');
+		$this->template->record_detail = $record_detail;
+
+		$this->template->view('form_request/accountable_view_details');
+
+	}
+
+	public function view_non_accountable_details($request_summary_id = 0)
+	{
+		$where = "request_summary_id = {$request_summary_id}";
+		$record_summary = $this ->dpr_model->get_request_summary($where);
+		$this->template->record_summary = $record_summary;
+		$this->template->request_code = $record_summary[0]->request_code;
+
+		$record_detail = $this ->dpr_model->get_request_detail($where,null,'request_detail_id DESC');
+		$this->template->record_detail = $record_detail;
+
+		$this->template->view('form_request/non_accountable_view_details');
+
+	}
 
 	public function accountables()
 	{
@@ -315,4 +343,118 @@ class Form_request extends Admin_Controller {
 		$this->return_json("1","Add new item successfully.",array('request_code' => $request_code));
 	}
 
+	public function view_update_accountable()
+	{
+		$request_detail_id = $this->input->post('request_detail_id');
+		$where = "request_detail_id = '{$request_detail_id}'";
+		$request_detail_update = $this->dpr_model->get_request_detail($where);
+
+		$html = "
+		<table id = 'update_list' class='table table-striped table-bordered'>
+		<thead>
+			<tr>			
+				<th>Send ATP</th>
+				<th>Received ATP</th>
+				<th>Faxed to Printer</th>
+				<th>Rec From Printer</th>
+				<th>Send For Stamping</th>
+				<th>Rec from Stamping</th>		
+				<th>Date Delivered</th>
+			</tr>
+		</thead>
+		<tbody>";
+			foreach ($request_detail_update as $rdu) {
+				$send_atp = $rdu->send_atp;
+				$received_atp = $rdu->receive_atp;
+				$faxed_to_printer = $rdu->faxed_to_printer;
+				$received_from_printer = $rdu->received_from_printer;
+				$send_for_stamping = $rdu->send_for_stamping;
+				$received_from_stamping = $rdu->received_from_stamping;
+				$date_delivered = $rdu->date_delivered;
+
+				if ($send_atp == "0000-00-00 00:00:00"){
+					$send_atp = "N/A";
+				}
+				if ($received_atp == "0000-00-00 00:00:00"){
+					$received_atp = "N/A";
+				}
+				if ($faxed_to_printer == "0000-00-00 00:00:00"){
+					$faxed_to_printer = "N/A";
+				}
+				if ($received_from_printer == "0000-00-00 00:00:00"){
+					$received_from_printer = "N/A";
+				}
+				if ($send_for_stamping == "0000-00-00 00:00:00"){
+					$send_for_stamping = "N/A";
+				}
+				if ($received_from_stamping == "0000-00-00 00:00:00"){
+					$received_from_stamping = "N/A";
+				}
+				if ($date_delivered == "0000-00-00 00:00:00"){
+					$date_delivered = "N/A";
+				}
+
+				$html .="<tr>			
+					<td>{$send_atp}</td>
+					<td>{$received_atp}</td>
+					<td>{$faxed_to_printer}</td>
+					<td>{$received_from_printer}</td>
+					<td>{$send_for_stamping}</td>
+					<td>{$received_from_stamping}</td>
+					<td>{$date_delivered}</td>
+				</tr>";
+			}
+			
+		$html .= "</tbody></table>";
+
+		$sql = "SELECT COLUMN_NAME as col_name, ORDINAL_POSITION, COLUMN_DEFAULT
+				FROM INFORMATION_SCHEMA.COLUMNS 
+				WHERE TABLE_SCHEMA = 'dpr' AND TABLE_NAME = 'tr_request_detail'
+				AND DATA_TYPE = 'timestamp' 
+				AND COLUMN_DEFAULT = '0000-00-00 00:00:00'
+				AND COLUMN_NAME NOT IN ('date_delivered', 'update_timestamp')
+				ORDER BY ORDINAL_POSITION;";
+
+		$detail_update_column = $this->db_dpr->query($sql);
+		$detail_update_column = $detail_update_column->result(); 
+		
+		$has_pending = 0;
+
+		foreach ($detail_update_column as $duc){
+			
+			$sql_test = "SELECT ". $duc->col_name ." AS timestamp_col FROM tr_request_detail WHERE request_detail_id = {$request_detail_id}";
+			$detail_test = $this->db_dpr->query($sql_test);
+			$detail_test = $detail_test->result(); 
+			$detail_test = $detail_test[0]; 
+
+			if ($detail_test->timestamp_col == '0000-00-00 00:00:00') {
+				$has_pending = 1;
+				break;
+			}
+
+		}
+
+		if ($has_pending == 1)
+			$current_col_name = $duc->col_name;
+		else
+			$current_col_name = "NONE";
+
+		//var_dump($current_col_name);
+		$current_col_name_unformat = $current_col_name;
+		$current_col_name = strtoupper(str_replace("_", " ", $current_col_name));
+		$this->return_json("1","View Update...",array('html' => $html,'current_col_name' => $current_col_name,'current_col_name_unformat' => $current_col_name_unformat));
+	}
+
+	public function proceed_update_request_detail()
+	{
+		$request_detail_id = $this->input->post('request_detail_id');
+		$current_col_name_unformat = $this->input->post('current_col_name_unformat');
+		$where = "request_detail_id = '{$request_detail_id}'";
+		$data = array(
+			$current_col_name_unformat => $current_datetime = date("Y-m-d H:i:s"));
+
+		$this->dpr_model->update_request_detail($data,$where);
+
+		$this->return_json("1","Update Successfully");
+	}
 }	
