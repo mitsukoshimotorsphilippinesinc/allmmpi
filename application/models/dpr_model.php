@@ -172,6 +172,16 @@ class Dpr_model extends Base_Model
 		}
 		return $row;
 	}
+
+	function get_form_by_id($form_type_id) 
+	{
+		$result = $this->get_form_type(array('form_type_id' => $form_type_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
 	// ========================================================================
 	// ========================================================================
 	// rf_printing_press
@@ -181,6 +191,7 @@ class Dpr_model extends Base_Model
 		$query->free_result();
 		return $row;	
 	}
+
 
 	function get_printing_press($where = null, $limit = null, $orderby = null, $fields = null) {
 		$query = $this->fetch('printing_press', $fields, $where, $orderby, $limit);
@@ -220,14 +231,6 @@ class Dpr_model extends Base_Model
 		$row = $query->first_row();
 		$query->free_result();
 		return $row->cnt;
-	}
-
-	// ========================================================================
-	// ========================================================================
-
-
-	function insert_new_request($data){
-		return $this->insert('request_detail', $data);
 	}
 
 	// ========================================================================
@@ -295,7 +298,11 @@ class Dpr_model extends Base_Model
 		return $row;
     }
 
-	function insert_request_detail($data) 
+	function insert_new_request($data){
+		return $this->insert('request_detail', $data);
+	}
+
+	function insert_request_detail($data)
 	{
 		return $this->insert('request_detail', $data);
 	}
@@ -330,7 +337,8 @@ class Dpr_model extends Base_Model
 		return $row;
 	}
 	
-	function get_request_detail_count($where = null) {
+	function get_request_detail_count($where = null) 
+	{
 		// do a sql count instead of row count
 		$query = $this->fetch('request_detail', 'count(1) as cnt', $where);
 		$row = $query->first_row();
@@ -374,7 +382,8 @@ class Dpr_model extends Base_Model
 		return $row;
 	}
 	
-	function get_booklet_count($where = null) {
+	function get_booklet_count($where = null) 
+	{
 		// do a sql count instead of row count
 		$query = $this->fetch('booklet', 'count(1) as cnt', $where);
 		$row = $query->first_row();
@@ -428,7 +437,8 @@ class Dpr_model extends Base_Model
 		return $row;
 	}
 	
-	function get_branch_rack_location_count($where = null) {
+	function get_branch_rack_location_count($where = null) 
+	{
 		// do a sql count instead of row count
 		$query = $this->fetch('branch_rack_location', 'count(1) as cnt', $where);
 		$row = $query->first_row();
@@ -467,7 +477,8 @@ class Dpr_model extends Base_Model
 		return $row;
 	}
 	
-	function get_branch_rack_location_view_count($where = null) {
+	function get_branch_rack_location_view_count($where = null) 
+	{
 		// do a sql count instead of row count
 		$query = $this->fetch('branch_rack_location_view', 'count(1) as cnt', $where);
 		$row = $query->first_row();
@@ -477,9 +488,9 @@ class Dpr_model extends Base_Model
 
 	// ========================================================================
 	// ========================================================================
-	// tr_action_LOG
-	
-	function insert_log($data) {
+	// tr_action_LOG	
+	function insert_log($data) 
+	{
         if(isset($data['remarks'])) {
             $data['remarks'] .= "\n\n URL:" . $this->uri->uri_string();
         } else {
@@ -490,4 +501,5 @@ class Dpr_model extends Base_Model
     }
 
     // ========================================================================
+
 }

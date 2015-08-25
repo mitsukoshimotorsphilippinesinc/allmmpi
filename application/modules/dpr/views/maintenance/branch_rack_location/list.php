@@ -5,7 +5,7 @@
 
 <?= $breadcrumb_container; ?>
 
-<h2>Branch Rack Location</h2>
+<div class='alert alert-danger'><h2>Branch Rack Location</h2></div>
 <hr/>
 
 <form id='search_details' method='get' action =''>
