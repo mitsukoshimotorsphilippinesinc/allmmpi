@@ -19,4 +19,11 @@ class Inventory extends Admin_Controller {
 	{		
 		$this->template->view('inventory/dashboard');	
 	}
+
+	public function main()
+	{		
+		
+		
+		$this->template->view('inventory/main_inventory');	
+	}
 }

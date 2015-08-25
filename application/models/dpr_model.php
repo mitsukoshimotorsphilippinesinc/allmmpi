@@ -17,7 +17,11 @@ class Dpr_model extends Base_Model
 			'form' => 'rf_form_type',
 			'printing_press' => 'rf_printing_press',
 			'request_summary' => 'tr_request_summary',
-			'request_detail' => 'tr_request_detail'
+			'request_detail' => 'tr_request_detail',
+			'booklet' => 'is_booklet',
+			'branch_rack_location' => 'rf_branch_rack_location',
+			'branch_rack_location_view' => 'rf_branch_rack_location_view',
+			'action_log' => 'at_action_log',
 		);
 
 	}
@@ -335,4 +339,155 @@ class Dpr_model extends Base_Model
 	}	
 
 	// ========================================================================
+	// ========================================================================
+	// is_booklet
+	function get_booklet($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('booklet', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_booklet($data) 
+	{
+		return $this->insert('booklet', $data);
+	}
+
+	function update_booklet($data, $where) 
+	{
+		return $this->update('booklet', $data, $where);
+	}
+
+	function delete_booklet($where) 
+	{
+		return $this->delete('booklet', $where);
+	}
+
+	function get_booklet_by_id($booklet_id) 
+	{
+		$result = $this->get_booklet(array('booklet_id' => $booklet_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_booklet_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('booklet', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}	
+
+	// ========================================================================
+	// ========================================================================
+	// rf_branch_rack_location
+	function get_branch_rack_location($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('branch_rack_location', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function insert_branch_rack_location($data) 
+	{
+		return $this->insert('branch_rack_location', $data);
+	}
+
+	function update_branch_rack_location($data, $where) 
+	{
+		return $this->update('branch_rack_location', $data, $where);
+	}
+
+	function delete_branch_rack_location($where) 
+	{
+		return $this->delete('branch_rack_location', $where);
+	}
+
+	function get_branch_rack_location_by_id($branch_rack_location_id) 
+	{
+		$result = $this->get_branch_rack_location(array('branch_rack_location_id' => $branch_rack_location_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_branch_rack_location_by_branch_id($branch_id) 
+	{
+		$result = $this->get_branch_rack_location(array('branch_id' => $branch_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_branch_rack_location_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('branch_rack_location', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}	
+
+	// ========================================================================
+	// ========================================================================
+	// rf_branch_rack_location_view
+	function get_branch_rack_location_view($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('branch_rack_location_view', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+	function get_branch_rack_location_view_by_branch_rack_location_id($branch_rack_location_id) 
+	{
+		$result = $this->get_branch_rack_location_view(array('branch_rack_location_id' => $branch_rack_location_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_branch_rack_location_view_by_branch_id($branch_id) 
+	{
+		$result = $this->get_branch_rack_location_view(array('branch_id' => $branch_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	
+	function get_branch_rack_location_view_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('branch_rack_location_view', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}	
+
+	// ========================================================================
+	// ========================================================================
+	// tr_action_LOG
+	
+	function insert_log($data) {
+        if(isset($data['remarks'])) {
+            $data['remarks'] .= "\n\n URL:" . $this->uri->uri_string();
+        } else {
+            $data['remarks'] = "URL:" . $this->uri->uri_string();
+        }	
+
+	    $result = $this->insert('action_log', $data);
+    }
+
+    // ========================================================================
 }

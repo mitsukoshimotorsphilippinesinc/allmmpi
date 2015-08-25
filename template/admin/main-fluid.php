@@ -51,8 +51,8 @@ body > .container > #content {
 	<?php echo js('libs/tinymce/jquery.tinymce.js'); ?>
 	<?php echo js('libs/yoxview/yoxview-init.js'); ?>
 	<?php echo js('apps/core.js'); ?>
-	<?php echo js('apps/inventory.js'); ?>
-	<?php echo js('apps/site.js'); ?>
+	<!--?php echo js('apps/inventory.js'); ?-->
+	<!--?php echo js('apps/site.js'); ?-->
 
 	<script type='text/javascript'>
 		var base_url = "<?=$this->config->item('base_url');?>";

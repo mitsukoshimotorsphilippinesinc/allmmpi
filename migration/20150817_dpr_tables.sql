@@ -120,6 +120,7 @@ CREATE TABLE `rf_branch_rack_location` (
 	`branch_id`					int(11) NOT NULL DEFAULT 0,
 	`rack_location`				varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`is_active`					tinyint(2) NOT NULL DEFAULT 0,
+	`is_deleted`				tinyint(2) NOT NULL DEFAULT 0,
 	`remarks`					text COLLATE utf8_unicode_ci,
 	`update_timetamp`			timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`insert_timestamp`			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -132,8 +133,9 @@ CREATE TABLE `rf_branch_rack_location` (
 DROP TABLE IF EXISTS `is_booklet`;
 CREATE TABLE `is_booklet` (
 	`booklet_id`				int(11) NOT NULL AUTO_INCREMENT,
+	`request_detail_id`			int(11) NOT NULL DEFAULT 0,	
 	`branch_id`					int(11) NOT NULL DEFAULT 0,	
-	`location_id`				int(11) NOT NULL DEFAULT 0,
+	`branch_rack_location_id`	int(11) NOT NULL DEFAULT 0,
 	`booklet_number`			varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`series_from`				int(11) NOT NULL DEFAULT 0,
 	`series_to`				  	int(11) NOT NULL DEFAULT 0,
@@ -144,7 +146,8 @@ CREATE TABLE `is_booklet` (
 	`insert_timestamp`			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`booklet_id`),
 	KEY `branch_id` (`branch_id`),
-	KEY `location_id` (`location_id`),
+	KEY `request_detail_id` (`request_detail_id`),
+	KEY `branch_rack_location_id` (`branch_rack_location_id`),
 	KEY `booklet_number` (`booklet_number`),
 	KEY `series_from` (`series_from`),
 	KEY `series_to` (`series_to`)
@@ -155,3 +158,61 @@ INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_nam
 VALUES('3', 'Main', '/main', '1', '1');
 INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
 VALUES('3', 'Branch', '/branch', '2', '1');
+
+-- MAINTENANCE MAINTENANCE
+INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
+VALUES('6', 'Branch Rack Location', '/branch_rack_location', '1', '1');
+
+
+
+
+
+-- VIEWS
+DROP VIEW IF EXISTS `rf_branch_rack_location_view`;
+CREATE VIEW `rf_branch_rack_location_view` 
+	AS 
+	SELECT
+	a.branch_id,
+	a.branch_name,
+	a.address_street,
+	a.address_city,
+	a.address_province,
+	a.address_country,
+	a.address_zip_code,
+	a.contact_number,
+	a.tin,
+	CASE WHEN a.is_active IS NULL THEN 0 ELSE a.is_active END AS is_active_branch,
+	b.branch_rack_location_id,
+	b.rack_location,
+	CASE WHEN b.is_active IS NULL THEN 0 ELSE b.is_active END AS is_active_rack_location,
+	b.is_deleted,
+	b.remarks, 
+	b.insert_timestamp
+	FROM human_relations.rf_branch a
+	LEFT JOIN dpr.rf_branch_rack_location b 
+	ON a.branch_id = b.branch_id;
+);
+
+-- ACTION LOG / TRAIL
+DROP TABLE IF EXISTS `at_action_log`;
+CREATE TABLE `at_action_log` (
+	`action_log_id` 			int(11) NOT NULL AUTO_INCREMENT,
+	`id_number` 				varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,  
+	`module_name` 				varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`submodule_name` 			varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`table_name` 				varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`action` 					varchar(100) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`details_before` 			text COLLATE utf8_unicode_ci,
+	`details_after` 			text COLLATE utf8_unicode_ci,
+	`remarks` 					text COLLATE utf8_unicode_ci,
+	`insert_timestamp` 			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`action_log_id`),
+	KEY `id_number` (`id_number`),
+	KEY `module_name` (`module_name`),
+	KEY `table_name` (`table_name`),
+	KEY `action` (`action`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+
+
+

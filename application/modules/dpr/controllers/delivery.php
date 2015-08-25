@@ -104,7 +104,13 @@ class Delivery extends Admin_Controller {
 
 			if ($listing_action == 'receive delivery') {
 				$title = "Receive Delivery :: " . $request_code;
-				$html = "You are about to receive the form delivery under Request Code: <strong>" . $request_code . "</strong>. Do you want to continue?";
+				$html = "<p>You are about to receive the form delivery under Request Code: <strong>" . $request_code . "</strong>. <br/>
+							<div id='reasonremarks-container'>
+								<span><strong>Remarks:</strong></span></br>
+								<input id='txt-remarks' style='width:400px;' maxlength='320' placeholder='Put remarks here...' /><br/>								
+							</div>	
+							<br/>
+							Do you want to continue?</p>";
 			}
 
 			if ($listing_action == 'return delivery') {
@@ -149,11 +155,12 @@ class Delivery extends Admin_Controller {
 			
 		} else {
 	
+			$new_remarks = "";
 			// change status to DENIED
 			$current_datetime = date("Y-m-d H:i:s");
-			
-			if ($listing_action == 'return delivery') {
-				$new_remarks = "[" . $current_datetime . "][" . $this->user->user_id . "] " .$remarks . "\n" . $request_detail_details->remarks;
+			$new_remarks = "[" . $current_datetime . "][" . $this->user->user_id . "] " .$remarks . "\n" . $request_detail_details->remarks;
+
+			if ($listing_action == 'return delivery') {				
 
 				$data = array(
 					'status' => "RETURNED",					
@@ -164,36 +171,61 @@ class Delivery extends Admin_Controller {
 				$html = "You have returned the form under Request Code: <strong>{$request_code}</strong>.";
 				$title = "Return :: " . $request_code;	
 
-			} else if ($listing_action == 'receive delivery') {
+			} else if ($listing_action == 'receive delivery') {			
 
-				// change status to FOR APPROVAL
-				$data = array(
-					'status' => "RECEIVED",					
-					'update_timestamp' => $current_datetime
-				);
+				$branch_rack_location_details = $this->dpr_model->get_branch_rack_location_by_branch_id($request_detail_details->branch_id);
 
-				// TODO: insert into inventory
+				if (empty($branch_rack_location_details)) {
+					$html = "There is something wrong with the form request under Request Code: <strong>{$request_code}</strong>.";
+					$title = "Form Received Error :: " . $request_code;
 
-				// check if all forms in request are all RECEIVED
-				$where = "status IN ('COMPLETED', 'RETURNED')";
-				$request_detail_count = $this->dpr_model->get_request_detail_count($where);
+					$this->return_json("0", "Branch Rack Location not found.", array("html" => $html, "title" => $title));
+					return;						
 
-				if ($request_detail_count == 0) {
-					// update overall status
-					$data_update = array(
-							'status' => 'RECEIVED',
-							'update_timestamp' => date("Y-m-d H:i:s")
-						);
-					$this->dpr_model->update_request_summary($data, $where);
+				} else {				
+
+					$booklet_data = array(
+						'request_detail_id' => $request_detail_id,
+						'branch_id' => $request_detail_details->branch_id,
+						'branch_rack_location_id' => $branch_rack_location_details->branch_rack_location_id, 
+						'booklet_number' => '',
+						'series_from' => 1,
+						'series_to' => 1,
+						'receive_timestamp' => $request_detail_details->date_delivered,
+						'receive_remarks' => $new_remarks,
+					);
+
+					$this->dpr_model->insert_booklet($booklet_data);
+
+					// change status to FOR APPROVAL
+					$data = array(
+						'status' => "RECEIVED",	
+						'remarks' => $new_remarks,				
+						'update_timestamp' => $current_datetime
+					);
+
+					$where = "request_detail_id = " . $request_detail_id;
+					$this->dpr_model->update_request_detail($data, $where);	
+
+
+					// check if all forms in request are all RECEIVED
+					$where = "status IN ('COMPLETED', 'RETURNED')";
+					$request_detail_count = $this->dpr_model->get_request_detail_count($where);
+
+					if ($request_detail_count == 0) {
+						// update overall status
+						$data_update = array(
+								'status' => 'RECEIVED',
+								'update_timestamp' => date("Y-m-d H:i:s")
+							);
+						$this->dpr_model->update_request_summary($data, $where);
+					}
 				}
 
 				$html = "You have successfully processed a form request under Request Code: <strong>{$request_code}</strong>.";
 				$title = "Form Recieved :: " . $request_code;
 			
-			}
-
-			$where = "request_detail_id = " . $request_detail_id;
-			$this->dpr_model->update_request_detail($data, $where);	
+			}		
 		}	
 
 		$this->return_json("1","Processed Form Request.",array("html" => $html, "title" => $title));
