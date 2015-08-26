@@ -37,27 +37,41 @@ class Delivery extends Admin_Controller {
 
 			if ($search_status == 'ALL') {
 				$where = "status IN ('COMPLETED', 'RECEIVED', 'RETURNED')";
-			} else {
+			} else {			
+
 				$where = "status = '". $search_status ."'";
 			}
-			
 
-			if ($search_by == 'code')	{
-				$request_summary_details = $this->dpr_model->get_request_summary_by_request_code($search_text);
+			if ($search_by == 'request_code') {
+				$request_summary_details = $this->dpr_model->get_request_summary("request_code LIKE UPPER('%{$search_text}%')", NULL, "request_code");
 
-				// TODO:::!!!
+				$request_summary_ids = "";
+				$total_record = count($request_summary_details);
+				$test_ctr = 0;
+				foreach($request_summary_details as $rsd) {
+					$request_summary_ids .= $rsd->request_summary_id;
+					$test_ctr++;
 
+					if ($test_ctr < $total_record) {
+						$request_summary_ids .= ",";
+					}
+				}
+
+				$ids_in = "(" . $request_summary_ids . ")";
 			}
-
 
 			if ($where != NULL) {
 				if ($search_by == 'name')
 					$where = $where . " AND ". $request_search_by ." IN (" . $where_id_numbers . ")";
+				else if ($search_by == 'request_code')
+					$where = $where . " AND request_summary_id IN " . $ids_in . "";
 				else
 					$where = $where . " AND ". $search_by ." LIKE '%" . $search_text . "%'";
 			} else {
 				if ($search_by == 'name')
 					$where = $request_search_by ." IN (" . $where_id_numbers . ")";
+				else if ($search_by == 'request_code')
+					$where = $where . " request_summary_id IN " . $ids_in . "";
 				else
 					$where = $search_by ." LIKE '%" . $search_text . "%'";
 			}

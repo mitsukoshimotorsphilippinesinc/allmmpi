@@ -2,9 +2,20 @@
 	
 	// tin number
 	$branch_details = $this->human_relations_model->get_branch_by_id($request_detail_details->branch_id);
+	if (empty($branch_details)) {
+		$branch_name = "N/A";
+		$branch_tin = "N/A";
+	} else {
+		$branch_name = $branch_details->branch_name;
+		$branch_tin = $branch_tin->tin;
+	}
 
 	// form type
 	$form_type_details = $this->dpr_model->get_form_type_by_id($request_detail_details->form_type_id);
+
+	$is_accountable = "(NON-ACCOUNTABLE)";
+	if ($form_type_details->is_accountable == 1)
+		$is_accountable = "(ACCOUNTABLE)";
 
 	// printing press
 	$printing_press_details = $this->dpr_model->get_printing_press_by_id($request_detail_details->printing_press_id);
@@ -48,16 +59,16 @@
 			<thead>
 				<th colspan=4>Details</th>
 			</thead>
-			<tbody>
+			<tbody>				
 				<tr>
 					<td><strong>Branch:</strong></td>
-					<td><?= $branch_details->branch_name; ?></td>
+					<td><?= $branch_name; ?></td>
 					<td><strong>Tin Number:</strong></td>
-					<td><?= $branch_details->tin; ?></td>
+					<td><?= $branch_tin; ?></td>
 				</tr>	
 				<tr>
 					<td><strong>Form Type:</strong></td>
-					<td><?= $form_type_details->name; ?></td>		
+					<td><?= $form_type_details->name; ?> <?= $is_accountable ?></td>		
 					<td><strong>Last Serial Number:</strong></td>
 					<td><?= $request_detail_details->last_serial_number; ?></td>
 				</tr>

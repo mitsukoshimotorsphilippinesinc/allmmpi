@@ -159,20 +159,20 @@
 		buttons: {
 			'Ok' : function() {
 				proceedAddNewModal.hide();
-
+				showLoading();
 				b.request({
 					url: "/dpr/form_request/add_new_item",
 					data: {
 					"branch_id": $('#branch_option').val(),
 					"last_serial_number": 0,
-					"form_id": $('#form_option').val(),
+					"form_type_id": $('#form_option').val(),
 					"quantity": $('#txtqty').val(),
 					"printing_press_id": $('#press_option').val(),
 					"request_code": $('#txtrequestcode').val()
 					},
 
 					on_success: function(data){
-
+						hideLoading();
 						if (data.status == "1") {
 
 							// show add form modal 
@@ -186,7 +186,7 @@
 										proceedAddNewItemModal.hide();
 										//alert(data.data.request_code);
 										$('#txtrequestcode').val(data.data.request_code);
-
+										showLoading();
 										b.request({
 											url:"/dpr/form_request/refresh_list_details",
 											data:{
@@ -194,6 +194,7 @@
 											},
 
 										on_success: function(data){
+											hideLoading();
 											//alert(data.data.html);
 											$('#record_data').html(data.data.html);
 										}
@@ -214,12 +215,14 @@
 
 	$('.delete_item').live('click',function(){
 		//alert($(this).attr('data'));
+		showLoading();
 		b.request({
 			url: "/dpr/form_request/delete_item",
 			data:{
 				"request_detail_id": $(this).attr('data')
 			},
 			on_success: function(data){
+				hideLoading();
 				proceedDeleteItemModal = b.modal.new({
 					title: 'Delete Item',
 					width:450,
@@ -228,7 +231,7 @@
 					buttons: {
 						'Ok' : function() {
 							proceedDeleteItemModal.hide();
-							
+							showLoading();
 							b.request({
 								url:"/dpr/form_request/refresh_list_details",
 								data:{
@@ -236,6 +239,7 @@
 								},
 
 								on_success: function(data){
+								hideLoading();
 								//alert(data.data.html);
 								$('#record_data').html(data.data.html);
 								}	

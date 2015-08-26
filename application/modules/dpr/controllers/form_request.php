@@ -142,7 +142,7 @@ class Form_request extends Admin_Controller {
 	{
 		$branch_id = $this->input->post('branch_id');
 		$last_serial_number = $this->input->post('last_serial_number');
-		$form_id = $this->input->post('form_id');
+		$form_type_id = $this->input->post('form_type_id');
 		$quantity = $this->input->post('quantity');
 		$printing_press_id = $this->input->post('printing_press_id');
 		$request_code_current = trim($this->input->post('request_code'));
@@ -183,7 +183,7 @@ class Form_request extends Admin_Controller {
 		$data_detail=array(
 			'branch_id' => $branch_id,
 			'last_serial_number' => $last_serial_number,
-			'form_id' => $form_id,
+			'form_type_id' => $form_type_id,
 			'quantity' => $quantity,
 			'printing_press_id' => $printing_press_id,
 			'request_summary_id' => $last_insert_id
@@ -208,7 +208,7 @@ class Form_request extends Admin_Controller {
 
        	foreach ($request_summary_last as $rsl) {
        						$branch_id = $rsl->branch_id;
-       						$form_type_id = $rsl->form_id;
+       						$form_type_id = $rsl->form_type_id;
        						$printing_press_id = $rsl->printing_press_id;
        						$request_detail_id = $rsl->request_detail_id;
 
@@ -262,7 +262,7 @@ class Form_request extends Admin_Controller {
 
 
        	foreach ($request_summary_last as $rsl) {
-       						$form_type_id = $rsl->form_id;
+       						$form_type_id = $rsl->form_type_id;
        						$printing_press_id = $rsl->printing_press_id;
        						$request_detail_id = $rsl->request_detail_id;
 
@@ -293,7 +293,7 @@ class Form_request extends Admin_Controller {
 	public function add_new_item_na()
 	{
 		$last_serial_number = $this->input->post('last_serial_number');
-		$form_id = $this->input->post('form_id');
+		$form_type_id = $this->input->post('form_type_id');
 		$quantity = $this->input->post('quantity');
 		$printing_press_id = $this->input->post('printing_press_id');
 		$request_code_current = trim($this->input->post('request_code'));
@@ -333,7 +333,7 @@ class Form_request extends Admin_Controller {
 
 		$data_detail=array(
 			'last_serial_number' => $last_serial_number,
-			'form_id' => $form_id,
+			'form_type_id' => $form_type_id,
 			'quantity' => $quantity,
 			'printing_press_id' => $printing_press_id,
 			'request_summary_id' => $last_insert_id

@@ -119,7 +119,7 @@
 					url: "/dpr/form_request/add_new_item_na",
 					data: {
 					"last_serial_number": 0,
-					"form_id": $('#form_option').val(),
+					"form_type_id": $('#form_option').val(),
 					"quantity": $('#txtqty').val(),
 					"printing_press_id": $('#press_option').val(),
 					"request_code": $('#txtrequestcode').val()

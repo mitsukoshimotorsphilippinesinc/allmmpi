@@ -213,6 +213,41 @@ CREATE TABLE `at_action_log` (
 	KEY `action` (`action`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+DROP TABLE `tr_request_detail`;
+CREATE TABLE `tr_request_detail` (
+  `request_detail_id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_summary_id` int(11) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
+  `last_serial_number` int(11) DEFAULT NULL,
+  `form_type_id` int(11) DEFAULT NULL,
+  `quantity` int(11) DEFAULT NULL,
+  `send_atp` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `receive_atp` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `faxed_to_printer` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `received_from_printer` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `send_for_stamping` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `received_from_stamping` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `date_delivered` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `printing_press_id` int(11) DEFAULT NULL,
+  `status` varchar(30) COLLATE utf8_unicode_ci DEFAULT 'PENDING',
+  `remarks` text COLLATE utf8_unicode_ci,
+  `insert_timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`request_detail_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE `tr_request_summary`;
+CREATE TABLE `tr_request_summary` (
+  `request_summary_id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_year` int(11) DEFAULT NULL,
+  `request_series` int(11) DEFAULT NULL,
+  `request_code` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `status` varchar(15) COLLATE utf8_unicode_ci DEFAULT 'PENDING',
+  `remarks` text COLLATE utf8_unicode_ci,
+  `is_accountable` tinyint(1) DEFAULT NULL,
+  `update_timestamp` timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `insert_timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`request_summary_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 

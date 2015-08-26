@@ -21,7 +21,7 @@
 	<tbody>
 		<?php
 			foreach ($record_detail as $rd){
-       				$form_type_id = $rd->form_id;
+       				$form_type_id = $rd->form_type_id;
        				$printing_press_id = $rd->printing_press_id;
        				$request_detail_id = $rd->request_detail_id;
 
