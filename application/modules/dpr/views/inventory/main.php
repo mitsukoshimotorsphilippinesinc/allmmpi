@@ -57,24 +57,24 @@
 	<thead>
 		<tr>			
 			<th style='width:80px;'>Request Code</th>
+			<th style='width:80px;'>Branch</th>	
+			<th style='width:80px;'>Rack Location</th>	
+			<th style='width:80px;'>Booklet Number</th>	
+			<th style='width:80px;'>Series From</th>
+			<th style='width:80px;'>Series To</th>			
 			<th>Status</th>
-			<th style=''>Requested By</th>
-			<th style=''>Motor Brand/Model</th>
-			<th style='width:50px;'>Total Items</th>
-			<th style='width:100px;'>Warehouse</th>
-			<th style=';'>Approved By (Warehouse)</th>			
-			<th style='width:70px;'>Date Created</th>
+			<th style=''>Date Received</th>			
 			<th style='width:118px;'>Action</th>
 		</tr>
 	</thead>
 	<tbody>
-	<?php if(empty($transfers)):?>
+	<?php if(empty($inventory)):?>
 		<tr><td colspan='9' style='text-align:center;'><strong>No Records Found</strong></td></tr>
 	<?php else: ?>
-	<?php foreach ($transfers as $t): ?>
+	<?php foreach ($inventory as $i): ?>
 		<tr>
 									
-			<td><?= $t->request_code; ?></td>
+			<td><?= $i->request_code; ?></td>
 			
 			<?php									
 			$status_class = strtolower(trim($t->status));			
@@ -88,7 +88,7 @@
 			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
 
 			// get requestor details
-			$id = str_pad($t->id_number, 7, '0', STR_PAD_LEFT);
+			$id = str_pad($t->booklet_id, 7, '0', STR_PAD_LEFT);
 			$requestor_details = $this->human_relations_model->get_employment_information_by_id($id);
 
 			if (count($requestor_details) == 0) {

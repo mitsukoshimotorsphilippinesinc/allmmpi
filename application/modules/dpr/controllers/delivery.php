@@ -159,6 +159,8 @@ class Delivery extends Admin_Controller {
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");		
 		
+		$this->load->model("job_model");
+
 		$request_detail_details = $this->dpr_model->get_request_detail_by_id($request_detail_id);
 
 		if (empty($request_detail_details)) {		
@@ -185,9 +187,16 @@ class Delivery extends Admin_Controller {
 				$html = "You have returned the form under Request Code: <strong>{$request_code}</strong>.";
 				$title = "Return :: " . $request_code;	
 
-			} else if ($listing_action == 'receive delivery') {			
+			} else if ($listing_action == 'receive delivery') {	
 
-				$branch_rack_location_details = $this->dpr_model->get_branch_rack_location_by_branch_id($request_detail_details->branch_id);
+				// check form class
+				$form_type_details = $this->dpr_model->get_form_type_by_id($request_detail_details->form_type_id);
+
+				if ($form_type_details->is_accountable == 1) {
+					$branch_rack_location_details = $this->dpr_model->get_branch_rack_location_by_branch_id($request_detail_details->branch_id);					
+				} else {
+					$branch_rack_location_details = $form_type_details;
+				}	
 
 				if (empty($branch_rack_location_details)) {
 					$html = "There is something wrong with the form request under Request Code: <strong>{$request_code}</strong>.";
@@ -198,7 +207,7 @@ class Delivery extends Admin_Controller {
 
 				} else {				
 
-					$booklet_data = array(
+					/*$booklet_data = array(
 						'request_detail_id' => $request_detail_id,
 						'branch_id' => $request_detail_details->branch_id,
 						'branch_rack_location_id' => $branch_rack_location_details->branch_rack_location_id, 
@@ -209,13 +218,12 @@ class Delivery extends Admin_Controller {
 						'receive_remarks' => $new_remarks,
 					);
 
-					$this->dpr_model->insert_booklet($booklet_data);
+					$this->dpr_model->insert_booklet($booklet_data);*/
 
 					// change status to FOR APPROVAL
 					$data = array(
 						'status' => "RECEIVED",	
-						'remarks' => $new_remarks,				
-						'update_timestamp' => $current_datetime
+						'remarks' => $new_remarks,						
 					);
 
 					$where = "request_detail_id = " . $request_detail_id;
@@ -235,6 +243,24 @@ class Delivery extends Admin_Controller {
 						$this->dpr_model->update_request_summary($data, $where);
 					}
 				}
+
+				// separate processing of booklet
+				$params = array(
+					'request_detail_id' => $request_detail_id,
+					'id_number' => $this->user->user_id,
+					'request_code' => $request_code, 
+				);
+
+				$job_data = array(
+					'job_type_id' => 1, // generate booklet
+					'parameters' => json_encode($params)
+				);
+				$this->job_model->insert_job($job_data);
+				$job_id = $this->job_model->insert_id();
+				
+				// execute job
+				job_exec($job_id);
+
 
 				$html = "You have successfully processed a form request under Request Code: <strong>{$request_code}</strong>.";
 				$title = "Form Recieved :: " . $request_code;
