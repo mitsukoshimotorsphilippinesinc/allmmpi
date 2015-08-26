@@ -15,7 +15,6 @@
 			<th>QTY</th>		
 			<th>Printing Press</th>
 			<th>Status</th>
-			<th>Action</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -39,7 +38,6 @@
 					<td>{$quantity}</td>
 					<td>{$printing_press_info->complete_name}</td>
 					<td>{$status}</td>
-					<td><a class = 'btn update_item' data = '{$request_detail_id}'>Update</a></td>
 				</tr>";
 		}
 		?>

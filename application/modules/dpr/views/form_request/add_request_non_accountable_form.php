@@ -16,10 +16,11 @@
 		<option value = '0'>Select Form</option>
 	<?php
 		$where = "is_accountable = 0 and is_active = 1";
-		$form_list=$this->dpr_model->get_form_type($where,null,'name ASC');
+		$form_list=$this->dpr_model->get_form_type($where,null,'form_type_id ASC');
 		foreach($form_list as $fl){
 			$form_name = $fl->name;
-			echo"<option name = 'form_data' value = {$fl->form_type_id} data-pcs='{$fl->pieces_per_booklet}'>{$form_name}</option>";
+			$form_id = $fl->form_type_id;
+			echo"<option name = 'form_data' value = {$fl->form_type_id} data-pcs='{$fl->pieces_per_booklet}'>{$form_id} - {$form_name}</option>";
 		}
 	?>
 	</Select>
@@ -33,10 +34,11 @@
 		<option value = '0'>Select Printing Press</option>
 	<?php
 		$where = "is_active = 1";
-		$press_list=$this->dpr_model->get_press_name($where,null,'complete_name ASC');
+		$press_list=$this->dpr_model->get_press_name($where,null,'printing_press_id ASC');
 		foreach($press_list as $pl){
 			$press_name = $pl->complete_name;
-			echo "<option value = '{$pl->printing_press_id}'>{$press_name}</option>";
+			$press_id = $pl->printing_press_id;
+			echo "<option value = '{$pl->printing_press_id}'>{$press_id} - {$press_name}</option>";
 		}
 	?>
 	</Select>
