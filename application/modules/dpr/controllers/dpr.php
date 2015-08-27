@@ -21,7 +21,7 @@ class Dpr extends Admin_Controller {
 	public function view_details() {
 		$request_detail_id = $this->input->post("request_detail_id");
 		$request_code = $this->input->post("request_code");
-		
+
 		$request_summary_details = $this->dpr_model->get_request_summary_by_request_code($request_code);		
 		$request_detail_details = $this->dpr_model->get_request_detail_by_id($request_detail_id);		
 

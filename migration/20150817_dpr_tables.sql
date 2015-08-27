@@ -136,9 +136,10 @@ DROP TABLE IF EXISTS `is_booklet`;
 CREATE TABLE `is_booklet` (
 	`booklet_id`				int(11) NOT NULL AUTO_INCREMENT,
 	`request_detail_id`			int(11) NOT NULL DEFAULT 0,	
-	`branch_id`					int(11) NOT NULL DEFAULT 0,	
-	`branch_rack_location_id`	int(11) NOT NULL DEFAULT 0,
-	`booklet_number`			varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`branch_id`					int(11) NOT NULL DEFAULT 0,		
+	`booklet_code`				varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`booklet_series`			int(11) NOT NULL DEFAULT 0,
+	`booklet_number`			varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`series_from`				int(11) NOT NULL DEFAULT 0,
 	`series_to`				  	int(11) NOT NULL DEFAULT 0,
 	`status`					varchar(30) COLLATE utf8_unicode_ci DEFAULT 'IN',
@@ -148,8 +149,7 @@ CREATE TABLE `is_booklet` (
 	`insert_timestamp`			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`booklet_id`),
 	KEY `branch_id` (`branch_id`),
-	KEY `request_detail_id` (`request_detail_id`),
-	KEY `branch_rack_location_id` (`branch_rack_location_id`),
+	KEY `request_detail_id` (`request_detail_id`),	
 	KEY `booklet_number` (`booklet_number`),
 	KEY `series_from` (`series_from`),
 	KEY `series_to` (`series_to`)
@@ -247,6 +247,7 @@ CREATE TABLE `tr_request_summary` (
   PRIMARY KEY (`request_summary_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+
 DROP TABLE IF EXISTS `rf_job_type`;
 CREATE TABLE `rf_job_type` (
   `job_type_id` 				int(11) NOT NULL AUTO_INCREMENT,
@@ -270,4 +271,7 @@ CREATE TABLE `et_job` (
   PRIMARY KEY (`job_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8  COLLATE=utf8_unicode_ci;
 
-CREATE VIEW `et_job_view` AS select `a`.`job_id` AS `job_id`,`a`.`job_type_id` AS `job_type_id`,`b`.`job_code` AS `job_code`,`b`.`scripts` AS `scripts`,`a`.`parameters` AS `parameters`,`a`.`status` AS `status`,`a`.`exceptions` AS `exceptions`,`a`.`insert_timestamp` AS `insert_timestamp` from (`et_job` `a` left join `rf_job_type` `b` on((`a`.`job_type_id` = `b`.`job_type_id`)))
+CREATE VIEW `et_job_view` 
+AS select 
+`a`.`job_id` AS `job_id`,`a`.`job_type_id` AS `job_type_id`,`b`.`job_code` AS `job_code`,`b`.`scripts` AS `scripts`,`a`.`parameters` AS `parameters`,`a`.`status` AS `status`,`a`.`exceptions` AS `exceptions`,`a`.`insert_timestamp` AS `insert_timestamp` 
+from (`et_job` `a` left join `rf_job_type` `b` on((`a`.`job_type_id` = `b`.`job_type_id`)))

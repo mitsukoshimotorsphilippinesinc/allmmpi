@@ -7,13 +7,94 @@ class Dpr extends  Base_Controller
 	function __construct() 
 	{
   		parent::__construct();
-  		$this->load->model('dpr_model');  		
+  		$this->load->model('dpr_model'); 
+  		$this->load->model('setting_model');
 	}
 	
 	public function index() 
 	{
-		echo "Process Booklet Processes...";
+		echo "Start Booklet Processes...";
 	}
+
+	public function generate_booklet($params=array()) {
+		//$request_detail_id = $params['request_detail_id'];
+		//$id_number = $params['id_number'];
+		//$request_code = $params['request_code'];		
+
+		$request_detail_id = 78;
+		$id_number = 1;
+		$request_code = "TRD082515-061";		
+
+		// get request details
+		$request_detail_details = $this->dpr_model->get_request_detail_by_id($request_detail_id);
+
+		$padded_form_id = str_pad($request_detail_details->form_type_id, 2, "0", STR_PAD_LEFT);
+		
+		if (($request_detail_details->branch_id == NULL) || ($request_detail_details->branch_id == 0) || (trim($request_detail_details->branch_id) == "")) {
+			$branch_id = 0;	
+		} else {
+			$branch_id = $request_detail_details->branch_id;	
+		}
+		
+		$padded_branch_id = str_pad($branch_id, 3, "0", STR_PAD_LEFT);
+
+		$booklet_number_code = $padded_form_id . $padded_branch_id;
+		$series_per_booklet = $this->setting->series_per_booklet;
+		$starting_series = abs($request_detail_details->last_serial_number);
+
+		for ($i = 1; $i <= $request_detail_details->quantity; $i++) {
+			
+			$ending_series = $starting_series + $series_per_booklet;	
+			$booklet_number = $booklet_number_code . "-" . $i;
+
+			$data_insert = array(
+					'request_detail_id' => $request_detail_id,
+					'branch_id' => $branch_id,
+					'booklet_code' => $booklet_number_code,
+					'booklet_series' => $i,		
+					'booklet_number' => $booklet_number,
+					'series_from' => $starting_series + 1, 
+					'series_to' => $ending_series, 
+					'receive_timestamp' => $request_detail_details->date_delivered, 
+					'receive_remarks' => $request_detail_details->remarks, 
+				);
+
+			$this->dpr_model->insert_booklet($data_insert);
+
+			$starting_series = $ending_series;
+		}
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	public function card_generation($params=array())
 	{

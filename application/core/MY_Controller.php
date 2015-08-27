@@ -27,7 +27,7 @@ class Base_Controller extends MX_Controller {
 	// selected menu/navigation code
 	public $selected_menu;
 	
-	public $settings;
+	public $setting;
 	
 	public $subdomain;
 	
@@ -51,7 +51,7 @@ class Base_Controller extends MX_Controller {
 		header('P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT');
 		
 		// load session, setting (to follow)
-		$this->load->library(array('template', 'authenticate', 'settings'));
+		$this->load->library(array('template', 'authenticate', 'setting'));
 		
 		// set the form validation delimiters
 		$this->form_validation->set_error_delimiters('<span>', '</span>');
@@ -89,7 +89,7 @@ class Base_Controller extends MX_Controller {
 		Events::register('before_render', array($this, 'before'));
 		Events::register('after_render', array($this, 'after'));
 		
-		$this->settings = new Settings();
+		$this->setting = new Setting();
 				
 		$this->template->initialize(array(
 			'path' => '../../template',

@@ -12,6 +12,7 @@ class Delivery extends Admin_Controller {
 		$this->load->model('human_relations_model');
 		$this->load->library('pager');				
 		$this->load->helper("breadcrumb_helper");
+		$this->load->helper("utils_helper");
 
 	}
 
@@ -158,9 +159,9 @@ class Delivery extends Admin_Controller {
 		$request_code = $this->input->post("request_code");
 		$listing_action = $this->input->post("listing_action");
 		$remarks =  $this->input->post("remarks");		
-		
-		$this->load->model("job_model");
 
+		$this->load->model("job_model");
+		
 		$request_detail_details = $this->dpr_model->get_request_detail_by_id($request_detail_id);
 
 		if (empty($request_detail_details)) {		

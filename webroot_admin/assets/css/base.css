@@ -3318,6 +3318,12 @@ a.thumbnail:hover {
 .label-cancelled {
   background-color: #CC0001;
 }
+.label-in {
+  background-color: #00F303;
+}
+.label-out {
+  background-color: #CC0001;
+}
 .label-deleted {
   background-color: #CC0001;
 }

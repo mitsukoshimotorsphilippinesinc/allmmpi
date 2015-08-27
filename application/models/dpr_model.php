@@ -24,7 +24,7 @@ class Dpr_model extends Base_Model
 			'action_log' => 'at_action_log',
 			'job' => 'et_job',
 			'job_view' => 'et_job_view',
-			'job_type' => 'rf_job_type',
+			'job_type' => 'rf_job_type',			
 		);
 
 	}
@@ -550,5 +550,6 @@ class Dpr_model extends Base_Model
 		return $row;
 	}
 	// ========================================================================	
+	
 
 }

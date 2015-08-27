@@ -56,14 +56,15 @@
 <table class='table table-striped table-bordered'>
 	<thead>
 		<tr>			
-			<th style='width:80px;'>Request Code</th>
-			<th style='width:80px;'>Branch</th>	
-			<th style='width:80px;'>Rack Location</th>	
-			<th style='width:80px;'>Booklet Number</th>	
+			<th style=''>Request Code</th>
+			<th style=''>Branch</th>	
+			<th style=''>Rack Location</th>	
+			<th style='width:100px;'>Booklet Number</th>	
 			<th style='width:80px;'>Series From</th>
 			<th style='width:80px;'>Series To</th>			
 			<th>Status</th>
-			<th style=''>Date Received</th>			
+			<th style=''>Date Received</th>
+			<th style=''>Date Created</th>
 			<th style='width:118px;'>Action</th>
 		</tr>
 	</thead>
@@ -73,98 +74,41 @@
 	<?php else: ?>
 	<?php foreach ($inventory as $i): ?>
 		<tr>
-									
-			<td><?= $i->request_code; ?></td>
-			
+			<?php
+				$request_detail_details = $this->dpr_model->get_request_detail_by_id($i->request_detail_id);
+				$request_summary_details = $this->dpr_model->get_request_summary_by_id($request_detail_details->request_summary_id);
+
+				if (($i->branch_id == NULL) || ($i->branch_id == 0) || ($i->branch_id == "")) {
+					$branch_rack_location_details = $this->dpr_model->get_form_type_by_id($request_detail_details->form_type_id);
+					$branch_name = "N/A";
+				} else {
+					$branch_rack_location_details = $this->dpr_model->get_branch_rack_location_view_by_branch_id($i->branch_id);
+					
+					$branch_name = $branch_rack_location_details->branch_name;
+				}		
+			?>
+
+			<td><?= $request_summary_details->request_code; ?></td>
+			<td><?= $branch_name; ?></td>
+			<td><?= $branch_rack_location_details->rack_location; ?></td>
+			<td><?= $i->booklet_number; ?> / <?= $request_detail_details->quantity; ?></td>
+			<td><?= $i->series_from; ?></td>
+			<td><?= $i->series_to; ?></td>
 			<?php									
-			$status_class = strtolower(trim($t->status));			
-
-			if (substr($status_class, 0, 12) == "cancellation") {
-				$status_class = substr($status_class, 13);
-			}
-
+			$status_class = strtolower(trim($i->status));			
 			$status_class = str_replace(" ", "-", $status_class);
 		
-			echo "<td><span class='label label-" . $status_class . "' >{$t->status}</span></td>";
-
-			// get requestor details
-			$id = str_pad($t->booklet_id, 7, '0', STR_PAD_LEFT);
-			$requestor_details = $this->human_relations_model->get_employment_information_by_id($id);
-
-			if (count($requestor_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$requestor_details->complete_name}</td>"; 
-			}			
-
-			// brand and model
-			$motor_brand_model_details = $this->warehouse_model->get_motorcycle_brand_model_class_view_by_id($t->motorcycle_brand_model_id);				
-			if (count($motor_brand_model_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$motor_brand_model_details->brand_name}" . " - " . "{$motor_brand_model_details->model_name}</td>"; 
-			}				
-
-			// get number of items
-			$where = "warehouse_request_id = " . $t->warehouse_request_id . " AND status NOT IN ('CANCELLED', 'DELETED')";
-			$warehouse_request_detail_info = $this->spare_parts_model->get_warehouse_request_detail($where);
-
-			$total_items = 0;
-			foreach ($warehouse_request_detail_info as $wrdi) {
-				$total_items = $total_items + ($wrdi->good_quantity + $wrdi->bad_quantity);
-			}
-			$total_items = number_format($total_items);
-
-			echo "<td  style='text-align:right;'>{$total_items}</td>";
-
-			// get warehouse detail			
-			$warehouse_details = $this->spare_parts_model->get_warehouse_by_id($t->warehouse_id);
-
-			if (count($warehouse_details) == 0) {
-				echo "<td>N/A</td>";
-			} else { 
-				echo "<td>{$warehouse_details->warehouse_name}</td>"; 
-			}
-
-			if (($t->warehouse_approved_by == 0) || ($t->warehouse_approved_by == '0')) {
-				echo "<td>N/A</td>";
-			} else {
-				$id = str_pad($t->warehouse_approved_by, 7, '0', STR_PAD_LEFT);
-				$warehouse_signatory_details = $this->human_relations_model->get_employment_information_view_by_id($id);
-				echo "<td>{$warehouse_signatory_details->complete_name}</td>";
-			}
-
-			?>				
-			<td><?= $t->insert_timestamp; ?></td>
-
-			<td data1="<?= $t->warehouse_request_id ?>" data2="<?= $t->request_code ?>">				
-				<a class='btn btn-small btn-info view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
-				<?php
-				if ($t->status == 'PENDING') {
-					echo "<a class='btn btn-small btn-warning process-btn' data='for approval' title='For Approval'><i class='icon-white icon-file'></i></a>
-							<a class='btn btn-small btn-danger process-btn' data='cancel' title='Cancel'><i class='icon-white icon-remove'></i></a>
+			echo "<td><span class='label label-" . $status_class . "' >{$i->status}</span></td>";
+			?>
+			<td><?= $i->receive_timestamp; ?></td>
+			<td><?= $i->insert_timestamp; ?></td>
+			
+			<td data1="<?= $i->request_detail_id ?>" data2="<?= $request_summary_details->request_code ?>">				
+				<a class='btn btn-small btn-info inv-main-view-details' data='info' title="View Details"><i class="icon-white icon-list"></i></a>	
+				<?php				
+					echo "<a href='/dpr/inventory/assign_to_branch/{$i->booklet_id}' class='btn btn-small btn-warning inv-main-process-btn' data='assign to branch' title='Assign To Branch'><i class='icon-white icon-file'></i></a>							
 						";
-				}
-
-				if ($t->status == 'APPROVED') {
-					echo "<a class='btn btn-small btn-success process-btn' data='forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
-				}
-
-				if ($t->status == 'CANCELLATION-APPROVED') {
-					echo "<a class='btn btn-small btn-success process-btn' data='cancellation-forward to warehouse' title='Forward to Warehouse'><i class='icon-white icon-home'></i></a>";
-				}
-
-				if ($t->status == 'COMPLETED') {
-					if (($t->mtr_number == 0) || ($t->mtr_number == NULL)) {
-						echo "<a class='btn btn-small btn-primary assign-mtr' data='assign mtr' title='Assign MTR Number'><i class='icon-white icon-pencil'></i></a>
-								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
-					} else {
-						echo "<a href='/spare_parts/display_mtr/" . $t->request_code . "' target = '_blank' class='btn btn-small btn-success print-mtr' data='print mtr' title='Print MTR' data='<?= $t->request_code ?>'><i class='icon-white icon-print'></i></a>
-								<a class='btn btn-small btn-primary process-btn' data='cancel completed' title='Cancel Override'><i class='icon-white icon-remove'></i></a>";
-					}						
-
-
-				}					
+									
 				?>
 			</td>
 		</tr>
@@ -186,6 +130,61 @@
 		$("#search_status").val(_search_status);             
 
 	});
+
+
+	$(".dpr-view-details").click(function(){
+		var request_detail_id = $(this).parent().attr("data1");
+		var request_code = $(this).parent().attr("data2");		
+
+
+		alert(request_detail_id + '|' + request_code);
+
+		showLoading();
+		b.request({
+			url: "/dpr/view_details",
+			data: {
+				"request_detail_id" : request_detail_id,
+				"request_code" : request_code,				
+			},
+			on_success: function(data){
+				hideLoading();
+				if (data.status == "1")	{
+					viewDetailsModal = b.modal.new({
+						title: data.data.title,
+						width:800,
+						//disableClose: true,
+						html: data.data.html,  
+					});
+				
+					viewDetailsModal.show();
+				} else {					
+					// show add form modal					
+					var errorViewDetailsModal = b.modal.new({
+						title: data.data.title,
+						width:450,
+						disableClose: true,
+						html: data.data.html,
+						buttons: {
+							'Close' : function() {
+								errorViewDetailsModal.hide();								 							
+							}
+						}
+					});
+					errorViewDetailsModal.show();		
+				}
+			}, on_error: function() {
+				hideLoading();
+			}					
+		});
+		return false;			
+	});
+
+
+
+
+
+
+
 
 	$(".assign-mtr").click(function(){
 

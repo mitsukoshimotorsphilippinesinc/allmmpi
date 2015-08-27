@@ -1,3 +1,6 @@
+<?php
+	var_dump($this->setting->series_per_booklet);
+?>
 <div class="hero-unit span10" style='margin-top:100px;'>
 	<label>
 	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
