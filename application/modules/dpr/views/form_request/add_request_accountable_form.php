@@ -39,7 +39,7 @@
 	<Select id = "form_option">
 		<option value = '0'>Select Form</option>
 	<?php
-		$where = "is_accountable = 1 and is_active = 1";
+		$where = "is_accountable = 1 and is_active = 1 and is_deleted = 0";
 		$form_list=$this->dpr_model->get_form_type($where,null,'form_type_id ASC');
 		foreach($form_list as $fl){
 			$form_name = $fl->name;
@@ -58,7 +58,7 @@
 	<Select id = "press_option" style = "width:450px;">
 		<option value = '0'>Select Printing Press</option>
 	<?php
-		$where = "is_active = 1";
+		$where = "is_active = 1 and is_deleted = 0";
 		$press_list=$this->dpr_model->get_press_name($where,null,'printing_press_id ASC');
 		foreach($press_list as $pl){
 			$press_name = $pl->complete_name;
