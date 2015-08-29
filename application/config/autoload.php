@@ -135,7 +135,7 @@ $autoload['language'] = array();
 |
 */
 
-$autoload['model'] = array('navigations_model','users_model');
+$autoload['model'] = array('navigation_model','user_model');
 
 
 

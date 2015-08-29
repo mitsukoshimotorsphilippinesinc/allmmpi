@@ -19,7 +19,7 @@ class Admin_Controller extends Base_Controller {
 		
 		// configure authenticate
 		$auth_config = array(
-			'table' => 'ad_users',
+			'table' => 'sa_user',
 			'field_id' => 'user_id',
 			'hash_salt' => 'gbs@admin8896',
 			'prefix' => 'ad_'
@@ -29,17 +29,20 @@ class Admin_Controller extends Base_Controller {
 		// 20150609 - LOGIN
 		// load the systems
 		$this->load->model(array('human_relations_model', 'warehouse_model', 'spare_parts_model','dpr_model'));
-		//ci()->systems = $this->systems = $this->systems_model->get_systems(null, null, "ordering ASC");
-		//ci()->current_system = $this->current_system = '';
-
-		//// get the seleced facility from session
-		//$this->selected_facility = ci()->session->userdata("selected_facility");
-		//ci()->selected_facility = $this->selected_facility;
-
 
 		if ($this->authenticate->is_logged_in()) {
+
+			$systems = $this->human_relations_model->get_department("url IS NOT NULL OR trim(url) <> ''", NULL, "department_name ASC");		
+			ci()->systems = $this->systems = $systems;
+			//ci()->current_system = $this->current_system = '';
+			
+			$current_segment_one = $this->uri->segment(1);
+			$current_system = $this->human_relations_model->get_department_by_url($current_segment_one);
+			ci()->current_system = $this->current_system = $current_system->department_name;
+			
+			
 			ci()->user = $this->user = $this->authenticate->get_user();
-			//if (!$this->users_model->is_user_allowed($this->uri->uri_string())) redirect("/admin/systems/noaccess");
+			//if (!$this->user_model->is_user_allowed($this->uri->uri_string())) redirect("/admin/systems/noaccess");
 		} else {
 			if (!$is_login_action) 
 				redirect('/admin/signin');

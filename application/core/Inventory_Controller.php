@@ -12,7 +12,7 @@ class Inventory_Controller extends Admin_Controller
 		{
 			// get default user facility
 			$where = array("user_id"=>$this->user->user_id, "is_default"=> 1);
-			$default_facility = $this->users_model->get_user_facilities($where);
+			$default_facility = $this->user_model->get_user_facilities($where);
 			$this->selected_facility = $this->facilities_model->get_facility_by_id($default_facility[0]->facility_id);
 		}
 

@@ -20,7 +20,7 @@ class SignIn extends Admin_Controller
 		
 		if ($this->authenticate->is_logged_in())
 		{			
-			$user = $this->users_model->get_user_by_id($this->user->user_id);
+			$user = $this->user_model->get_user_by_id($this->user->user_id);
 			$redirect_url = $user->default_page;
 			redirect($redirect_url);							
 			return;
@@ -41,18 +41,18 @@ class SignIn extends Admin_Controller
 			if ($this->authenticate->login($username, $password))
 			{	
 				// check the default user page
-				$user_details = $this->users_model->get_users("username = '{$username}' OR email = '{$username}'");
+				//$user_details = $this->user_model->get_user("username = '{$username}' OR email = '{$username}'");
+				$user_details = $this->user_model->get_user("username = '{$username}'");
 				
-				//$redirect_url = $user_details[0]->default_page;
-				$redirect_url = "/admin";
-			
+				$redirect_url = $user_details[0]->default_page;
+							
 				redirect($redirect_url);				
 				return;
 			}
-			//else
-			//{
-			//	$invalid_login = true;
-			//}
+			else
+			{
+				$invalid_login = true;
+			}
 		}
 		
 		// assign data to be sent to view

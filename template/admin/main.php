@@ -66,11 +66,25 @@ body > .container > #content {
 	
 	<div id="header" class='navbar navbar-fixed-top cleafix'>
 		<div class="navbar-inner">
-			<div class="container" style='width:95%;'>
+			<div class="container" style='width:95%;height:50px;'>
 				<a class="brand" href="/admin">Mitsukoshi Motors Philippines Inc.<br/>Administration</a>
 				
 				<div class='pull-right admin-login-profile'>					
-					<span class='admin-login-profile-name'>Hi <?= ucfirst($this->user->first_name).' '.ucfirst($this->user->last_name) ?></span>
+					<?php
+						$this->load->model("human_relations_model");
+						$upload_url = $this->config->item("media_url") . "/employees";
+
+						$employment_view_details = $this->human_relations_model->get_employment_information_view_by_id($this->user->id_number);
+
+						if ((empty($employment_view_details->image_filename)) || ($employment_view_details->image_filename == NULL) || (trim($employment_view_details->image_filename) == "")) {
+							$image_display = "ni_". strtolower($employment_view_details->gender) .".png";
+						} else {
+							$image_display = $employment_view_details->image_filename;
+						}
+
+					?>
+					<img id="" src="<?= $upload_url; ?>/<?= $image_display ?>" alt="" style="margin-right:5px;margin-bottom:5px;width:30px; height:30px;"></img>
+					<span class='admin-login-profile-name'>Hi <?= ucfirst($employment_view_details->first_name) . ' ' . ucfirst($employment_view_details->last_name) ?></span>
 					<a href='/admin/signin/signout' class='btn'><span>Logout</span></a>					
 				
 					<button style="margin-top:-2px;width:30px;height:30px;" class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">
@@ -78,15 +92,11 @@ body > .container > #content {
 					</button>
 				</div>	
 			</div>
-			<?= $this->load->view('navigation_top', null, TRUE, 'admin');  ?>
+			<!--?= $this->load->view('navigation_top', null, TRUE, 'admin');  ?-->
 		</div>
 	</div>
 	
 	<?php
-	if ($this->uri->segment(2) == NULL) {
-		echo "<div class='container-full'>";	
-	} else {
-
 		$data = array(
 			'system_name' => $this->uri->segment(1),
 			'segment_name' => $this->uri->segment(2)
@@ -101,7 +111,7 @@ body > .container > #content {
 		<div style="margin-top:40px;width:1000px;" class='content-wrapper'>
 			<div id='content'>
 		      <?php
-					//if (!$this->users_model->is_user_allowed($this->uri->uri_string())) 
+					//if (!$this->user_model->is_user_allowed($this->uri->uri_string())) 
 					//	echo "<div class='alert alert-error'>You do not have access to this module. Please contact your administrator if you require accesss to this module</div>";
 					//else 
 			      		echo $content;						

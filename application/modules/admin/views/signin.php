@@ -7,7 +7,7 @@
 			<?php if (isset($invalid_login)) if ($invalid_login) :?>
 				<div class="alert alert-error">
 					<h4 class="alert-heading">Error!</h4>
-					Invalid Username or Password.
+					Invalid Username and/or Password.
 				</div>
 			<?php endif?>
 				<form action="/admin/signin/authenticate" method="post" class="form-inline">
