@@ -1,4 +1,4 @@
-<div class="hero-unit span10" style='margin-top:100px;'>
+<div class="hero-unit span12" style='margin-top:100px;margin-left:5em;'>
 	<label>
 	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
 	tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,

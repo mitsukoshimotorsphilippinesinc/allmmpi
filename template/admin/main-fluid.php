@@ -101,6 +101,11 @@ body > .container > #content {
 	</div>
 	
 	<?php
+	if ($this->uri->segment(1) == "admin") {		
+		echo "<div class='container-full'>";		
+	} else {
+
+		$data = array();
 		$data = array(
 			'system_name' => $this->uri->segment(1),
 			'segment_name' => $this->uri->segment(2)
@@ -109,7 +114,8 @@ body > .container > #content {
 	?>	
 	<?= $this->load->view('navigation_side', $data, TRUE, 'admin'); ?>
 	<?php		
-		echo "<div class='container'>";		
+		echo "<div class='container'>";	
+	}
 	?>	
 		<div style="margin-top:40px;width:1000px;" class='content-wrapper'>
 			<div id='content'>

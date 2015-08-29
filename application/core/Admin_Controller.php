@@ -21,8 +21,8 @@ class Admin_Controller extends Base_Controller {
 		$auth_config = array(
 			'table' => 'sa_user',
 			'field_id' => 'user_id',
-			'hash_salt' => 'gbs@admin8896',
-			'prefix' => 'ad_'
+			'hash_salt' => 'mmpi@admin8896',
+			'prefix' => 'sa_'
 		);
 		$this->authenticate->initialize($auth_config);
 		
@@ -37,12 +37,18 @@ class Admin_Controller extends Base_Controller {
 			//ci()->current_system = $this->current_system = '';
 			
 			$current_segment_one = $this->uri->segment(1);
-			$current_system = $this->human_relations_model->get_department_by_url($current_segment_one);
-			ci()->current_system = $this->current_system = $current_system->department_name;
-			
-			
+
+			if ($current_segment_one == "admin") {
+				$current_system = "N/A";
+			} else {	
+				$current_system = $this->human_relations_model->get_department_by_url($current_segment_one);
+				ci()->current_system = $this->current_system = $current_system->department_name;
+			}
+
 			ci()->user = $this->user = $this->authenticate->get_user();
+			
 			//if (!$this->user_model->is_user_allowed($this->uri->uri_string())) redirect("/admin/systems/noaccess");
+
 		} else {
 			if (!$is_login_action) 
 				redirect('/admin/signin');

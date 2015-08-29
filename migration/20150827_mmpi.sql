@@ -65,9 +65,6 @@ LEFT JOIN `rf_job_type` `b` ON((`a`.`job_type_id` = `b`.`job_type_id`)));
 --------
 -- USERS
 --------
-
-
-
 DROP TABLE IF EXISTS `sa_user`;
 CREATE TABLE `sa_user` (
   `user_id` 						int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -94,17 +91,20 @@ INSERT INTO `sa_user`(`employment_information_id`, `id_number`, `username`, `pas
 
 DROP TABLE IF EXISTS `sa_user_privilege`;
 CREATE TABLE `sa_user_privilege` (
-  `user_id` 			int(10) unsigned NOT NULL,
-  `privilege_id` 		int(10) unsigned NOT NULL,
+  `user_id` 			int(11) unsigned NOT NULL,
+  `privilege_id` 		int(11) unsigned NOT NULL,
   `insert_timestamp` 	timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`,`privilege_id`),
   KEY `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+INSERT INTO `sa_user_privilege`(`user_id`, `privilege_id`) 
+VALUES('1', '1');
+
 
 DROP TABLE IF EXISTS `sa_privilege`;
 CREATE TABLE `sa_privilege` (
-  `privilege_id` 			int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `privilege_id` 			int(11) unsigned NOT NULL AUTO_INCREMENT,
   `privilege_code` 			varchar(65) COLLATE utf8_unicode_ci NOT NULL,
   `privilege_description` 	text COLLATE utf8_unicode_ci NOT NULL,
   `privilege_uri` 			text COLLATE utf8_unicode_ci NOT NULL,
@@ -115,6 +115,11 @@ CREATE TABLE `sa_privilege` (
   KEY `system_code` (`system_code`),
   KEY `menu_code` (`menu_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+INSERT INTO `sa_privilege`(`privilege_code`, `privilege_description`, `privilege_uri`, `system_code`)
+VALUES('DPR', 'DPR Booklet Monitoring', '["dpr"]', 'dpr]');
+
+
 
 DROP TABLE IF EXISTS `sa_navigation`;
 CREATE TABLE `sa_navigation` (
@@ -245,3 +250,7 @@ INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_
 VALUES(1, 'approval', 'Approval', '/spare_parts/dealer_request/approval', '3', '33', '1', 'SUBMODULE');
 INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_order`, `parent_id`, `is_active`, `type`)
 VALUES(1, 'reports', 'Reports', '/spare_parts/dealer_request/reports', '4', '33', '1', 'SUBMODULE');
+
+-- 38
+INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_order`, `parent_id`, `is_active`, `type`)
+VALUES(1, 'admin', 'Admin Dashboard', '/admin', '0', '0', '1', 'MODULE');

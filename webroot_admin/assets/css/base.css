@@ -295,7 +295,8 @@ a:hover {
   text-decoration: underline;
 }
 .row {
-  margin-left: -20px;
+  /*margin-left: -20px;*/
+  margin-left: 100px;
   *zoom: 1;
 }
 .row:before, .row:after {
