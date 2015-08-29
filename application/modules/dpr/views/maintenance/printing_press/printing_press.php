@@ -20,6 +20,7 @@
 			<th>Address</th>
 			<th>Contact No</th>
 			<th>Contact Person</th>
+			<th>Remarks</th>
 			<th style = "width:250px;">Action</th>
 		</tr>
 	</thead>
@@ -35,6 +36,7 @@
 					$press_address = $al->complete_address;
 					$contact_no = $al->contact_number;
        				$contact_person = $al->contact_person;
+       				$remarks = $al->remarks;
        				$is_deleted = $al->is_deleted;
        				$is_active = $al->is_active;
 
@@ -47,6 +49,7 @@
 								<td>{$press_address}</td>
 								<td>{$contact_no}</td>
 								<td>{$contact_person}</td>
+								<td>{$remarks}</td>
 								";
 								if ($is_active == "1"){
 								echo 	
