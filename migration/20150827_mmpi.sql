@@ -251,6 +251,3 @@ VALUES(1, 'approval', 'Approval', '/spare_parts/dealer_request/approval', '3', '
 INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_order`, `parent_id`, `is_active`, `type`)
 VALUES(1, 'reports', 'Reports', '/spare_parts/dealer_request/reports', '4', '33', '1', 'SUBMODULE');
 
--- 38
-INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_order`, `parent_id`, `is_active`, `type`)
-VALUES(1, 'admin', 'Admin Dashboard', '/admin', '0', '0', '1', 'MODULE');
