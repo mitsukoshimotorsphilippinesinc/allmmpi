@@ -22,13 +22,10 @@ class Dpr_model extends Base_Model
 			'branch_rack_location' => 'rf_branch_rack_location',
 			'branch_rack_location_view' => 'rf_branch_rack_location_view',
 			'action_log' => 'at_action_log',
-<<<<<<< HEAD
-
-=======
 			'job' => 'et_job',
 			'job_view' => 'et_job_view',
 			'job_type' => 'rf_job_type',			
->>>>>>> system/master/dpr-booklet-monitoring-20150826
+
 		);
 
 	}
