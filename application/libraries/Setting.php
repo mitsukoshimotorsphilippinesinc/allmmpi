@@ -3,14 +3,14 @@
 /**
  * Settings Library
  */
-class Settings {
+class Setting {
 	
 	private static $cache = array();
 	
 	public function __construct()
 	{
 		// load the settings model
-		ci()->load->model('settings_model');
+		ci()->load->model('setting_model');
 	
 		//$this->get_all();
 	}
@@ -45,10 +45,20 @@ class Settings {
 			return self::$cache[$name];
 		}
 		
-		$setting = ci()->settings_model->get_setting_by_slug($name);
+		$setting = ci()->setting_model->get_setting_by_slug($name);
 		
 		// Setting doesn't exist, maybe it's a config option
-		$value = $setting ? $setting->value : config_item($name);
+		if ($setting) {
+			if ((trim($setting->value == "")) || ($setting->value == NULL))
+				$value = $setting->default;
+			else 
+				$value = $setting->value;
+			
+		} else {
+			$value = config_item($name);
+		}
+		
+		//$value = $setting ? $setting->value : config_item($name);
 
 		// Store it for later
 		self::$cache[$name] = $value;
@@ -66,7 +76,7 @@ class Settings {
 		{
 			if (is_scalar($value))
 			{
-				$setting = ci()->settings_model->update_settings(array('value' => $value), array('slug' => $name));
+				$setting = ci()->setting_model->update_setting(array('value' => $value), array('slug' => $name));
 			}
 
 			self::$cache[$name] = $value;
@@ -87,7 +97,7 @@ class Settings {
 			return self::$cache;
 		}
 		
-		$settings = ci()->settings_model->get_settings();
+		$settings = ci()->setting_model->get_settings();
 		
 		foreach ($settings as $setting)
 		{

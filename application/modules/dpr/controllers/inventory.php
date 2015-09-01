@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Inventory extends Admin_Controller {
+class Inventory extends Systems_Controller {
 
 	function __construct()
 	{
@@ -93,7 +93,7 @@ class Inventory extends Admin_Controller {
 
 		$this->pager->set_config($config);
 
-		$inventory = $this->dpr_model->get_booklet($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "insert_timestamp DESC");			
+		$inventory = $this->dpr_model->get_booklet($where, array('rows' => $this->pager->per_page, 'offset' => $this->pager->offset), "booklet_series, insert_timestamp");			
 		
 		// search vars
 		$this->template->search_status = $search_status;
@@ -103,5 +103,26 @@ class Inventory extends Admin_Controller {
 		$this->template->inventory = $inventory;
 		
 		$this->template->view('inventory/main');	
+	}
+
+
+	public function  assign_to_branch($booklet_id = 0)
+	{
+		$booklet_details = $this->dpr_model->get_booklet_by_id($booklet_id);	
+
+
+		if ($booklet_details->branch_id == 0) {
+			// non-accouontable			
+		} else {
+			// accountable forms
+
+		}
+
+		$where = "";
+		$branch_rack_location_view_details = $this->dpr_model->get_branch_rack_location_view($where);
+
+		$this->template->branch_rack_location_view_details = $branch_rack_location_view_details;
+		$this->template->booklet_details = $booklet_details;
+		$this->template->view('inventory/assign_to_branch');
 	}
 }

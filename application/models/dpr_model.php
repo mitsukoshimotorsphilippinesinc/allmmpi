@@ -22,7 +22,13 @@ class Dpr_model extends Base_Model
 			'branch_rack_location' => 'rf_branch_rack_location',
 			'branch_rack_location_view' => 'rf_branch_rack_location_view',
 			'action_log' => 'at_action_log',
+<<<<<<< HEAD
 
+=======
+			'job' => 'et_job',
+			'job_view' => 'et_job_view',
+			'job_type' => 'rf_job_type',			
+>>>>>>> system/master/dpr-booklet-monitoring-20150826
 		);
 
 	}
@@ -520,5 +526,52 @@ class Dpr_model extends Base_Model
 	}	
 
     // ========================================================================
+    // ========================================================================
+    // et_job
+    function get_job($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('job_view', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+    function get_job_by_id($job_id) 
+	{
+		$result = $this->get_jobs(array('job_id' => $job_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function insert_job($data) 
+	{
+		return $this->insert('job', $data);
+	}
+
+	function update_job($data, $where) 
+	{
+		return $this->update('job', $data, $where);
+	}
+
+	function delete_job($where) 
+	{
+		return $this->delete('job', $where);
+	}
+
+	// job types
+	function get_job_type_by_job_type_id($job_type_id)
+	{
+		$result = $this->get_jobs(array('job_type_id' => $job_type_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+	// ========================================================================	
+	
 
 }

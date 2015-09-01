@@ -61,7 +61,6 @@ AS select
 FROM (`et_job` `a` 
 LEFT JOIN `rf_job_type` `b` ON((`a`.`job_type_id` = `b`.`job_type_id`)));
 
-
 --------
 -- USERS
 --------

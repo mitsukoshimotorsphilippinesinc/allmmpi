@@ -27,6 +27,7 @@ CREATE TABLE `rf_form_type` (
 	`parent_form_id`			int(11) NOT NULL DEFAULT 0,
 	`is_accountable`			tinyint(2) NOT NULL DEFAULT 0, 
 	`pieces_per_booklet`		tinyint(2) NOT NULL DEFAULT 0, 
+	`rack_location`				varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`is_active`					tinyint(2) NOT NULL DEFAULT 0,  
 	`is_deleted`				tinyint(2) NOT NULL DEFAULT 0,  
 	`remarks` 					text COLLATE utf8_unicode_ci,
@@ -37,6 +38,7 @@ CREATE TABLE `rf_form_type` (
   KEY `code` (`code`),
   KEY `is_accountable` (`is_accountable`),
   KEY `pieces_per_booklet` (`pieces_per_booklet`),
+  KEY `rack_location` (`rack_location`),
   KEY `parent_form_id` (`parent_form_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -134,9 +136,10 @@ DROP TABLE IF EXISTS `is_booklet`;
 CREATE TABLE `is_booklet` (
 	`booklet_id`				int(11) NOT NULL AUTO_INCREMENT,
 	`request_detail_id`			int(11) NOT NULL DEFAULT 0,	
-	`branch_id`					int(11) NOT NULL DEFAULT 0,	
-	`branch_rack_location_id`	int(11) NOT NULL DEFAULT 0,
-	`booklet_number`			varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`branch_id`					int(11) NOT NULL DEFAULT 0,		
+	`booklet_code`				varchar(10) COLLATE utf8_unicode_ci DEFAULT NULL,
+	`booklet_series`			int(11) NOT NULL DEFAULT 0,
+	`booklet_number`			varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
 	`series_from`				int(11) NOT NULL DEFAULT 0,
 	`series_to`				  	int(11) NOT NULL DEFAULT 0,
 	`status`					varchar(30) COLLATE utf8_unicode_ci DEFAULT 'IN',
@@ -146,8 +149,7 @@ CREATE TABLE `is_booklet` (
 	`insert_timestamp`			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`booklet_id`),
 	KEY `branch_id` (`branch_id`),
-	KEY `request_detail_id` (`request_detail_id`),
-	KEY `branch_rack_location_id` (`branch_rack_location_id`),
+	KEY `request_detail_id` (`request_detail_id`),	
 	KEY `booklet_number` (`booklet_number`),
 	KEY `series_from` (`series_from`),
 	KEY `series_to` (`series_to`)
@@ -162,9 +164,6 @@ VALUES('3', 'Branch', '/branch', '2', '1');
 -- MAINTENANCE MAINTENANCE
 INSERT INTO `rf_department_module_submodule`(department_module_id, submodule_name, submodule_url, priority_order, is_active)
 VALUES('6', 'Branch Rack Location', '/branch_rack_location', '1', '1');
-
-
-
 
 
 -- VIEWS
@@ -191,7 +190,6 @@ CREATE VIEW `rf_branch_rack_location_view`
 	FROM human_relations.rf_branch a
 	LEFT JOIN dpr.rf_branch_rack_location b 
 	ON a.branch_id = b.branch_id;
-);
 
 -- ACTION LOG / TRAIL
 DROP TABLE IF EXISTS `at_action_log`;
@@ -215,39 +213,65 @@ CREATE TABLE `at_action_log` (
 
 DROP TABLE `tr_request_detail`;
 CREATE TABLE `tr_request_detail` (
-  `request_detail_id` int(11) NOT NULL AUTO_INCREMENT,
-  `request_summary_id` int(11) DEFAULT NULL,
-  `branch_id` int(11) DEFAULT NULL,
-  `last_serial_number` int(11) DEFAULT NULL,
-  `form_type_id` int(11) DEFAULT NULL,
-  `quantity` int(11) DEFAULT NULL,
-  `send_atp` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `receive_atp` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `faxed_to_printer` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `received_from_printer` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `send_for_stamping` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `received_from_stamping` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `date_delivered` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `printing_press_id` int(11) DEFAULT NULL,
-  `status` varchar(30) COLLATE utf8_unicode_ci DEFAULT 'PENDING',
-  `remarks` text COLLATE utf8_unicode_ci,
-  `insert_timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `request_detail_id` 			int(11) NOT NULL AUTO_INCREMENT,
+  `request_summary_id` 			int(11) DEFAULT NULL,
+  `branch_id` 					int(11) DEFAULT NULL,
+  `last_serial_number` 			int(11) DEFAULT NULL,
+  `form_type_id` 				int(11) DEFAULT NULL,
+  `quantity` 					int(11) DEFAULT NULL,
+  `send_atp` 					timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `receive_atp` 				timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `faxed_to_printer` 			timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `received_from_printer` 		timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `send_for_stamping` 			timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `received_from_stamping` 		timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `date_delivered` 				timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `printing_press_id` 			int(11) DEFAULT NULL,
+  `status` 						varchar(30) COLLATE utf8_unicode_ci DEFAULT 'PENDING',
+  `remarks` 					text COLLATE utf8_unicode_ci,
+  `insert_timestamp` 			timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`request_detail_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 DROP TABLE `tr_request_summary`;
 CREATE TABLE `tr_request_summary` (
-  `request_summary_id` int(11) NOT NULL AUTO_INCREMENT,
-  `request_year` int(11) DEFAULT NULL,
-  `request_series` int(11) DEFAULT NULL,
-  `request_code` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `status` varchar(15) COLLATE utf8_unicode_ci DEFAULT 'PENDING',
-  `remarks` text COLLATE utf8_unicode_ci,
-  `is_accountable` tinyint(1) DEFAULT NULL,
-  `update_timestamp` timestamp NULL DEFAULT '0000-00-00 00:00:00',
-  `insert_timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `request_summary_id` 			int(11) NOT NULL AUTO_INCREMENT,
+  `request_year` 				int(11) DEFAULT NULL,
+  `request_series` 				int(11) DEFAULT NULL,
+  `request_code` 				varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `status` 						varchar(15) COLLATE utf8_unicode_ci DEFAULT 'PENDING',
+  `remarks` text				COLLATE utf8_unicode_ci,
+  `is_accountable` 				tinyint(1) DEFAULT NULL,
+  `update_timestamp` 			timestamp NULL DEFAULT '0000-00-00 00:00:00',
+  `insert_timestamp` 			timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`request_summary_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
+DROP TABLE IF EXISTS `rf_job_type`;
+CREATE TABLE `rf_job_type` (
+  `job_type_id` 				int(11) NOT NULL AUTO_INCREMENT,
+  `job_code` 					varchar(16) NOT NULL DEFAULT '',
+  `scripts` 					text,
+  `insert_timestamp` 			timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`job_type_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8  COLLATE=utf8_unicode_ci;
 
+INSERT INTO rf_job_type(job_code, scripts)
+VALUES('generate_booklet', '/jobs/dpr/generate_booklet');
+
+DROP TABLE IF EXISTS `et_job`;	
+CREATE TABLE `et_job` (
+  `job_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `job_type_id` int(11) unsigned NOT NULL DEFAULT '0',
+  `parameters` text,
+  `status` varchar(30) NOT NULL DEFAULT 'PENDING',
+  `exceptions` text,
+  `insert_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`job_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8  COLLATE=utf8_unicode_ci;
+
+CREATE VIEW `et_job_view` 
+AS select 
+`a`.`job_id` AS `job_id`,`a`.`job_type_id` AS `job_type_id`,`b`.`job_code` AS `job_code`,`b`.`scripts` AS `scripts`,`a`.`parameters` AS `parameters`,`a`.`status` AS `status`,`a`.`exceptions` AS `exceptions`,`a`.`insert_timestamp` AS `insert_timestamp` 
+from (`et_job` `a` left join `rf_job_type` `b` on((`a`.`job_type_id` = `b`.`job_type_id`)))
