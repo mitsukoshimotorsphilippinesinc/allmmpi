@@ -453,8 +453,41 @@ class Form_request extends Admin_Controller {
 		$data = array(
 			$current_col_name_unformat => $current_datetime = date("Y-m-d H:i:s"));
 
+		if ($current_col_name_unformat == "received_from_stamping") {
+			$data['status'] = "COMPLETED";
+		}
+
 		$this->dpr_model->update_request_detail($data,$where);
 
 		$this->return_json("1","Update Successfully");
+	}
+	public function update_summary_request()
+	{
+		$request_summary_id = $this->input->post('request_summary_id');
+		$where = "request_summary_id = '{$request_summary_id}'";
+		$data = array(
+			'status' => "COMPLETED");
+
+		$this->dpr_model->update_request_summary($data,$where);	
+
+		$this->dpr_model->update_request_detail($data,$where);	
+		
+		$this->return_json("1","Update Successfully");
+
+	}
+
+	public function cancel_update_summary_request()
+	{
+		$request_summary_id = $this->input->post('request_summary_id');
+		$where = "request_summary_id = '{$request_summary_id}'";
+		$data = array(
+			'status' => "CANCELLED");
+
+		$this->dpr_model->update_request_summary($data,$where);	
+
+		$this->dpr_model->update_request_detail($data,$where);	
+		
+		$this->return_json("1","Update Successfully");
+
 	}
 }	

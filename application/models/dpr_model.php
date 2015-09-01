@@ -22,6 +22,7 @@ class Dpr_model extends Base_Model
 			'branch_rack_location' => 'rf_branch_rack_location',
 			'branch_rack_location_view' => 'rf_branch_rack_location_view',
 			'action_log' => 'at_action_log',
+
 		);
 
 	}
@@ -171,6 +172,16 @@ class Dpr_model extends Base_Model
 			$row = $result[0];
 		}
 		return $row;
+	}
+
+	function update_form_type($data,$where)
+	{
+		return $this->update('form', $data, $where);
+	}
+
+	function insert_form_type($data) 
+	{
+		return $this->insert('form', $data);
 	}
 
 	function get_form_by_id($form_type_id) 
@@ -499,6 +510,14 @@ class Dpr_model extends Base_Model
 
 	    $result = $this->insert('action_log', $data);
     }
+
+    function get_form_type_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('form', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}	
 
     // ========================================================================
 

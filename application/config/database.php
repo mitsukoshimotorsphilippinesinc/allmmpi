@@ -72,7 +72,7 @@
 | the active record class
 */
 
-/*
+
 $active_group = 'default';
 $active_record = TRUE;
 $db['default']['dsn']      = '';
@@ -177,8 +177,8 @@ $db['warehouse']['swap_pre'] = '';
 $db['warehouse']['autoinit'] = TRUE;
 $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
-*/
 
+/*
 $active_group = 'default';
 $active_record = TRUE;
 $db['default']['dsn']      = '';
@@ -283,7 +283,7 @@ $db['warehouse']['swap_pre'] = '';
 $db['warehouse']['autoinit'] = TRUE;
 $db['warehouse']['stricton'] = FALSE;
 $db['warehouse']['failover'] = array();
-
+*/
 
 /* End of file database.php */
 /* Location: ./application/config/database.php */

@@ -30,6 +30,7 @@
        				$form_type_id = $rd->form_type_id;
        				$printing_press_id = $rd->printing_press_id;
        				$request_detail_id = $rd->request_detail_id;
+       				$status = $rd->status;
 
        				$last_series = $rd->last_serial_number;
        				$quantity = $rd->quantity;
@@ -78,11 +79,16 @@
 					<td>{$status}</td>";
 					
 						if ($has_pending == 1){
-							echo"
-							<td><a id = 'update_detail_item' class = 'btn update_item' data = '{$request_detail_id}'>Update</a></td>";
+							If ($status == "CANCELLED"){
+								echo"
+								<td><a id = 'update_detail_item' class = 'btn update_item btn-primary' data = '{$request_detail_id}'>View Details</a><a style = 'display:none;' id = 'update_detail_item' class = 'btn update_item btn-success' data = '{$request_detail_id}'>Update</a></td>";	
+							}else{
+								echo"
+								<td><a id = 'update_detail_item' class = 'btn update_item btn-success' data = '{$request_detail_id}'>Update</a></td>";
+							}	
 						}else{
 							echo"
-							<td><a id = 'update_detail_item' class = 'btn update_item' data = '{$request_detail_id}'>View Details</a></td>";
+							<td><a id = 'update_detail_item' class = 'btn update_item btn-primary' data = '{$request_detail_id}'>View Details</a></td>";	
 						}
 				echo"
 				</tr>";
