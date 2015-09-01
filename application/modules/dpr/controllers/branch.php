@@ -8,4 +8,9 @@ class Branch extends Admin_Controller {
 		$this->template->view('/branch/dashboard');
 	}
 
+	public function releasing_of_form()
+	{
+		$this->template->view('/branch/transaction/releasing');
+	}
+
 }
