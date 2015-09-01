@@ -38,7 +38,7 @@
 	if (($this->uri->segment(2) == NULL) || (empty($this->uri->segment(2)))) {
 		$where = "department_id = {$department_details->department_id} AND name = 'main_dashboard' AND is_active = 1";
 	} else {
-		$where = "department_id = {$department_details->department_id} AND name = '{$this->uri->segment(2)}' AND is_active = 1";
+		$where = "department_id = {$department_details->department_id} AND name = '{$this->uri->segment(2)}' AND is_active = 1 AND parent_id = 0 AND is_active = 1 AND type = 'MODULE'";
 	}	
 	$current_navigation_details = $this->navigation_model->get_navigation($where);
 	$current_navigation_details = $current_navigation_details[0];
@@ -46,8 +46,8 @@
 	$where = "parent_id = {$current_navigation_details->navigation_id} AND is_active = 1";
 	$current_submodule_details = $this->navigation_model->get_navigation($where, NULL, "priority_order ASC");
 	
-	// get all navigation
-	$where = "department_id = '{$department_details->department_id}' AND navigation_id <> {$current_navigation_details->navigation_id} AND parent_id = 0 AND is_active = 1";
+	// get all navigation	
+	$where = "department_id = '{$department_details->department_id}' AND navigation_id <> {$current_navigation_details->navigation_id} AND parent_id = 0 AND is_active = 1 AND type = 'MODULE'";
 	$navigation_details = $this->navigation_model->get_navigation($where);
 	
 

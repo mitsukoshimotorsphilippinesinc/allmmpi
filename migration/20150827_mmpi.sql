@@ -171,9 +171,9 @@ VALUES(33, 'maintenance', 'Maintenance', '/dpr/maintenance', '0', '0', '1', 'MOD
 
 -- 10 and 11
 INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_order`, `parent_id`, `is_active`, `type`)
-VALUES(33, 'branch_rack_location', 'Branch Rack Location', '/dpr/maintenane/branch_location', '1', '9', '1', 'SUBMODULE');
+VALUES(33, 'branch_rack_location', 'Branch Rack Location', '/dpr/maintenance/branch_rack_location', '1', '9', '1', 'SUBMODULE');
 INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_order`, `parent_id`, `is_active`, `type`)
-VALUES(33, 'form_types', 'Form Types', '/dpr/maintenane/form_types', '2', '9', '1', 'SUBMODULE');
+VALUES(33, 'form_types', 'Form Types', '/dpr/maintenance/form_types', '2', '9', '1', 'SUBMODULE');
 
 
 -- SPARE PARTS

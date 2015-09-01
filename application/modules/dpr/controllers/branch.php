@@ -5,7 +5,9 @@ class Branch extends Admin_Controller {
 
 	public function index()
 	{
-		$this->template->view('/branch/dashboard');
+		$this->template->view('branch/dashboard');
 	}
 
-}
+	
+
+}	
