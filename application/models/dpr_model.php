@@ -22,6 +22,8 @@ class Dpr_model extends Base_Model
 			'branch_rack_location' => 'rf_branch_rack_location',
 			'branch_rack_location_view' => 'rf_branch_rack_location_view',
 			'action_log' => 'at_action_log',
+			'release_summary' => 'tr_release_summary',
+			'release_detail' => 'tr_release_detail'
 
 		);
 
@@ -518,6 +520,50 @@ class Dpr_model extends Base_Model
 		$query->free_result();
 		return $row->cnt;
 	}	
+
+	function get_release_summary($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('release_summary', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+    function get_release_detail($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('release_detail', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+    function get_release_summary_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('release_summary', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}	
+
+	function insert_release_summary($data) 
+	{
+		return $this->insert('release_summary', $data);
+	}
+
+	function insert_release_detail($data) 
+	{
+		return $this->insert('release_detail', $data);
+	}
+
+	function delete_release_detail($where) 
+	{
+		return $this->delete('release_detail', $where);
+	}
+
+	function update_release_summary($data, $where) 
+	{
+		return $this->update('release_summary', $data, $where);
+	}
 
     // ========================================================================
 
