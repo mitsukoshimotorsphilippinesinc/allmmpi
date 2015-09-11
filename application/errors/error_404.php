@@ -19,8 +19,8 @@
 			<div align="center" style="font-family:Consolas;font-size:20px;color:gray;">
 				<label>Oops, you've encountered an error! It appears the page you were looking for doesn't exist. Sorry about that.<br/> <a href="/admin">Click here to go back to Main Page.</a>
 			</label>
+			</div>
 		</div>
-	</div>
 	</div>
 </body>
 </html>
