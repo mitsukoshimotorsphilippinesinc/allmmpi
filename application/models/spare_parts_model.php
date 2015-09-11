@@ -35,12 +35,48 @@ class Spare_parts_model extends Base_Model
 			'department_module_submodule' => 'rf_department_module_submodule',
 			'department' => 'rf_department',
 			'reprocessed_item' => 'is_reprocessed_item',
-			'warehouse_return' => 'tr_warehouse_return',			
+			'warehouse_return' => 'tr_warehouse_return',
+			'spare_parts' => 'rf_spare_part',			
+			'counter_summary' => 'is_counter_order_summary',
+			'counter_detail' => 'is_counter_order_detail'
 		);
 
 	}
 
-	
+	function get_counter_summary($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('counter_summary', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+    function get_counter_detail($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('counter_detail', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
+    function insert_counter_summary($data) 
+	{
+		return $this->insert('counter_summary', $data);
+	}
+
+	function insert_counter_detail($data) 
+	{
+		return $this->insert('counter_detail', $data);
+	}
+
+	function get_spare_part($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('spare_parts', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+    }
+
 	// is_salary_deduction
 	function get_salary_deduction($where = null, $limit = null, $orderby = null, $fields = null) 
 	{
