@@ -180,10 +180,10 @@
 
 							// show add form modal 
 							proceedAddNewItemModal = b.modal.new({
-								title: 'Add New Item',
+								title: 'Add New Booklet',
 								width:450,
 								disableClose: true,
-								html: 'Successfully add new item...',
+								html: 'Successfully add new Booklet...',
 								buttons: {
 									'Ok' : function() {
 										proceedAddNewItemModal.hide();
@@ -198,7 +198,6 @@
 
 										on_success: function(data){
 											hideLoading();
-											//alert(data.data.html);
 											$('#record_data').html(data.data.html);
 										}
 

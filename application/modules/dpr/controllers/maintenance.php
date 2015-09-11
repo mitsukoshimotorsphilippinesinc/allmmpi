@@ -457,6 +457,7 @@ class Maintenance extends Admin_Controller {
 		$this->dpr_model->update_printing_press($data,$where);	
 		
 		$this->return_json("1","Update Successfully");
+	}	
 
 	public function privileges() 
 	{
