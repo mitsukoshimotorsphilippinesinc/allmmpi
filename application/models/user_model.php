@@ -11,13 +11,12 @@ class User_model extends Base_Model
 		// assign the table for this model
 		$this->_TABLES = array(
 			'user' => 'sa_user',
-			'user_privileges'=>'sa_user_privileges',
-			'user_privileges_view'=>'sa_user_privileges_view',
-			//'user_facilities' => 'sa_user_facilities',
-			//'user_facilities_view' => 'sa_user_facilities_view',
+			'user_privilege'=>'sa_user_privilege',
+			'user_privilege_view'=>'sa_user_privilege_view',
 			'user_roles' => 'sa_user_roles',
-			'user_role_privileges'=>'sa_user_role_privileges',
-			'user_role_privileges_view'=>'sa_user_role_privileges_view'
+			'user_role_privilege'=>'sa_user_role_privilege',
+			'user_role_privilege_view'=>'sa_user_role_privilege_view',
+			'privilege'=>'sa_privilege'
 		);
 
 	}
@@ -54,6 +53,16 @@ class User_model extends Base_Model
 		}
 		return $row;
 	}
+
+	function get_user_by_id_number($id_number) 
+	{
+		$result = $this->get_user(array('id_number' => $id_number));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
 	
 	function get_user_by_username($username) 
 	{
@@ -72,43 +81,6 @@ class User_model extends Base_Model
 		$query->free_result();
 		return $row->cnt;
 	}
-	
-	
-	function get_user_facilities($where = null, $limit = null, $orderby = null, $fields = null) 
-	{
-		$query = $this->fetch('user_facilities_view', $fields, $where, $orderby, $limit);
-		$row = $query->result();
-		$query->free_result();
-		return $row;
-    }
-
-	function get_user_facility_by_user_id($user_id)
-	{
-		$result = $this->get_user_facilities(array('user_id' => $user_id));
-		return $result;
-	}
-	
-	function get_default_user_facility($user_id)
-	{
-		$result = $this->get_user_facilities(array('user_id' => $user_id,'is_default' => 1));
-		return $result[0];
-	}
-	
-	function insert_user_facilities($data) 
-	{
-		return $this->insert('user_facilities', $data);
-	}
-
-	function update_user_facilities($data, $where) 
-	{
-		return $this->update('user_facilities', $data, $where);
-	}
-
-	function delete_user_facilities($where) 
-	{
-		return $this->delete('user_facilities', $where);
-	}
-
 	
 	function search_user($search, $query, $limit = null, $orderby = null, $fields = null)
 	{
@@ -141,9 +113,9 @@ class User_model extends Base_Model
 		return $row->cnt;
 	}
 
-	function get_user_privileges($where = null, $limit = null, $orderby = null, $fields = null) 
+	function get_user_privilege($where = null, $limit = null, $orderby = null, $fields = null) 
 	{
-		$query = $this->fetch('user_privileges_view', $fields, $where, $orderby, $limit);
+		$query = $this->fetch('user_privilege_view', $fields, $where, $orderby, $limit);
 		$row = $query->result();
 		$query->free_result();
 		return $row;
@@ -151,22 +123,22 @@ class User_model extends Base_Model
 
 	function insert_user_privilege($data) 
 	{
-		return $this->insert('user_privileges', $data);
+		return $this->insert('user_privilege', $data);
 	}
 
-	function update_user_privileges($data, $where) 
+	function update_user_privilege($data, $where) 
 	{
-		return $this->update('user_privileges', $data, $where);
+		return $this->update('user_privilege', $data, $where);
 	}
 
-	function delete_user_privileges($where) 
+	function delete_user_privilege($where) 
 	{
-		return $this->delete('user_privileges', $where);
+		return $this->delete('user_privilege', $where);
 	}
 
 	function get_user_privilege_count($where = null) {
 		// do a sql count instead of row count
-		$query = $this->fetch('user_privileges', 'count(1) as cnt', $where);
+		$query = $this->fetch('user_privilege', 'count(1) as cnt', $where);
 		$row = $query->first_row();
 		$query->free_result();
 		return $row->cnt;
@@ -175,8 +147,10 @@ class User_model extends Base_Model
 	function is_user_allowed($uri_string)
 	{
 		
-		$privileges = $this->get_user_privileges("user_id  = {$this->user->user_id}");
+		$privileges = $this->get_user_privilege("user_id  = {$this->user->user_id}");
 		
+		//var_dump($uri_string);
+
 		$result = false;
 		
         $uri_strings = array();		
@@ -220,7 +194,7 @@ class User_model extends Base_Model
 
 	function is_user_allowed_by_privilege_code($user_id, $privilege_code)
 	{
-		$privileges = $this->get_user_privileges(array("user_id"=>$user_id, "privilege_code" => $privilege_code));
+		$privileges = $this->get_user_privilege(array("user_id"=>$user_id, "privilege_code" => $privilege_code));
 		return count($privileges) > 0;
 	}
 	
@@ -239,7 +213,7 @@ class User_model extends Base_Model
 
 	function update_user_roles($data, $where) 
 	{
-		return $this->update('user_roles', $data, $where);
+		return $this->update('user_roles', $data, $where);	
 	}
 
 	function delete_user_roles($where) 
@@ -265,9 +239,9 @@ class User_model extends Base_Model
 		return $row->cnt;
 	}
 	
-	function get_user_role_privileges($where = null, $limit = null, $orderby = null, $fields = null) 
+	function get_user_role_privilege($where = null, $limit = null, $orderby = null, $fields = null) 
 	{
-		$query = $this->fetch('user_role_privileges_view', $fields, $where, $orderby, $limit);
+		$query = $this->fetch('user_role_privilege_view', $fields, $where, $orderby, $limit);
 		$row = $query->result();
 		$query->free_result();
 		return $row;
@@ -275,24 +249,68 @@ class User_model extends Base_Model
 
 	function insert_user_role_privilege($data) 
 	{
-		return $this->insert('user_role_privileges', $data);
+		return $this->insert('user_role_privilege', $data);
 	}
 
-	function update_user_role_privileges($data, $where) 
+	function update_user_role_privilege($data, $where) 
 	{
-		return $this->update('user_role_privileges', $data, $where);
+		return $this->update('user_role_privilege', $data, $where);
 	}
 
-	function delete_user_role_privileges($where) 
+	function delete_user_role_privilege($where) 
 	{
-		return $this->delete('user_role_privileges', $where);
+		return $this->delete('user_role_privilege', $where);
 	}
 
 	function get_user_role_privilege_count($where = null) {
 		// do a sql count instead of row count
-		$query = $this->fetch('user_role_privileges', 'count(1) as cnt', $where);
+		$query = $this->fetch('user_role_privilege', 'count(1) as cnt', $where);
 		$row = $query->first_row();
 		$query->free_result();
 		return $row->cnt;
 	}
+	// ==============================================================
+	// ==============================================================
+	// sa_privilege
+	function get_privilege($where = null, $limit = null, $orderby = null, $fields = null) 
+	{
+		$query = $this->fetch('privilege', $fields, $where, $orderby, $limit);
+		$row = $query->result();
+		$query->free_result();
+		return $row;
+	}
+
+	function insert_privilege($data) 
+	{
+		return $this->insert('privilege', $data);
+	}
+
+	function update_privilege($data, $where) 
+	{
+		return $this->update('privilege', $data, $where);
+	}
+
+	function delete_privilege($where) 
+	{
+		return $this->delete('privilege', $where);
+	}
+
+	function get_privilege_by_id($privilege_id) 
+	{
+		$result = $this->get_privilege(array('privilege_id' => $privilege_id));
+		$row = NULL;
+		if (count($result) > 0) {
+			$row = $result[0];
+		}
+		return $row;
+	}
+
+	function get_privilege_count($where = null) {
+		// do a sql count instead of row count
+		$query = $this->fetch('privilege', 'count(1) as cnt', $where);
+		$row = $query->first_row();
+		$query->free_result();
+		return $row->cnt;
+	}
+	// ==============================================================
 }

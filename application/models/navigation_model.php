@@ -40,7 +40,7 @@ class Navigation_model extends Base_Model
 
 	function get_navigation_by_id($navigation_id) 
 	{
-		$result = $this->get_navigation(array('navigation_id' => $navigation_id), null, "ordering ASC");
+		$result = $this->get_navigation(array('navigation_id' => $navigation_id), null, "priority_order ASC");
 		$row = NULL;
 		if (count($result) > 0) {
 			$row = $result[0];

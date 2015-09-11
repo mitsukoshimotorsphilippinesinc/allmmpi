@@ -44,4 +44,18 @@ class Admin extends Admin_Controller {
 		$this->return_json('ok', 'Ok', array('facility' => $facility));
 		return;
 	}
+
+	public function noaccess()
+	{		
+		$site_page = current_url();
+
+		$int_noaccess_pos = strpos($site_page, "noaccess");
+		
+		$forbsite = substr($site_page, $int_noaccess_pos + strlen("noaccess"));
+
+		$forbid_url = config_item('base_url') . $forbsite;
+
+		$this->template->forbid_url = $forbid_url;
+		$this->template->view("noaccess");
+	}
 }

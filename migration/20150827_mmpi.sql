@@ -250,3 +250,20 @@ VALUES(1, 'approval', 'Approval', '/spare_parts/dealer_request/approval', '3', '
 INSERT INTO `sa_navigation` (`department_id`, `name`, `title`, `url`, `priority_order`, `parent_id`, `is_active`, `type`)
 VALUES(1, 'reports', 'Reports', '/spare_parts/dealer_request/reports', '4', '33', '1', 'SUBMODULE');
 
+
+DROP VIEW IF EXISTS `sa_user_privilege_view`;
+CREATE VIEW `sa_user_privilege_view` AS 
+SELECT 
+`a`.`user_id` AS `user_id`,
+`a`.`privilege_id` AS `privilege_id`,
+`b`.`privilege_code` AS `privilege_code`,
+`b`.`privilege_description` AS `privilege_description`,
+`b`.`privilege_uri` AS `privilege_uri`,
+`b`.`system_code` AS `system_code`,
+`a`.`insert_timestamp` AS `insert_timestamp` 
+FROM 
+(`sa_user_privilege` `a` LEFT JOIN `sa_privilege` `b`  ON ((`a`.`privilege_id` = `b`.`privilege_id`)));
+
+
+ALTER TABLE `sa_user` ADD COLUMN `is_active` tinyint(2) NOT NULL DEFAULT 0 AFTER `default_page`;
+UPDATE `sa_user` SET `is_active` = 1;
