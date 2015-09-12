@@ -570,14 +570,16 @@ class Maintenance extends Admin_Controller {
 
 		$user_privileges = $this->user_model->get_user_privilege("user_id = {$user_id}");		
 		
+		$where = "system_code = '{$this->uri->segment(1)}'";
+
 		if (!empty($user_privileges))
 		{
 			$up_array = array();
 			foreach ($user_privileges as $up) $up_array[] = $up->privilege_id;			
-			$where = "privilege_id NOT IN (".implode(",",$up_array).")";
+			$where .= " AND privilege_id NOT IN (".implode(",",$up_array).")";
 		}
 		else
-			$where = null;
+			$where .= null;
 		
 		$privileges = $this->user_model->get_privilege($where);
 
@@ -588,4 +590,67 @@ class Maintenance extends Admin_Controller {
 		$this->template->view('maintenance/privileges/privilege');
 	}
 
+
+	private $_validation_rule = array(
+		array(
+			'field' => 'is_active',
+			'label' => 'Is Active',
+			'rules' => 'trim|required'
+		),
+		array(
+			'field' => 'default_page',
+			'label' => 'Default Page',
+			'rules' => 'trim|required'
+		)
+	);
+
+	public function edit_user($user_id = 0)
+	{
+		$user = $this->user_model->get_user_by_id($user_id);
+		
+		if ($_POST and !empty($user))
+		{
+
+			$this->form_validation->set_rules($this->_validation_rule);
+
+			if ($this->form_validation->run()) 
+			{
+
+				// insert the new user
+				$data = array(					
+					'is_active' => set_value('is_active'),
+					'default_page' => set_value('default_page')
+				);
+				
+				$this->user_model->update_user($data, array('user_id' => $user_id));
+				
+				/*//LOGGING FOR EDIT USER
+				$details_before = array('id' => $user_id, 'details' => $user);
+				$details_before = json_encode($details_before);
+				$details_after = array('id' => $user_id, 'details' => $data);
+				$details_after = json_encode($details_after);
+				$update_user_data_logs = array(
+					'user_id' => $this->user->user_id,
+					'module_name' => 'USERS',
+					'table_name' => 'ad_users',
+					'action' => 'UPDATE',
+					'details_before' => $details_before,
+					'details_after' => $details_after,
+					'remarks' => ""
+				);
+				$this->tracking_model->insert_logs('admin', $update_user_data_logs);
+				*/
+
+				redirect('/dpr/maintenance/privileges');
+				return;
+			}
+		}
+
+		$employment_info_details = $this->human_relations_model->get_employment_information_view("id_number = '{$user->id_number}'");
+		$employment_info_details = $employment_info_details[0];
+
+		$this->template->user = $user;		
+		$this->template->employment_info_details = $employment_info_details;
+		$this->template->view('dpr/maintenance/privileges/edit_user');
+	}
 }

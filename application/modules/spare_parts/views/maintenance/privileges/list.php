@@ -6,7 +6,7 @@
 <div class='alert alert-danger'><h2>Users and Privileges</h2></div>
 
 <div >
-	<form id='search_details' method='get' action ='/dpr/maintenance/privileges'>
+	<form id='search_details' method='get' action ='/spare_parts/maintenance/privileges'>
 		<strong>Search By:&nbsp;</strong>
 		<select name="search_option" id="search_option_wo" style="width:150px;" value="<?= $search_by ?>">
 			<option value="username">Username</option>
@@ -75,8 +75,8 @@
 					echo "<span class='label label-success'>ACTIVE</span>";
 				?>				
 			<td>
-				<a href='/dpr/maintenance/edit_user/<?= $user_account_details->user_id ?>' class='btn btn-small btn-primary' title='Edit User'><i class="icon-pencil icon-white"></i></a>				
-				<a href='/dpr/maintenance/edit_privilege/<?= $user_account_details->user_id ?>' class='btn btn-small btn-primary' title='User Privileges'><i class="icon-lock icon-white"></i></a>
+				<a href='/spare_parts/maintenance/edit_user/<?= $user_account_details->user_id ?>' class='btn btn-small btn-primary' title='Edit User'><i class="icon-pencil icon-white"></i></a>				
+				<a href='/spare_parts/maintenance/edit_privilege/<?= $user_account_details->user_id ?>' class='btn btn-small btn-primary' title='User Privileges'><i class="icon-lock icon-white"></i></a>
 			</td>
 		</tr>
 	<?php endforeach; ?>
@@ -175,7 +175,7 @@
 								confirmaddUserModal.hide();
 							},
 							'Yes' : function() {
-								addProduct(username, email, password, first_name, last_name, mobile_number, user_facility, is_active, default_page);
+								adspare_partsoduct(username, email, password, first_name, last_name, mobile_number, user_facility, is_active, default_page);
 								confirmaddUserModal.hide();
 							}
 						}
@@ -198,7 +198,7 @@
 		})
 	};
 	
-	var addProduct = function(username, email, password, first_name, last_name, mobile_number, user_facility, is_active, default_page) {	
+	var adspare_partsoduct = function(username, email, password, first_name, last_name, mobile_number, user_facility, is_active, default_page) {	
 		beyond.request({
 			url : '/admin/users/add_user',
 			data : {

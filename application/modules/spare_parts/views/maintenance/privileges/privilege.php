@@ -12,7 +12,7 @@
 	}
 	$user_privileges_tag .= "</select>";
 
-    $return_url = $this->config->item('base_url') . "/dpr/maintenance/privileges";
+    $return_url = $this->config->item('base_url') . "/spare_parts/maintenance/privileges";
 
     $breadcrumb_container = assemble_breadcrumb();
 ?>
@@ -81,13 +81,13 @@
             });
 
 			b.request({
-		        url: '/dpr/maintenance/edit_privilege',
+		        url: '/spare_parts/maintenance/edit_privilege',
 		        data: {
 					"user_id": parseInt('<?=$user->user_id?>'),
 					"privileges":_selected_privs
 				},
 		        on_success: function(data, status) {
-					if (data.status==1) redirect("/dpr/maintenance/privileges");
+					if (data.status==1) redirect("/spare_parts/maintenance/privileges");
 		        }
 		    });
             
