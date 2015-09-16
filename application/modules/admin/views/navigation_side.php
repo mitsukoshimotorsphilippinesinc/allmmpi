@@ -44,13 +44,12 @@
 	$current_navigation_details = $current_navigation_details[0];
 
 	$where = "parent_id = {$current_navigation_details->navigation_id} AND is_active = 1";
-	$current_submodule_details = $this->navigation_model->get_navigation($where, NULL, "priority_order ASC");
-	
+	$current_submodule_details = $this->navigation_model->get_navigation($where, NULL, "priority_order ASC");	
+
 	// get all navigation	
 	$where = "department_id = '{$department_details->department_id}' AND navigation_id <> {$current_navigation_details->navigation_id} AND parent_id = 0 AND is_active = 1 AND type = 'MODULE'";
 	$navigation_details = $this->navigation_model->get_navigation($where);
 	
-
 ?>
 
 <div id="wrapper">
