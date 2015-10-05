@@ -1,8 +1,11 @@
 <html>
 <head>
 
-<?PHP
+<?php
+	$breadcrumb_container = assemble_breadcrumb();
 ?>
+
+<?= $breadcrumb_container; ?>
 <div class='alert alert-danger'><h2>Request List(Accountable Forms) <a style = 'float:right;' class = 'btn' href = "add_new_accountables" >Create New Request</a> <a style = 'float:right; margin-right:5px;' class = 'btn btn-success' >Print Request</a></div>
 </head>
 
@@ -29,13 +32,13 @@
 		<tr>			
 			<th style='width:100px;'>Date Requested</th>
 			<th style='width:80px;'>Reference No.</th>
+			<th style='width:80px;'>Completion Progress</th>
 			<th style='width:118px;'>Status</th>
 			<th style='width:118px;'>Action</th>
 		</tr>
 	</thead>
 	<tbody>
-		<?php
-			//var_dump($all_record);
+		<?php			
 			If (empty($all_record)){
 				echo "<tr><td colspan = 4> No Records Found... </td></tr>";
 			}else{
@@ -46,18 +49,39 @@
        						$reference_no = $al->request_code;
        						$status = $al->status;
 
+       						// completion
+       						$detail_total_count = $this->dpr_model->get_request_detail_count("request_summary_id = '{$request_summary_id}' AND status NOT IN ('CANCELLED')");
+       						$detail_completed_count = $this->dpr_model->get_request_detail_count("request_summary_id = '{$request_summary_id}' AND status = 'COMPLETED'");
+
+       						if ($detail_total_count == 0) {
+       							$detail_percent_complete = "0%";
+       							$detail_display = "0 / 0";
+       						} else {
+       							$detail_percent_complete = ($detail_completed_count / $detail_total_count) * 100;
+       							$detail_display = "{$detail_completed_count} / {$detail_total_count}";
+       						}	       					
+
        					 	 echo "<tr>			
 								<td>{$date_request}</td>
 								<td>{$reference_no}</td>
+								<td><div class='progress'>
+  										<div class='progress-bar label-success' role='progressbar' aria-valuenow='66' aria-valuemin='0' aria-valuemax='100' style='width: {$detail_percent_complete}%;'>
+    										<center style='color:#ffffff'>{$detail_display}</center>
+  										</div>  										
+									</div>
+								</td>
 								<td>{$status}</td>
+								<td>
 								";
-								if (($status == "COMPLETED") || ($status == "CANCELLED") || ($status == "RECEIVED") || ($status == "RETURNED")){
-								echo 	
-								"<td><a href='{$this->config->item('base_url')}/dpr/form_request/view_accountable_details/{$request_summary_id}' class = 'btn view_details btn-primary' data = '{$request_summary_id}'>View Details</a> <a disabled = 'disabled' class = 'btn delete_item btn-danger' data = '{$request_summary_id}'>Cancel</a></td></tr>";
-								}else{
-								echo 	
-								"<td><a href='{$this->config->item('base_url')}/dpr/form_request/view_accountable_details/{$request_summary_id}' class = 'btn view_details btn-primary' data = '{$request_summary_id}'>View Details</a> <a class = 'btn delete_item btn-danger' data = '{$request_summary_id}'>Cancel</a></td></tr>";	
-								}			
+
+								echo "<a href='{$this->config->item('base_url')}/dpr/form_request/view_accountable_details/{$request_summary_id}' class = 'btn view_details btn-primary' data = '{$request_summary_id}'>View Details</a>";
+
+								if (!($status == "CANCELLED")) {
+									echo "<a  style='margin-left:5px;' class = 'btn delete_item btn-danger' data = '{$request_summary_id}'>Cancel</a>";		
+								}
+
+								echo "</td></tr>";
+	
        					};
 			}
 		?>

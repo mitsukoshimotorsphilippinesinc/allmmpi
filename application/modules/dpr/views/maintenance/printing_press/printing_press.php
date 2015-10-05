@@ -1,8 +1,9 @@
 <?php
-	
+$breadcrumb_container = assemble_breadcrumb();
 ?>
 
-<div class='alert alert-danger'><h2>Printing Press <a id = "btn add_printing_press" class = 'btn' style = "float:right;" href = "add_new_printing_press">Add Printing Press</a> </div>
+<?= $breadcrumb_container; ?>
+<div class='alert alert-danger'><h2>Printing Press <a id = "btn add_printing_press" style="float:right;margin-right:-30px;margin-top:5px;" class = "btn" href = "add_new_printing_press">Add Printing Press</a> </div>
 
 <body>
 
@@ -20,6 +21,7 @@
 			<th>Address</th>
 			<th>Contact No</th>
 			<th>Contact Person</th>
+			<th>Is Active?</th>
 			<th>Remarks</th>
 			<th style = "width:250px;">Action</th>
 		</tr>
@@ -40,15 +42,21 @@
        				$is_deleted = $al->is_deleted;
        				$is_active = $al->is_active;
 
+       				if ($is_active == 1)
+       					$html = "<span class='alert-success'><strong>YES</strong></span>";
+       				else 
+       					$html = "<span class='alert-danger'><strong>NO</strong></span>";
+
        					if ($is_deleted == 1){
 
        					}else{
 
-       					 	 	echo "<tr>			
+       					 	 	echo "<tr class='danger'>			
 								<td>{$press_name}</td>
 								<td>{$press_address}</td>
 								<td>{$contact_no}</td>
 								<td>{$contact_person}</td>
+								<td style='text-align:center'>{$html}</td>
 								<td>{$remarks}</td>
 								";
 								if ($is_active == "1"){

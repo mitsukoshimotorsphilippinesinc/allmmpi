@@ -1,7 +1,12 @@
 <html>
 
 <head>
-<h3><?= $request_code ?> </h3>
+<?php
+$breadcrumb_container = assemble_breadcrumb();
+?>
+
+<?= $breadcrumb_container; ?>
+<h2>Request Code: <?= $request_code ?> <a class="btn btn-small" style="float:right" href="/dpr/form_request/accountables">Back</a></h2>
 </head>
 
 <body>
@@ -18,6 +23,7 @@
 			<th>QTY</th>		
 			<th>Printing Press</th>
 			<th>Status</th>
+			<th>Current State</th>
 			<th>Action</th>
 		</tr>
 	</thead>
@@ -25,36 +31,37 @@
 		<?php
 		$this->db_dpr = $this->load->database('dpr', TRUE);
 
-			foreach ($record_detail as $rd){
-					$branch_id = $rd->branch_id;
-       				$form_type_id = $rd->form_type_id;
-       				$printing_press_id = $rd->printing_press_id;
-       				$request_detail_id = $rd->request_detail_id;
-       				$status = $rd->status;
+			foreach ($record_detail as $rd) {
+				$branch_id = $rd->branch_id;
+   				$form_type_id = $rd->form_type_id;
+   				$printing_press_id = $rd->printing_press_id;
+   				$request_detail_id = $rd->request_detail_id;
+   				$status = $rd->status;
 
-       				$last_series = $rd->last_serial_number;
-       				$quantity = $rd->quantity;
-       				$status = $rd->status;
+   				$last_series = $rd->last_serial_number;
+   				$quantity = $rd->quantity;
+   				$status = $rd->status;
 
-       				$branch_info = $this->human_relations_model->get_branch_by_id($branch_id);
-					$form_info = $this->dpr_model->get_form_by_id($form_type_id);
-					$printing_press_info = $this->dpr_model->get_printing_press_by_id($printing_press_id);
+   				$branch_info = $this->human_relations_model->get_branch_by_id($branch_id);
+				$form_info = $this->dpr_model->get_form_by_id($form_type_id);
+				$printing_press_info = $this->dpr_model->get_printing_press_by_id($printing_press_id);
 
-					$sql = "SELECT COLUMN_NAME as col_name, ORDINAL_POSITION, COLUMN_DEFAULT
-					FROM INFORMATION_SCHEMA.COLUMNS 
-					WHERE TABLE_SCHEMA = 'dpr' AND TABLE_NAME = 'tr_request_detail'
-					AND DATA_TYPE = 'timestamp' 
-					AND COLUMN_DEFAULT = '0000-00-00 00:00:00'
-					AND COLUMN_NAME NOT IN ('date_delivered', 'update_timestamp')
-					ORDER BY ORDINAL_POSITION;";
+				$sql = "SELECT COLUMN_NAME as col_name, ORDINAL_POSITION, COLUMN_DEFAULT
+				FROM INFORMATION_SCHEMA.COLUMNS 
+				WHERE TABLE_SCHEMA = 'dpr' AND TABLE_NAME = 'tr_request_detail'
+				AND DATA_TYPE = 'timestamp' 
+				AND COLUMN_DEFAULT = '0000-00-00 00:00:00'
+				AND COLUMN_NAME NOT IN ('date_delivered', 'update_timestamp')
+				ORDER BY ORDINAL_POSITION;";
 
-					$detail_update_column = $this->db_dpr->query($sql);
-					$detail_update_column = $detail_update_column->result(); 
+				$detail_update_column = $this->db_dpr->query($sql);
+				$detail_update_column = $detail_update_column->result(); 
 
-					$has_pending = 0;
+				$has_pending = 0;
+				$current_col_state = "";
 
-					foreach ($detail_update_column as $duc){
-			
+				foreach ($detail_update_column as $duc) {
+		
 					$sql_test = "SELECT ". $duc->col_name ." AS timestamp_col FROM tr_request_detail WHERE request_detail_id = {$request_detail_id}";
 					$detail_test = $this->db_dpr->query($sql_test);
 					$detail_test = $detail_test->result(); 
@@ -62,21 +69,24 @@
 
 					if ($detail_test->timestamp_col == '0000-00-00 00:00:00') {
 						$has_pending = 1;
+						$current_col_state = str_replace("_", " ", strtoupper($duc->col_name));
 						break;
 					}
+				}	
 
-					}	
+				$status_class = str_replace(" ", "-", $status);
 
 				echo "
 				<tr>
 					<td>{$branch_info->branch_name}</td>
 					<td>{$branch_info->tin}</td>
 					<td>{$form_info->name}</td>
-					<td>{$last_series}</td>
-					<td>{$form_info->pieces_per_booklet}</td>
-					<td>{$quantity}</td>		
-					<td>{$printing_press_info->complete_name}</td>
-					<td>{$status}</td>";
+					<td style='text-align:right'>{$last_series}</td>
+					<td style='text-align:right'>{$form_info->pieces_per_booklet}</td>
+					<td style='text-align:right'>{$quantity}</td>		
+					<td>{$printing_press_info->complete_name}</td>										
+					<td><span class='label label-{$status_class}' >{$status}</span></td>				
+					<td>{$current_col_state}</td>";
 					
 						if ($has_pending == 1){
 							If ($status == "CANCELLED"){
@@ -90,9 +100,10 @@
 							echo"
 							<td><a id = 'update_detail_item' class = 'btn update_item btn-primary' data = '{$request_detail_id}'>View Details</a></td>";	
 						}
-				echo"
+				echo"					
 				</tr>";
-		}
+
+			}
 		?>
 	</tbody>
 </table>

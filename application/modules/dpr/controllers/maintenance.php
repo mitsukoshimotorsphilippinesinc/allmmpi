@@ -201,7 +201,7 @@ class Maintenance extends Admin_Controller {
 
 	}
 
-	public function form_type()
+	public function form_types()
 	{
 		$all_record = "";
 		$where = "";
@@ -230,7 +230,7 @@ class Maintenance extends Admin_Controller {
 		}
 
 		$config = array(
-				'pagination_url' => "/dpr/maintenance/form_type/",
+				'pagination_url' => "/dpr/maintenance/form_types/",
 				'total_items' => $this->dpr_model->get_form_type_count($where),
 				'per_page' => 10,
 				'uri_segment' => 4,);
@@ -245,7 +245,7 @@ class Maintenance extends Admin_Controller {
 		$this->template->search_by = $search_by;
 		$this->template->search_url = $search_url;
 
-		$this->template->view('dpr/maintenance/forms/form_type');
+		$this->template->view('dpr/maintenance/forms/form_types');
 
 	}
 	

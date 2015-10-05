@@ -8,6 +8,7 @@ class Form_request extends Admin_Controller {
 		$this->load->model('human_relations_model');
 		$this->load->library('pager');
 		$this->db_dpr = $this->load->database('dpr', TRUE);
+		$this->load->helper('breadcrumb_helper');
 	}
 
 	public function index()

@@ -1,6 +1,9 @@
+<?php
+$breadcrumb_container = assemble_breadcrumb();
+?>
 
-
-<div class='alert alert-danger'><h2>Add New Request(Accountable Forms) <a id = "btn_save_request" class = 'btn' style = "float:right;" href = "add_new_accountables">New Request</a></div>
+<?= $breadcrumb_container; ?>
+<div class='alert alert-danger'><h2>Add New Request(Accountable Forms) <a class="btn btn-small" style="float:right;margin-right:-30px;margin-top:5px;" href="/dpr/form_request/accountables">Back</a> <a id = "btn_save_request" class = 'btn'  style="float:right;margin-top:5px;" href = "add_new_accountables">New Request</a></div>
 
 <body>
 
