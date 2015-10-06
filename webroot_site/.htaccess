@@ -5,7 +5,7 @@ SetEnv BEYOND_ENV development
 # Make sure directory listing is disabled
 Options +FollowSymLinks -Indexes
 AddDefaultCharset utf-8
-#ExpiresActive On
+ExpiresActive On
 FileETag none
 # Keep people out of codeigniter directory and Git/Mercurial data
 RedirectMatch 403 ^/(\.git|\.hg).*$
@@ -24,7 +24,7 @@ RedirectMatch 403 ^/(\.git|\.hg).*$
 #AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript application/json
 
 <IfModule mod_expires.c>
-#    ExpiresActive On
+    ExpiresActive On
     ExpiresDefault "access plus 10 days"
     ExpiresByType text/css "access plus 1 week"
     ExpiresByType text/plain "access plus 1 month"

@@ -53,7 +53,7 @@
 ?>
 
 <div id="wrapper">
-	<div id="sidebar-wrapper" style="background-color:#0C0C0C;font-family:Tahoma">	
+	<div id="sidebar-wrapper" style="background-color:#0C0C0C;font-family:"Droid Sans"">	
 		<ul class="sidebar-nav">
 			<li class="sidebar-brand">
 				<!--a href="#"><strong><?= $module_title ?></strong></a-->

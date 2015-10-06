@@ -67,7 +67,7 @@ body > .container > #content {
 	<div id="header" class='navbar navbar-fixed-top cleafix'>
 		<div class="navbar-inner">
 			<div class="container" style='width:95%;height:50px;'>
-				<a class="brand" href="/admin">Mitsukoshi Motors Philippines Inc.<br/>Administration</a>
+				<a class="brand" style="font-size:1.3em;margin-top:.5em;" href="/admin">Mitsukoshi Motors Philippines Inc.<br/>Administration</a>
 				
 				<div class='pull-right admin-login-profile'>					
 					<?php

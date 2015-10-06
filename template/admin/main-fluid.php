@@ -68,7 +68,7 @@ body > .container > #content {
 	<div id="header" class='navbar navbar-fixed-top cleafix'>
 		<div class="navbar-inner">
 			<div class="container" style='width:95%;;height:50px;'>
-				<a class="brand" href="/admin">Mitsukoshi Motors Philippines Inc.<br/>Administration</a>
+				<a class="brand" style="font-size:1.3em;margin-top:.5em;" href="/admin">Mitsukoshi Motors Philippines Inc.<br/>Administration</a>
 				<div class='pull-left'>
 					<?= $this->load->view('switcher-system', null, TRUE, 'admin'); ?>
 				</div>
@@ -88,7 +88,7 @@ body > .container > #content {
 
 					?>
 					<img id="" src="<?= $upload_url; ?>/<?= $image_display ?>" alt="" style="margin-right:5px;margin-bottom:5px;width:30px; height:30px;"></img>
-					<span class='admin-login-profile-name'>Hi <?= ucfirst($employment_view_details->first_name) . ' ' . ucfirst($employment_view_details->last_name) ?></span>
+					<span class='admin-login-profile-name'>Hi <?= ucfirst($employment_view_details->first_name) ?></span>
 					<a href='/admin/signin/signout' class='btn'><span>Logout</span></a>					
 				
 					<button style="margin-top:-2px;width:30px;height:30px;" class="navbar-toggle collapse in" data-toggle="collapse" id="menu-toggle-2">

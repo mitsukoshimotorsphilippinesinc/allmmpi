@@ -55,7 +55,7 @@ class MX_Router extends CI_Router
 			$segments = explode('/', $this->routes['404_override']);
 			if ($located = $this->locate($segments)) return $located;
 		}
-		
+
 		/* no controller found */
 		show_404();
 	}
@@ -70,10 +70,10 @@ class MX_Router extends CI_Router
 		/* use module route if available */
 		if (isset($segments[0]) AND $routes = Modules::parse_routes($segments[0], implode('/', $segments))) {
 			$segments = $routes;
-		}
-	
+		}	
+
 		/* get the segments array elements */
-		list($module, $directory, $controller) = array_pad($segments, 3, NULL);
+		list($module, $directory, $controller) = array_pad($segments, 3, NULL);	
 
 		/* check modules */
 		foreach (Modules::$locations as $location => $offset) {
@@ -96,39 +96,42 @@ class MX_Router extends CI_Router
 					$this->directory .= $directory.'/';
 
 					/* module sub-directory controller exists? */
-					if(is_file($source.$directory.$ext)) {
+					if(is_file($source.$directory.$ext)) {						
 						return array_slice($segments, 1);
 					}
 				
 					/* module sub-directory sub-controller exists? */
-					if($controller AND is_file($source.$controller.$ext))	{
+					if($controller AND is_file($source.$controller.$ext))	{						
 						return array_slice($segments, 2);
 					}
 				}
 				
 				/* module controller exists? */			
-				if(is_file($source.$module.$ext)) {
+				if(is_file($source.$module.$ext)) {					
 					return $segments;
 				}
 			}
 		}
 		
 		/* application controller exists? */			
-		if (is_file(APPPATH.'controllers/'.$module.$ext)) {
+		if (is_file(APPPATH.'controllers/'.$module.$ext)) {			
 			return $segments;
 		}
 		
 		/* application sub-directory controller exists? */
 		if($directory AND is_file(APPPATH.'controllers/'.$module.'/'.$directory.$ext)) {
-			$this->directory = $module.'/';
+			$this->directory = $module.'/';			
 			return array_slice($segments, 1);
 		}
 		
 		/* application sub-directory default controller exists? */
 		if (is_file(APPPATH.'controllers/'.$module.'/'.$this->default_controller.$ext)) {
-			$this->directory = $module.'/';
+			$this->directory = $module.'/';		
 			return array($this->default_controller);
 		}
+
+		//var_dump($module . '/' . $this->default_controller . '/' . $ext);
+
 	}
 
 	public function set_class($class) {

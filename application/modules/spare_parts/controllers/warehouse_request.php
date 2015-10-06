@@ -23,7 +23,7 @@ class Warehouse_request extends Admin_Controller {
 
 	public function index()
 	{		
-		$this->template->view('Warehouse_request/dashboard');
+		$this->template->view('warehouse_request/dashboard');
 	}
 
 	public function approval()

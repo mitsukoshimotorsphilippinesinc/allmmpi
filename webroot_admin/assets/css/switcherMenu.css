@@ -27,7 +27,7 @@
 
 /* SWITCHER CONTAINER
 -------------------------------------------------------------------*/
-	.switcherMenu {font-family: 'Tahoma'; display: inline-block; width: 235px; height: 35px; position: relative; top: 5px; left: 0; z-index: 2000;}
+	.switcherMenu {font-family: 'Droid Sans'; display: inline-block; width: 235px; height: 35px; position: relative; top: 5px; left: 0; z-index: 2000;}
 
 
 	/* DROPDOWN LIST

@@ -124,57 +124,69 @@ $breadcrumb_container = assemble_breadcrumb();
 		
 			on_success: function(data){
 
-				proceedAddNewModal = b.modal.new({
-				title: "Update Request Detail",
-				width:1000,
-				disableClose: false,
-				html: data.data.html,
-				buttons: {
-					'Update' : function() {
-						proceedupdateNewItemModal = b.modal.new({
-						title: 'Update Item',
-						width:450,
-						disableClose: true,
-						html: 'Are you sure you want to update' + " " + data.data.current_col_name + " " + "of this Item",
+				if (data.data.request_detail_status == "PENDING") {
+					proceedAddNewModal = b.modal.new({
+						title: "Update Request Detail",
+						width:1000,
+						disableClose: false,
+						html: data.data.html,
 						buttons: {
-						'Cancel' : function() {
-							proceedupdateNewItemModal.hide();
-						}
-						,
-						'Ok' : function() {
-							b.request({
-								url: "/dpr/form_request/proceed_update_request_detail",
-								data:{
-									'request_detail_id' : request_detail_id,
-									'current_col_name_unformat' : data.data.current_col_name_unformat
-								},				
-								on_success: function(data){
-								proceedupdateNewItemModal.hide();
-								proceedAddNewModal.hide();
-								
-								proceedSaveNewItemModal = b.modal.new({
-								title: 'Update Item',
-								width:450,
-								disableClose: true,
-								html: 'Successfully updating this Item',
-								buttons:{
-									'Ok':function(){
-										redirect('dpr/form_request/view_accountable_details/' + request_summary_id +'');
+							'Update' : function() {
+								proceedupdateNewItemModal = b.modal.new({
+									title: 'Update Item',
+									width:450,
+									disableClose: true,
+									html: 'Are you sure you want to update' + " " + data.data.current_col_name + " " + "of this Item",
+									buttons: {
+										'Cancel' : function() {
+											proceedupdateNewItemModal.hide();
+										}
+										,
+										'Ok' : function() {
+											b.request({
+												url: "/dpr/form_request/proceed_update_request_detail",
+												data:{
+													'request_detail_id' : request_detail_id,
+													'current_col_name_unformat' : data.data.current_col_name_unformat
+												},				
+												on_success: function(data){
+													proceedupdateNewItemModal.hide();
+													proceedAddNewModal.hide();
+													
+													proceedSaveNewItemModal = b.modal.new({
+													title: 'Update Item',
+													width:450,
+													disableClose: true,
+													html: 'Successfully updating this Item',
+													buttons:{
+														'Ok':function(){
+															redirect('dpr/form_request/view_accountable_details/' + request_summary_id +'');
+														}
+													}
+													});
+													proceedSaveNewItemModal.show();
+												}
+											})
+										}
 									}
-								}
 								});
-								proceedSaveNewItemModal.show();
+								proceedupdateNewItemModal.show();
 							}
-							})
-						}
-						}
-					});
-						proceedupdateNewItemModal.show();
-					}
+						}					
+					})			
+					proceedAddNewModal.show();
+
+				} else {
+					proceedAddNewModal = b.modal.new({
+						title: "Update Request Detail",
+						width:1000,
+						disableClose: false,
+						html: data.data.html						
+					})			
+					
+					proceedAddNewModal.show();
 				}
-		})
-		proceedAddNewModal.show();
-	}
-	});
+			}
+		});
 	});
 </SCRIPT>

@@ -3,76 +3,73 @@ $breadcrumb_container = assemble_breadcrumb();
 ?>
 
 <?= $breadcrumb_container; ?>
-<div class='alert alert-danger'><h2>Add New Request(Accountable Forms) <a class="btn btn-small" style="float:right;margin-right:-30px;margin-top:5px;" href="/dpr/form_request/accountables">Back</a> <a id = "btn_save_request" class = 'btn'  style="float:right;margin-top:5px;" href = "add_new_accountables">New Request</a></div>
+<div class='alert alert-danger'><h2>Add New Request(Accountable Forms) <a class="btn btn-small" style="float:right;margin-right:-30px;margin-top:5px;" href="/dpr/form_request/accountables">Back To List</a> <a id = "btn_save_request" class = 'btn'  style="float:right;margin-top:5px;" href = "add_new_accountables">Create New Request</a></div>
 
 <body>
 
-	<span>Reference No.</span>
-	<input id = "txtrequestcode" TYPE = "TEXT" disabled = "disabled">
-	<Label>Branch</Label>
-	
-	<Select id = "branch_option">
-		<option value = '0'>Select Branch</option>
-	<?php
-		$where = "is_active = 1";
-		$branch_list=$this->human_relations_model->get_branch($where,null,'branch_name ASC');
-		foreach ($branch_list as $bl) {
-			$branch_name = $bl->branch_name;
-			$branch_id = $bl->branch_id;
-			echo "<option name = 'branch_data' value = {$bl->branch_id} data-tin='{$bl->tin}' data-address='{$bl->address_street}'>{$branch_id} - {$branch_name}</option>";
-		}
-	?>
-	</Select>
-	<br>
+	<div class="span6">
+		<label>Reference No.</label>
+		<input id = "txtrequestcode" TYPE = "TEXT" disabled = "disabled">
+		<label>Branch</label>
+		
+		<select id = "branch_option">
+			<option value = '0'>Select Branch</option>
+		<?php
+			$where = "is_active = 1";
+			$branch_list=$this->human_relations_model->get_branch($where,null,'branch_name ASC');
+			foreach ($branch_list as $bl) {
+				$branch_name = $bl->branch_name;
+				$branch_id = str_pad($bl->branch_id, 4, "0", STR_PAD_LEFT);
+				echo "<option name = 'branch_data' value = {$bl->branch_id} data-tin='{$bl->tin}' data-address='{$bl->address_street}'>{$branch_id} - {$branch_name}</option>";
+			}
+		?>
+		</select>
 
-	<Label style = "position:absolute";>TIN</Label>
-	<Label style = "position:absolute; left:500px;">Address</Label>
+		<label>TIN</label>
+		<input id = "txttin" placeholder="TIN"  TYPE = "TEXT" disabled = "disabled">
+		<label>Address</label>
+		<textarea id = 'txtaddress' placeholder="Address" class="span5" TYPE = "TEXT" disabled = "disabled"></textarea>
+	</div>
+	<div class="span6">
 
-	<br>
-	
-	<input id = "txttin" placeholder="TIN"  TYPE = "TEXT" disabled = "disabled">
-	<Label style = "position:absolute; left:500px;">Last Series No.</Label>
-	<Label style = "position:absolute; left:730px;">Pcs. Per Booklet</Label>
-	<Label style = "position:absolute; left:955px;">Quantity</Label>
-	<input id = 'txtaddress' placeholder="Address" style = "width:500px;" TYPE = "TEXT" disabled = "disabled">
+		<label>Form Type</label>
 
-	<br>
-	<Label>Form Type</Label>
+		<select id = "form_option">
+			<option value = '0'>Select Form</option>
+		<?php
+			$where = "is_accountable = 1 and is_active = 1 and is_deleted = 0";
+			$form_list=$this->dpr_model->get_form_type($where,null,'form_type_id ASC');
+			foreach($form_list as $fl){
+				$form_name = $fl->name;
+				$form_id = $fl->form_type_id;
+				echo"<option name = 'form_data' value = {$fl->form_type_id} data-pcs='{$fl->pieces_per_booklet}'>${form_id} - {$form_name}</option>";
+			}
+		?>
+		</select>
 
-	<Select id = "form_option">
-		<option value = '0'>Select Form</option>
-	<?php
-		$where = "is_accountable = 1 and is_active = 1 and is_deleted = 0";
-		$form_list=$this->dpr_model->get_form_type($where,null,'form_type_id ASC');
-		foreach($form_list as $fl){
-			$form_name = $fl->name;
-			$form_id = $fl->form_type_id;
-			echo"<option name = 'form_data' value = {$fl->form_type_id} data-pcs='{$fl->pieces_per_booklet}'>${form_id} - {$form_name}</option>";
-		}
-	?>
-	</Select>
+		<label>Last Series No.</label>
+		<input placeholder="Last Series Number" TYPE = "TEXT" disabled = "disabled">
+		<label>Pcs. Per Booklet</label>
+		<input id = "txtpcs" placeholder="Pcs. Per Booklet" TYPE = "TEXT" disabled = "disabled">
+		<label>Quantity</label>
+		<input id = "txtqty" placeholder="0" TYPE = "TEXT" style = "text-align:right;">	
 
-	<input placeholder="Last Series Number" TYPE = "TEXT" disabled = "disabled">
-	<input id = "txtpcs" placeholder="Pcs. Per Booklet" TYPE = "TEXT" disabled = "disabled">
-	<input id = "txtqty" placeholder="0" TYPE = "TEXT" style = "text-align:right;">
-	<br>
-	<Label>Select Printing Press</Label>
+		<label>Select Printing Press</label>
+		<select id = "press_option" style = "width:450px;">
+			<option value = '0'>Select Printing Press</option>
+		<?php
+			$where = "is_active = 1 and is_deleted = 0";
+			$press_list=$this->dpr_model->get_press_name($where,null,'printing_press_id ASC');
+			foreach($press_list as $pl){
+				$press_name = $pl->complete_name;
+				$press_id = $pl->printing_press_id;
+				echo "<option value = '{$pl->printing_press_id}'>{$press_id} - {$press_name}</option>";
+			}
+		?>
+		</select>
+	</div>
 
-	<Select id = "press_option" style = "width:450px;">
-		<option value = '0'>Select Printing Press</option>
-	<?php
-		$where = "is_active = 1 and is_deleted = 0";
-		$press_list=$this->dpr_model->get_press_name($where,null,'printing_press_id ASC');
-		foreach($press_list as $pl){
-			$press_name = $pl->complete_name;
-			$press_id = $pl->printing_press_id;
-			echo "<option value = '{$pl->printing_press_id}'>{$press_id} - {$press_name}</option>";
-		}
-	?>
-	</Select>
-	<br>
-
-	<a id = "btn_add_new" class = 'btn' >Add</a>
+	<a id = "btn_add_new" class = 'btn btn-success' >Add To List</a>
 	<span id = "Error_Message_Branch" style = "color:red; display:none;">Select branch first...</span>
 	<span id = "Error_Message_Form" style = "color:red; display:none;">Select form first...</span>
 	<span id = "Error_Message_Press" style = "color:red; display:none;">Select Printing Press first...</span>

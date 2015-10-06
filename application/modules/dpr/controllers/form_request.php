@@ -364,47 +364,48 @@ class Form_request extends Admin_Controller {
 			</tr>
 		</thead>
 		<tbody>";
-			foreach ($request_detail_update as $rdu) {
-				$send_atp = $rdu->send_atp;
-				$received_atp = $rdu->receive_atp;
-				$faxed_to_printer = $rdu->faxed_to_printer;
-				$received_from_printer = $rdu->received_from_printer;
-				$send_for_stamping = $rdu->send_for_stamping;
-				$received_from_stamping = $rdu->received_from_stamping;
-				$date_delivered = $rdu->date_delivered;
+		
+		foreach ($request_detail_update as $rdu) {
+			$send_atp = $rdu->send_atp;
+			$received_atp = $rdu->receive_atp;
+			$faxed_to_printer = $rdu->faxed_to_printer;
+			$received_from_printer = $rdu->received_from_printer;
+			$send_for_stamping = $rdu->send_for_stamping;
+			$received_from_stamping = $rdu->received_from_stamping;
+			$date_delivered = $rdu->date_delivered;
 
-				if ($send_atp == "0000-00-00 00:00:00"){
-					$send_atp = "N/A";
-				}
-				if ($received_atp == "0000-00-00 00:00:00"){
-					$received_atp = "N/A";
-				}
-				if ($faxed_to_printer == "0000-00-00 00:00:00"){
-					$faxed_to_printer = "N/A";
-				}
-				if ($received_from_printer == "0000-00-00 00:00:00"){
-					$received_from_printer = "N/A";
-				}
-				if ($send_for_stamping == "0000-00-00 00:00:00"){
-					$send_for_stamping = "N/A";
-				}
-				if ($received_from_stamping == "0000-00-00 00:00:00"){
-					$received_from_stamping = "N/A";
-				}
-				if ($date_delivered == "0000-00-00 00:00:00"){
-					$date_delivered = "N/A";
-				}
-
-				$html .="<tr>			
-					<td>{$send_atp}</td>
-					<td>{$received_atp}</td>
-					<td>{$faxed_to_printer}</td>
-					<td>{$received_from_printer}</td>
-					<td>{$send_for_stamping}</td>
-					<td>{$received_from_stamping}</td>
-					<td>{$date_delivered}</td>
-				</tr>";
+			if ($send_atp == "0000-00-00 00:00:00"){
+				$send_atp = "N/A";
 			}
+			if ($received_atp == "0000-00-00 00:00:00"){
+				$received_atp = "N/A";
+			}
+			if ($faxed_to_printer == "0000-00-00 00:00:00"){
+				$faxed_to_printer = "N/A";
+			}
+			if ($received_from_printer == "0000-00-00 00:00:00"){
+				$received_from_printer = "N/A";
+			}
+			if ($send_for_stamping == "0000-00-00 00:00:00"){
+				$send_for_stamping = "N/A";
+			}
+			if ($received_from_stamping == "0000-00-00 00:00:00"){
+				$received_from_stamping = "N/A";
+			}
+			if ($date_delivered == "0000-00-00 00:00:00"){
+				$date_delivered = "N/A";
+			}
+
+			$html .="<tr>			
+				<td>{$send_atp}</td>
+				<td>{$received_atp}</td>
+				<td>{$faxed_to_printer}</td>
+				<td>{$received_from_printer}</td>
+				<td>{$send_for_stamping}</td>
+				<td>{$received_from_stamping}</td>
+				<td>{$date_delivered}</td>
+			</tr>";
+		}
 			
 		$html .= "</tbody></table>";
 
@@ -443,7 +444,8 @@ class Form_request extends Admin_Controller {
 		//var_dump($current_col_name);
 		$current_col_name_unformat = $current_col_name;
 		$current_col_name = strtoupper(str_replace("_", " ", $current_col_name));
-		$this->return_json("1","View Update...",array('html' => $html,'current_col_name' => $current_col_name,'current_col_name_unformat' => $current_col_name_unformat));
+		
+		$this->return_json("1","View Update...",array('html' => $html,'current_col_name' => $current_col_name, 'current_col_name_unformat' => $current_col_name_unformat, 'request_detail_status' => $request_detail_update[0]->status));
 	}
 
 	public function proceed_update_request_detail()

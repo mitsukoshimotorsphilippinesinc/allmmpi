@@ -468,8 +468,8 @@ if (!function_exists('run_cli')){
 	    $query = $params;
 	    $root_path = FCPATH;
 	    $cmd = "/usr/bin/php-cli {$root_path}cli.php --run='{$module}' --query='{$query}' --log-file=/dev/null";
-	    $outputfile = "/tmp/vitalc_execute_" . date("YmdHis") . ".log";
-	    $pidfile = "/tmp/vitalc_execute_pid_" . date("YmdHis") . ".log";
+	    $outputfile = "/tmp/mmpi_execute_" . date("YmdHis") . ".log";
+	    $pidfile = "/tmp/mmpi_execute_pid_" . date("YmdHis") . ".log";
 	    exec(sprintf("%s > %s 2>&1 & echo $! >> %s", $cmd, $outputfile, $pidfile),$cli_status,$cli_return);
 	}
 }
@@ -480,9 +480,12 @@ if (!function_exists('run_cli')){
 if (!function_exists('job_exec')){
 	function job_exec($job_id, $separate_process = false) {
 		$root_path = FCPATH;
-		//$com_script = "/usr/bin/php {$root_path}jobs.php jobs process {$job_id} >> /dev/null 2>&1";
-		$com_script = "C:/xampp/php {$root_path}jobs.php jobs process {$job_id} >> /dev/null 2>&1";
+		$com_script = "/usr/bin/php {$root_path}jobs.php jobs process {$job_id} >> /dev/null 2>&1";
+		//$com_script = "C:/xampp/php {$root_path}jobs.php jobs process {$job_id} >> /dev/null 2>&1";
 		$com_script .= ($separate_process)?' &':'';
+
+		var_dump($com_script);
+		
 		exec($com_script);
 	}
 }

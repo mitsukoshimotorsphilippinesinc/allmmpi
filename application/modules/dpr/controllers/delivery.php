@@ -259,8 +259,18 @@ class Delivery extends Admin_Controller {
 				$this->job_model->insert_job($job_data);
 				$job_id = $this->job_model->insert_id();
 				
-				// execute job
-				job_exec($job_id);
+				//// execute job
+				//job_exec($job_id);
+
+				// TODO: try modules::run instead of job_exec
+				$data = array(
+					"request_detail_id" => $request_detail_id,
+					"id_number"=>1,
+					"request_code"=>$request_code
+				);
+
+				Modules::run('jobs/dpr/generate_booklet',$data);
+
 
 
 				$html = "You have successfully processed a form request under Request Code: <strong>{$request_code}</strong>.";

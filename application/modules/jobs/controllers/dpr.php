@@ -17,13 +17,15 @@ class Dpr extends  Base_Controller
 	}
 
 	public function generate_booklet($params=array()) {
-		//$request_detail_id = $params['request_detail_id'];
-		//$id_number = $params['id_number'];
-		//$request_code = $params['request_code'];		
+		$request_detail_id = $params['request_detail_id'];
+		$id_number = $params['id_number'];
+		$request_code = $params['request_code'];		
 
-		$request_detail_id = 83;
-		$id_number = 1;
-		$request_code = "TRD082615-063";		
+		var_dump($request_details_id);
+
+		//$request_detail_id = 83;
+		//$id_number = 1;
+		//$request_code = "TRD082615-063";		
 
 		// get request details
 		$request_detail_details = $this->dpr_model->get_request_detail_by_id($request_detail_id);
