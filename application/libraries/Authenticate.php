@@ -73,6 +73,7 @@ class Authenticate {
 
 		return true;
 	}
+<<<<<<< HEAD
 
 	function e_login($username, $password, $remember = FALSE) 
 	{
@@ -125,6 +126,8 @@ class Authenticate {
 
 		return true;
 	}
+=======
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	
 	public function get_user()
 	{
@@ -162,6 +165,7 @@ class Authenticate {
 		return !empty($this->user);
     } 
 
+<<<<<<< HEAD
     function e_is_logged_in() 
 	{
 		$user_id = $this->_ci->session->userdata($this->_prefix."user_id");
@@ -181,4 +185,6 @@ class Authenticate {
 		return !empty($this->user);
     } 
 
+=======
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 }

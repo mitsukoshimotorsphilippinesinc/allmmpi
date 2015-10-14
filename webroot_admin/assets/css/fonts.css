@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @font-face {
 	font-family: "Electrofied";
 	src: url(/assets/fonts/electrbi.eot ); /* IE */
@@ -5,3 +6,12 @@
 }
 
 
+=======
+@font-face {
+	font-family: "Electrofied";
+	src: url(/assets/fonts/electrbi.eot ); /* IE */
+	src: local("Electrofied"), url(/assets/fonts/electrbi.ttf )format("truetype"); /* non-IE */
+}
+
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16

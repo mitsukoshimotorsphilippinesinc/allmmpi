@@ -53,8 +53,13 @@ class Modules
 	* Run a module controller method
 	* Output from module is buffered and returned.
 	**/
+<<<<<<< HEAD
 	public static function run($module) {
 		
+=======
+	public static function run($module) {				
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 		$method = 'index';
 		
 		if(($pos = strrpos($module, '/')) != FALSE) {
@@ -63,13 +68,29 @@ class Modules
 		}
 
 		if($class = self::load($module)) {
+<<<<<<< HEAD
 			
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 			if (method_exists($class, $method))	{
 				ob_start();
 				$args = func_get_args();
 				$output = call_user_func_array(array($class, $method), array_slice($args, 1));
 				$buffer = ob_get_clean();
+<<<<<<< HEAD
 				return ($output !== NULL) ? $output : $buffer;
+=======
+
+				if($output === NULL && $buffer === '')
+				{ 
+				     $output = CI::$APP->output->get_output(); 
+				}
+
+				return $output;
+
+				//return ($output !== NULL) ? $output : $buffer;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 			}
 		}
 		

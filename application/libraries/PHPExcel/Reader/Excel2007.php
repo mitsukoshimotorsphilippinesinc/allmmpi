@@ -53,6 +53,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 	 */
 	private $_readDataOnly = FALSE;
 
+<<<<<<< HEAD
 	/**
 	 * Read charts that are defined in the workbook?
 	 * Identifies whether the Reader should read the definitions for any charts that exist in the workbook;
@@ -61,6 +62,16 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 	 */
 	private $_includeCharts = FALSE;
 
+=======
+	/**
+	 * Read charts that are defined in the workbook?
+	 * Identifies whether the Reader should read the definitions for any charts that exist in the workbook;
+	 *
+	 * @var	boolean
+	 */
+	private $_includeCharts = FALSE;
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Restrict which sheets should be loaded?
 	 * This property holds an array of worksheet names to be loaded. If null, then all worksheets will be loaded.
@@ -91,6 +102,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 	private static $_theme = NULL;
 
 
+<<<<<<< HEAD
 	/**
 	 * Create a new PHPExcel_Reader_Excel2007 instance
 	 */
@@ -100,6 +112,17 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 	}
 
 
+=======
+	/**
+	 * Create a new PHPExcel_Reader_Excel2007 instance
+	 */
+	public function __construct() {
+		$this->_readFilter = new PHPExcel_Reader_DefaultReadFilter();
+		$this->_referenceHelper = PHPExcel_ReferenceHelper::getInstance();
+	}
+
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Read data only?
 	 *		If this is true, then the Reader will only read data values for cells, it will not read any formatting information.
@@ -111,7 +134,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $this->_readDataOnly;
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Set read data only
 	 *		Set to true, to advise the Reader only to read data values for cells, and to ignore any formatting information.
@@ -125,6 +152,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		$this->_readDataOnly = $pValue;
 		return $this;
 	}
+<<<<<<< HEAD
 
 
 	/**
@@ -156,6 +184,39 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 	}
 
 
+=======
+
+
+	/**
+	 * Read charts in workbook?
+	 *		If this is true, then the Reader will include any charts that exist in the workbook.
+	 *      Note that a ReadDataOnly value of false overrides, and charts won't be read regardless of the IncludeCharts value.
+	 *		If false (the default) it will ignore any charts defined in the workbook file.
+	 *
+	 * @return	boolean
+	 */
+	public function getIncludeCharts() {
+		return $this->_includeCharts;
+	}
+
+
+	/**
+	 * Set read charts in workbook
+	 *		Set to true, to advise the Reader to include any charts that exist in the workbook.
+	 *      Note that a ReadDataOnly value of false overrides, and charts won't be read regardless of the IncludeCharts value.
+	 *		Set to false (the default) to discard charts.
+	 *
+	 * @param	boolean	$pValue
+	 *
+	 * @return	PHPExcel_Reader_Excel2007
+	 */
+	public function setIncludeCharts($pValue = FALSE) {
+		$this->_includeCharts = (boolean) $pValue;
+		return $this;
+	}
+
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Get which sheets to load
 	 * Returns either an array of worksheet names (the list of worksheets that should be loaded), or a null
@@ -168,7 +229,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $this->_loadSheetsOnly;
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Set which sheets to load
 	 *
@@ -185,7 +250,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $this;
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Set all sheets to load
 	 *		Tells the Reader to load all worksheets from the workbook.
@@ -198,7 +267,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $this;
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Read filter
 	 *
@@ -208,7 +281,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $this->_readFilter;
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Set read filter
 	 *
@@ -264,6 +341,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $xl;
 	}
 
+<<<<<<< HEAD
 
 	/**
 	 * Return worksheet info (Name, Last Column Letter, Last Column Index, Total Rows, Total Columns)
@@ -340,6 +418,84 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 	}
 
 
+=======
+
+	/**
+	 * Return worksheet info (Name, Last Column Letter, Last Column Index, Total Rows, Total Columns)
+	 *
+	 * @param   string     $pFilename
+	 * @throws   Exception
+	 */
+	public function listWorksheetInfo($pFilename)
+	{
+		// Check if file exists
+		if (!file_exists($pFilename)) {
+			throw new Exception("Could not open " . $pFilename . " for reading! File does not exist.");
+		}
+
+		$worksheetInfo = array();
+
+		$zip = new ZipArchive;
+		$zip->open($pFilename);
+
+		$rels = simplexml_load_string($this->_getFromZipArchive($zip, "_rels/.rels")); //~ http://schemas.openxmlformats.org/package/2006/relationships");
+		foreach ($rels->Relationship as $rel) {
+			if ($rel["Type"] == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument") {
+				$dir = dirname($rel["Target"]);
+				$relsWorkbook = simplexml_load_string($this->_getFromZipArchive($zip, "$dir/_rels/" . basename($rel["Target"]) . ".rels"));  //~ http://schemas.openxmlformats.org/package/2006/relationships");
+				$relsWorkbook->registerXPathNamespace("rel", "http://schemas.openxmlformats.org/package/2006/relationships");
+
+				$worksheets = array();
+				foreach ($relsWorkbook->Relationship as $ele) {
+					if ($ele["Type"] == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet") {
+						$worksheets[(string) $ele["Id"]] = $ele["Target"];
+					}
+				}
+
+				$xmlWorkbook = simplexml_load_string($this->_getFromZipArchive($zip, "{$rel['Target']}"));  //~ http://schemas.openxmlformats.org/spreadsheetml/2006/main");
+				if ($xmlWorkbook->sheets) {
+					$dir = dirname($rel["Target"]);
+					foreach ($xmlWorkbook->sheets->sheet as $eleSheet) {
+						$tmpInfo = array();
+						$tmpInfo['worksheetName'] = (string) $eleSheet["name"];
+						$tmpInfo['lastColumnLetter'] = 'A';
+						$tmpInfo['lastColumnIndex'] = 0;
+						$tmpInfo['totalRows'] = 0;
+						$tmpInfo['totalColumns'] = 0;
+
+						$fileWorksheet = $worksheets[(string) self::array_item($eleSheet->attributes("http://schemas.openxmlformats.org/officeDocument/2006/relationships"), "id")];
+						$xmlSheet = simplexml_load_string($this->_getFromZipArchive($zip, "$dir/$fileWorksheet"));  //~ http://schemas.openxmlformats.org/spreadsheetml/2006/main");
+						if ($xmlSheet && $xmlSheet->sheetData && $xmlSheet->sheetData->row) {
+							foreach ($xmlSheet->sheetData->row as $row) {
+								foreach ($row->c as $c) {
+									$r = (string) $c["r"];
+									$coordinates = PHPExcel_Cell::coordinateFromString($r);
+
+									$rowIndex = $coordinates[1];
+									$columnIndex = PHPExcel_Cell::columnIndexFromString($coordinates[0]) - 1;
+
+									$tmpInfo['totalRows'] = max($tmpInfo['totalRows'], $rowIndex);
+									$tmpInfo['lastColumnIndex'] = max($tmpInfo['lastColumnIndex'], $columnIndex);
+								}
+							}
+						}
+
+						$tmpInfo['lastColumnLetter'] = PHPExcel_Cell::stringFromColumnIndex($tmpInfo['lastColumnIndex']);
+						$tmpInfo['totalColumns'] = $tmpInfo['lastColumnIndex'] + 1;
+
+						$worksheetInfo[] = $tmpInfo;
+					}
+				}
+			}
+		}
+
+		$zip->close();
+
+		return $worksheetInfo;
+	}
+
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private static function _castToBool($c) {
 //		echo 'Initial Cast to Boolean<br />';
 		$value = isset($c->v) ? (string) $c->v : NULL;
@@ -353,19 +509,31 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $value;
 	}	//	function _castToBool()
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private static function _castToError($c) {
 //		echo 'Initial Cast to Error<br />';
 		return isset($c->v) ? (string) $c->v : NULL;
 	}	//	function _castToError()
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private static function _castToString($c) {
 //		echo 'Initial Cast to String<br />';
 		return isset($c->v) ? (string) $c->v : NULL;
 	}	//	function _castToString()
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private function _castToFormula($c,$r,&$cellDataType,&$value,&$calculatedValue,&$sharedFormulas,$castBaseType) {
 //		echo 'Formula<br />';
 //		echo '$c->f is '.$c->f.'<br />';
@@ -414,7 +582,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		}
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	public function _getFromZipArchive(ZipArchive $archive, $fileName = '')
 	{
 		// Root-relative paths
@@ -434,7 +606,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $contents;
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	/**
 	 * Reads names of the worksheets from a file, without parsing the whole file to a PHPExcel object
 	 *
@@ -510,7 +686,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 						$xmlThemeName = $xmlTheme->attributes();
 						$xmlTheme = $xmlTheme->children("http://schemas.openxmlformats.org/drawingml/2006/main");
 						$themeName = (string)$xmlThemeName['name'];
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 						$colourScheme = $xmlTheme->themeElements->clrScheme->attributes();
 						$colourSchemeName = (string)$colourScheme['name'];
 						$colourScheme = $xmlTheme->themeElements->clrScheme->children("http://schemas.openxmlformats.org/drawingml/2006/main");
@@ -689,7 +869,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 
 					$dxfs = array();
 					if (!$this->_readDataOnly && $xmlStyles) {
+<<<<<<< HEAD
 						//	Conditional Styles
+=======
+						//	Conditional Styles
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 						if ($xmlStyles->dxfs) {
 							foreach ($xmlStyles->dxfs->dxf as $dxf) {
 								$style = new PHPExcel_Style(FALSE, TRUE);
@@ -697,7 +881,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 								$dxfs[] = $style;
 							}
 						}
+<<<<<<< HEAD
 						//	Cell Styles
+=======
+						//	Cell Styles
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 						if ($xmlStyles->cellStyles) {
 							foreach ($xmlStyles->cellStyles->cellStyle as $cellStyle) {
 								if (intval($cellStyle['builtinId']) == 0) {
@@ -751,10 +939,17 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 
 							// Load sheet
 							$docSheet = $excel->createSheet();
+<<<<<<< HEAD
 							//	Use false for $updateFormulaCellReferences to prevent adjustment of worksheet
 							//		references in formula cells... during the load, all formulae should be correct,
 							//		and we're simply bringing the worksheet name in line with the formula, not the
 							//		reverse
+=======
+							//	Use false for $updateFormulaCellReferences to prevent adjustment of worksheet
+							//		references in formula cells... during the load, all formulae should be correct,
+							//		and we're simply bringing the worksheet name in line with the formula, not the
+							//		reverse
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 							$docSheet->setTitle((string) $eleSheet["name"],false);
 							$fileWorksheet = $worksheets[(string) self::array_item($eleSheet->attributes("http://schemas.openxmlformats.org/officeDocument/2006/relationships"), "id")];
 							$xmlSheet = simplexml_load_string($this->_getFromZipArchive($zip, "$dir/$fileWorksheet"));  //~ http://schemas.openxmlformats.org/spreadsheetml/2006/main");
@@ -774,10 +969,17 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 								    $docSheet->getSheetView()->setZoomScaleNormal( intval($xmlSheet->sheetViews->sheetView['zoomScaleNormal']) );
 								}
 
+<<<<<<< HEAD
 							    if (isset($xmlSheet->sheetViews->sheetView['view'])) {
 								    $docSheet->getSheetView()->setView((string) $xmlSheet->sheetViews->sheetView['view']);
 								}
 
+=======
+							    if (isset($xmlSheet->sheetViews->sheetView['view'])) {
+								    $docSheet->getSheetView()->setView((string) $xmlSheet->sheetViews->sheetView['view']);
+								}
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 								if (isset($xmlSheet->sheetViews->sheetView['showGridLines'])) {
 									$docSheet->setShowGridLines((string)$xmlSheet->sheetViews->sheetView['showGridLines'] ? true : false);
 								}
@@ -855,9 +1057,15 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 								if (isset($xmlSheet->sheetFormatPr['defaultColWidth'])) {
 									$docSheet->getDefaultColumnDimension()->setWidth( (float)$xmlSheet->sheetFormatPr['defaultColWidth'] );
 								}
+<<<<<<< HEAD
 								if (isset($xmlSheet->sheetFormatPr['zeroHeight']) &&
 									((string)$xmlSheet->sheetFormatPr['zeroHeight'] == '1')) {
 									$docSheet->getDefaultRowDimension()->setzeroHeight(true);
+=======
+								if (isset($xmlSheet->sheetFormatPr['zeroHeight']) &&
+									((string)$xmlSheet->sheetFormatPr['zeroHeight'] == '1')) {
+									$docSheet->getDefaultRowDimension()->setzeroHeight(true);
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 								}
 							}
 
@@ -965,11 +1173,19 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 												} else {
 													// Formula
 													$this->_castToFormula($c,$r,$cellDataType,$value,$calculatedValue,$sharedFormulas,'_castToBool');
+<<<<<<< HEAD
 													if (isset($c->f['t'])) {
 														$att = array();
 														$att = $c->f;
 														$docSheet->getCell($r)->setFormulaAttributes($att);
 													}
+=======
+													if (isset($c->f['t'])) {
+														$att = array();
+														$att = $c->f;
+														$docSheet->getCell($r)->setFormulaAttributes($att);
+													}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	//												echo '$calculatedValue = '.$calculatedValue.'<br />';
 												}
 												break;
@@ -1086,7 +1302,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 									}
 								}
 							}
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 							$aKeys = array("sheet", "objects", "scenarios", "formatCells", "formatColumns", "formatRows", "insertColumns", "insertRows", "insertHyperlinks", "deleteColumns", "deleteRows", "selectLockedCells", "sort", "autoFilter", "pivotTables", "selectUnlockedCells");
 							if (!$this->_readDataOnly && $xmlSheet && $xmlSheet->sheetProtection) {
 								foreach ($aKeys as $key) {
@@ -1105,6 +1325,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 							}
 
 							if ($xmlSheet && $xmlSheet->autoFilter && !$this->_readDataOnly) {
+<<<<<<< HEAD
 								$autoFilter = $docSheet->getAutoFilter();
 								$autoFilter->setRange((string) $xmlSheet->autoFilter["ref"]);
 								foreach ($xmlSheet->autoFilter->filterColumn as $filterColumn) {
@@ -1202,14 +1423,120 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 										}
 									}
 								}
+=======
+								$autoFilter = $docSheet->getAutoFilter();
+								$autoFilter->setRange((string) $xmlSheet->autoFilter["ref"]);
+								foreach ($xmlSheet->autoFilter->filterColumn as $filterColumn) {
+									$column = $autoFilter->getColumnByOffset((integer) $filterColumn["colId"]);
+									//	Check for standard filters
+									if ($filterColumn->filters) {
+										$column->setFilterType(PHPExcel_Worksheet_AutoFilter_Column::AUTOFILTER_FILTERTYPE_FILTER);
+										$filters = $filterColumn->filters;
+										if ((isset($filters["blank"])) && ($filters["blank"] == 1)) {
+											$column->createRule()->setRule(
+												NULL,	//	Operator is undefined, but always treated as EQUAL
+												''
+											)
+											->setRuleType(PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_RULETYPE_FILTER);
+										}
+										//	Standard filters are always an OR join, so no join rule needs to be set
+										//	Entries can be either filter elements
+										foreach ($filters->filter as $filterRule) {
+											$column->createRule()->setRule(
+												NULL,	//	Operator is undefined, but always treated as EQUAL
+												(string) $filterRule["val"]
+											)
+											->setRuleType(PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_RULETYPE_FILTER);
+										}
+										//	Or Date Group elements
+										foreach ($filters->dateGroupItem as $dateGroupItem) {
+											$column->createRule()->setRule(
+												NULL,	//	Operator is undefined, but always treated as EQUAL
+												array(
+													'year' => (string) $dateGroupItem["year"],
+													'month' => (string) $dateGroupItem["month"],
+													'day' => (string) $dateGroupItem["day"],
+													'hour' => (string) $dateGroupItem["hour"],
+													'minute' => (string) $dateGroupItem["minute"],
+													'second' => (string) $dateGroupItem["second"],
+												),
+												(string) $dateGroupItem["dateTimeGrouping"]
+											)
+											->setRuleType(PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_RULETYPE_DATEGROUP);
+										}
+									}
+									//	Check for custom filters
+									if ($filterColumn->customFilters) {
+										$column->setFilterType(PHPExcel_Worksheet_AutoFilter_Column::AUTOFILTER_FILTERTYPE_CUSTOMFILTER);
+										$customFilters = $filterColumn->customFilters;
+										//	Custom filters can an AND or an OR join;
+										//		and there should only ever be one or two entries
+										if ((isset($customFilters["and"])) && ($customFilters["and"] == 1)) {
+											$column->setJoin(PHPExcel_Worksheet_AutoFilter_Column::AUTOFILTER_COLUMN_JOIN_AND);
+										}
+										foreach ($customFilters->customFilter as $filterRule) {
+											$column->createRule()->setRule(
+												(string) $filterRule["operator"],
+												(string) $filterRule["val"]
+											)
+											->setRuleType(PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_RULETYPE_CUSTOMFILTER);
+										}
+									}
+									//	Check for dynamic filters
+									if ($filterColumn->dynamicFilter) {
+										$column->setFilterType(PHPExcel_Worksheet_AutoFilter_Column::AUTOFILTER_FILTERTYPE_DYNAMICFILTER);
+										//	We should only ever have one dynamic filter
+										foreach ($filterColumn->dynamicFilter as $filterRule) {
+											$column->createRule()->setRule(
+												NULL,	//	Operator is undefined, but always treated as EQUAL
+												(string) $filterRule["val"],
+												(string) $filterRule["type"]
+											)
+											->setRuleType(PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_RULETYPE_DYNAMICFILTER);
+											if (isset($filterRule["val"])) {
+												$column->setAttribute('val',(string) $filterRule["val"]);
+											}
+											if (isset($filterRule["maxVal"])) {
+												$column->setAttribute('maxVal',(string) $filterRule["maxVal"]);
+											}
+										}
+									}
+									//	Check for dynamic filters
+									if ($filterColumn->top10) {
+										$column->setFilterType(PHPExcel_Worksheet_AutoFilter_Column::AUTOFILTER_FILTERTYPE_TOPTENFILTER);
+										//	We should only ever have one top10 filter
+										foreach ($filterColumn->top10 as $filterRule) {
+											$column->createRule()->setRule(
+												(((isset($filterRule["percent"])) && ($filterRule["percent"] == 1))
+													? PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_COLUMN_RULE_TOPTEN_PERCENT
+													: PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_COLUMN_RULE_TOPTEN_BY_VALUE
+												),
+												(string) $filterRule["val"],
+												(((isset($filterRule["top"])) && ($filterRule["top"] == 1))
+													? PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_COLUMN_RULE_TOPTEN_TOP
+													: PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_COLUMN_RULE_TOPTEN_BOTTOM
+												)
+											)
+											->setRuleType(PHPExcel_Worksheet_AutoFilter_Column_Rule::AUTOFILTER_RULETYPE_TOPTENFILTER);
+										}
+									}
+								}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 							}
 
 							if ($xmlSheet && $xmlSheet->mergeCells && $xmlSheet->mergeCells->mergeCell && !$this->_readDataOnly) {
 								foreach ($xmlSheet->mergeCells->mergeCell as $mergeCell) {
+<<<<<<< HEAD
 									$mergeRef = (string) $mergeCell["ref"];
 									if (strpos($mergeRef,':') !== FALSE) {
 										$docSheet->mergeCells((string) $mergeCell["ref"]);
 									}
+=======
+									$mergeRef = (string) $mergeCell["ref"];
+									if (strpos($mergeRef,':') !== FALSE) {
+										$docSheet->mergeCells((string) $mergeCell["ref"]);
+									}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 								}
 							}
 
@@ -1534,12 +1861,20 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 												if ($ele["Type"] == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image") {
 													$images[(string) $ele["Id"]] = self::dir_add($fileDrawing, $ele["Target"]);
 												} elseif ($ele["Type"] == "http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart") {
+<<<<<<< HEAD
 													if ($this->_includeCharts) {
+=======
+													if ($this->_includeCharts) {
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 														$charts[self::dir_add($fileDrawing, $ele["Target"])] = array('id'		=> (string) $ele["Id"],
 																													 'sheet'	=> $docSheet->getTitle()
 																													);
 													}
+<<<<<<< HEAD
 												}
+=======
+												}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 											}
 										}
 										$xmlDrawing = simplexml_load_string($this->_getFromZipArchive($zip, $fileDrawing))->children("http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing");
@@ -1575,7 +1910,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 													}
 													$objDrawing->setWorksheet($docSheet);
 												} else {
+<<<<<<< HEAD
 													//	? Can charts be positioned with a oneCellAnchor ?
+=======
+													//	? Can charts be positioned with a oneCellAnchor ?
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 													$coordinates	= PHPExcel_Cell::stringFromColumnIndex((string) $oneCellAnchor->from->col) . ($oneCellAnchor->from->row + 1);
 													$offsetX		= PHPExcel_Shared_Drawing::EMUToPixels($oneCellAnchor->from->colOff);
 													$offsetY		= PHPExcel_Shared_Drawing::EMUToPixels($oneCellAnchor->from->rowOff);
@@ -1616,7 +1955,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 														$shadow->setAlpha(self::array_item($outerShdw->srgbClr->alpha->attributes(), "val") / 1000);
 													}
 													$objDrawing->setWorksheet($docSheet);
+<<<<<<< HEAD
 												} elseif(($this->_includeCharts) && ($twoCellAnchor->graphicFrame)) {
+=======
+												} elseif(($this->_includeCharts) && ($twoCellAnchor->graphicFrame)) {
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 													$fromCoordinate	= PHPExcel_Cell::stringFromColumnIndex((string) $twoCellAnchor->from->col) . ($twoCellAnchor->from->row + 1);
 													$fromOffsetX	= PHPExcel_Shared_Drawing::EMUToPixels($twoCellAnchor->from->colOff);
 													$fromOffsetY	= PHPExcel_Shared_Drawing::EMUToPixels($twoCellAnchor->from->rowOff);
@@ -1636,7 +1979,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 																	'toOffsetY'			=> $toOffsetY,
 																	'worksheetTitle'	=> $docSheet->getTitle()
 																 );
+<<<<<<< HEAD
 												}
+=======
+												}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 											}
 										}
 
@@ -1666,10 +2013,17 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 										// Switch on type
 										switch ((string)$definedName['name']) {
 
+<<<<<<< HEAD
 											case '_xlnm._FilterDatabase':
 												if ((string)$definedName['hidden'] !== '1') {
 													$docSheet->getAutoFilter()->setRange($extractedRange);
 												}
+=======
+											case '_xlnm._FilterDatabase':
+												if ((string)$definedName['hidden'] !== '1') {
+													$docSheet->getAutoFilter()->setRange($extractedRange);
+												}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 												break;
 
 											case '_xlnm.Print_Titles':
@@ -1805,7 +2159,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 			foreach ($contentTypes->Override as $contentType) {
 				switch ($contentType["ContentType"]) {
 					case "application/vnd.openxmlformats-officedocument.drawingml.chart+xml":
+<<<<<<< HEAD
 						if ($this->_includeCharts) {
+=======
+						if ($this->_includeCharts) {
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 							$chartEntryRef = ltrim($contentType['PartName'],'/');
 							$chartElements = simplexml_load_string($this->_getFromZipArchive($zip, $chartEntryRef));
 							$objChart = PHPExcel_Reader_Excel2007_Chart::readChart($chartElements,basename($chartEntryRef,'.xml'));
@@ -1818,7 +2176,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 //								echo 'Position Ref ',$chartPositionRef,'<br />';
 								if (isset($chartDetails[$chartPositionRef])) {
 //									var_dump($chartDetails[$chartPositionRef]);
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 									$excel->getSheetByName($charts[$chartEntryRef]['sheet'])->addChart($objChart);
 									$objChart->setWorksheet($excel->getSheetByName($charts[$chartEntryRef]['sheet']));
 									$objChart->setTopLeftPosition( $chartDetails[$chartPositionRef]['fromCoordinate'],
@@ -1830,7 +2192,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 																	   $chartDetails[$chartPositionRef]['toOffsetY']
 																	 );
 								}
+<<<<<<< HEAD
 							}
+=======
+							}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 						}
 				}
 			}
@@ -1840,7 +2206,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 
 		return $excel;
 	}
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 
 	private static function _readColor($color, $background=FALSE) {
 		if (isset($color["rgb"])) {
@@ -1864,6 +2234,7 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return 'FF000000';
 	}
 
+<<<<<<< HEAD
 
 	private static function _readStyle($docStyle, $style) {
 		// format code
@@ -1874,6 +2245,18 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 				$docStyle->getNumberFormat()->setFormatCode($style->numFmt);
 //			}
 //		}
+=======
+
+	private static function _readStyle($docStyle, $style) {
+		// format code
+//		if (isset($style->numFmt)) {
+//			if (isset($style->numFmt['formatCode'])) {
+//				$docStyle->getNumberFormat()->setFormatCode((string) $style->numFmt['formatCode']);
+//			} else {
+				$docStyle->getNumberFormat()->setFormatCode($style->numFmt);
+//			}
+//		}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 
 		// font
 		if (isset($style->font)) {
@@ -1911,7 +2294,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		if (isset($style->fill)) {
 			if ($style->fill->gradientFill) {
 				$gradientFill = $style->fill->gradientFill[0];
+<<<<<<< HEAD
 				if(!empty($gradientFill["type"])) {
+=======
+				if(!empty($gradientFill["type"])) {
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 					$docStyle->getFill()->setFillType((string) $gradientFill["type"]);
 				}
 				$docStyle->getFill()->setRotation(floatval($gradientFill["degree"]));
@@ -1995,7 +2382,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 			}
 		}
 	}
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 
 	private static function _readBorder($docBorder, $eleBorder) {
 		if (isset($eleBorder["style"])) {
@@ -2006,7 +2397,11 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		}
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private function _parseRichText($is = null) {
 		$value = new PHPExcel_RichText();
 
@@ -2069,17 +2464,29 @@ class PHPExcel_Reader_Excel2007 implements PHPExcel_Reader_IReader
 		return $value;
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private static function array_item($array, $key = 0) {
 		return (isset($array[$key]) ? $array[$key] : null);
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private static function dir_add($base, $add) {
 		return preg_replace('~[^/]+/\.\./~', '', dirname($base) . "/$add");
 	}
 
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	private static function toCSSArray($style) {
 		$style = str_replace(array("\r","\n"), "", $style);
 

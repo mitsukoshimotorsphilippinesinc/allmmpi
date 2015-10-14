@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 ﻿{     "Direction" : "ltr",     "Close" : "Sluiten",     "Help" : "Help",     "FirstImage" : "Naar eerste afbeelding",     "LastImage" : "Naar laatste afbeelding",     "StartStopSlideShow" : "Start/Stop diavoorstelling",     "Pause" : "Stop",     "Play" : "Afspelen",     "Prev" : "Vorige",     "PinInfo" : "Pin info",
     "UnpinInfo" : "Unpin info",     "Next" : "Volgende",     "PrevImage" : "Vorige afbeelding",     "NextImage" : "Volgende afbeelding",     "Loading" : "Laden",     "CloseHelp" : "Sluit help",     "HelpText" : "De afbeeldingen kunnen doorlopen worden met het toetsenbord:<br/><br/>LINKS/RECHTS: Vorige/Volgende<br/>Spatie: Volgende<br/>ENTER: Start/Stop voorstelling<br/>ESCAPE: Sluit venster<br/>HOME/END: Eerste/Laatste<br/>H - Dit help paneel",     "Slideshow" : "Voorstelling",
+=======
+﻿{     "Direction" : "ltr",     "Close" : "Sluiten",     "Help" : "Help",     "FirstImage" : "Naar eerste afbeelding",     "LastImage" : "Naar laatste afbeelding",     "StartStopSlideShow" : "Start/Stop diavoorstelling",     "Pause" : "Stop",     "Play" : "Afspelen",     "Prev" : "Vorige",     "PinInfo" : "Pin info",
+    "UnpinInfo" : "Unpin info",     "Next" : "Volgende",     "PrevImage" : "Vorige afbeelding",     "NextImage" : "Volgende afbeelding",     "Loading" : "Laden",     "CloseHelp" : "Sluit help",     "HelpText" : "De afbeeldingen kunnen doorlopen worden met het toetsenbord:<br/><br/>LINKS/RECHTS: Vorige/Volgende<br/>Spatie: Volgende<br/>ENTER: Start/Stop voorstelling<br/>ESCAPE: Sluit venster<br/>HOME/END: Eerste/Laatste<br/>H - Dit help paneel",     "Slideshow" : "Voorstelling",
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
     "OriginalContext": "Bekijk in originele context" }

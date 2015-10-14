@@ -9,6 +9,7 @@
  *
  * Date: 17th July, 2010
  * Version : 1.6
+<<<<<<< HEAD
  */
 function yox_flickr()
 {
@@ -35,6 +36,34 @@ function yox_flickr()
             method: 'flickr.photosets.getList',
             extras: 'description'
         };
+=======
+ */
+function yox_flickr()
+{
+    var $ = jQuery,
+        flickrUrl = "http://www.flickr.com/",
+        flickrApiUrl = "http://api.flickr.com/services/rest/",
+        yoxviewFlickrApikey = "cd6c91f9721f34ead20e6ebe03dd5871",
+        flickrUserIdRegex = /\d+@N\d+/,
+	    flickrUrlRegex = /http:\/\/(?:www\.)?flickr\.com\/(\w+)\/(?:([^\/]+)\/(?:(\w+)\/?(?:([^\/]+)\/?)?)?)?(?:\?(.*))?/,
+        self = this,
+        fixedOptions = {
+            api_key: yoxviewFlickrApikey,
+            format: 'json'
+        };
+        
+    this.getImagesData = function(options, callback)
+    {
+        var defaults = {
+            imageSize: "medium", // medium/large/original, for large, your images in Flickr must be 1280 in width or more. For original, you must allow originals to be downloaded
+            thumbsize: "smallSquare",
+            setThumbnail: true,
+            setSinglePhotosetThumbnails: true,
+            setTitle: true,
+            method: 'flickr.photosets.getList',
+            extras: 'description'
+        };
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 
 		var requireLookup = true;
 		var lookupData = {
@@ -126,6 +155,7 @@ function yox_flickr()
 				}
             }
         }
+<<<<<<< HEAD
 		
         var datasourceOptions = jQuery.extend({}, defaults, fromDataUrl, options.dataSourceOptions, fixedOptions);
 		
@@ -139,6 +169,21 @@ function yox_flickr()
         if (!datasourceOptions.imageSize || (screenSize.width <= 800 && datasourceOptions.imageSize != "medium"))
             datasourceOptions.imageSize = "medium";
 
+=======
+		
+        var datasourceOptions = jQuery.extend({}, defaults, fromDataUrl, options.dataSourceOptions, fixedOptions);
+		
+        datasourceOptions.media = "photos";
+        if (datasourceOptions.user && datasourceOptions.photoset_id)
+            datasourceOptions.method = "flickr.photosets.getPhotos";
+
+        var screenSize = screen.width > screen.height ? screen.width : screen.height;
+        
+        // Save resources for smaller screens:
+        if (!datasourceOptions.imageSize || (screenSize.width <= 800 && datasourceOptions.imageSize != "medium"))
+            datasourceOptions.imageSize = "medium";
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 		if (requireLookup)
 		{
 			$.jsonp({
@@ -203,6 +248,7 @@ function yox_flickr()
 		}
     }
 	
+<<<<<<< HEAD
 	
     var flickrImageSizes = {
         smallSquare : "_s", // 75x75
@@ -226,6 +272,31 @@ function yox_flickr()
         return url.replace(/\s/g, "_");
     }
     this.getImagesDataFromJson = function(data, datasourceOptions)
+=======
+	
+    var flickrImageSizes = {
+        smallSquare : "_s", // 75x75
+        thumbnail : "_t", // 100px
+        small : "_m", // 240px
+        medium : "", // 500px
+        large : "_b", // 1024px
+        original : "_o"
+    };
+    function getImageUrl(photoData, size)
+    {
+        return "http://farm" + photoData.farm + ".static.flickr.com/" + photoData.server + "/" + (photoData.primary || photoData.id) + "_" + photoData.secret + size + ".jpg";
+    }
+    function getPhotosetUrl(userid, photosetId)
+    {
+         return prepareUrl(flickrUrl + "photos/" + userid + "/sets/" + photosetId + "/");
+    }
+    // makes sure a string can be used as a Flickr url
+    function prepareUrl(url)
+    {
+        return url.replace(/\s/g, "_");
+    }
+    this.getImagesDataFromJson = function(data, datasourceOptions)
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
     {
 		var isPhotos = data.photoset || data.photos;
 		var photos;
@@ -244,6 +315,7 @@ function yox_flickr()
 		{
 			var thumbSuffix = flickrImageSizes[datasourceOptions.thumbsize];
 			var imageSuffix = flickrImageSizes[datasourceOptions.imageSize];
+<<<<<<< HEAD
 			
 			jQuery.each(photos, function(i, photo){
 				var imageData = {
@@ -255,10 +327,24 @@ function yox_flickr()
 						alt: photo.title._content || photo.title,
 						description: photo.description ? photo.description._content : undefined
 					}
+=======
+			
+			jQuery.each(photos, function(i, photo){
+				var imageData = {
+					thumbnailSrc : getImageUrl(photo, thumbSuffix),
+					link: prepareUrl(flickrUrl + "photos/" + (photo.owner || datasourceOptions.user_id) + "/" + photo.id + inSet),
+					media: {
+						src: getImageUrl(photo, imageSuffix),
+						title: isPhotos ? photo.title : photo.title._content + (!isPhotos ? " (" + photo.photos + " images)" : ""),
+						alt: photo.title._content || photo.title,
+						description: photo.description ? photo.description._content : undefined
+					}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 				};
 				
 				if (!isPhotos)
 					imageData.data = { photoset_id: photo.id };
+<<<<<<< HEAD
 					
 				imagesData.push(imageData);
 			});
@@ -266,4 +352,13 @@ function yox_flickr()
 		
 		return imagesData;
     }
+=======
+					
+				imagesData.push(imageData);
+			});
+		}
+		
+		return imagesData;
+    }
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 }

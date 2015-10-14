@@ -307,6 +307,12 @@ define('MBSTRING', function_exists('mb_get_info'));
  *
  * And away we go...
  */
+<<<<<<< HEAD
+=======
+
+#var_dump($system_path);
+
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 require_once BASEPATH.'core/CodeIgniter.php';
 
 /* End of file index.php */

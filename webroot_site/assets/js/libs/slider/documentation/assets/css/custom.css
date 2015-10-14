@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .custom-list {
 	list-style: circle;
 }
@@ -10,4 +11,18 @@
 
 .table {
 	margin: 20px 0 40px;
+=======
+.custom-list {
+	list-style: circle;
+}
+
+
+.custom-list li {
+	line-height: 24px;
+}
+
+
+.table {
+	margin: 20px 0 40px;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 }

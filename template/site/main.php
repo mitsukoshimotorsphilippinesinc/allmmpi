@@ -6,7 +6,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<<<<<<< HEAD
 	<title>Mitsukoshi Motors Philippines Inc</title>
+=======
+	<title>MMPI</title>
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<meta name="google-site-verification" content="n3OStZb5h80YSMRjBwO8RTzDFXGEWuDdF-pYHUmNDus" />
@@ -58,6 +62,7 @@
 	
 	<header>
 		<div class="clearfix">
+<<<<<<< HEAD
 			<h1 class="pull-left" style="margin-top:-10px;">								
 				<a href="/">MMPI</a>
 				<!--img style="width:8em;" src="$this->/assets/img/mitsukoshi-logo.svg"></img-->
@@ -66,18 +71,31 @@
 			</h1>
 			<?= $this->load->view('snippets/menu', NULL, TRUE,'main');  ?>
 			<?= $this->load->view('snippets/navigation', NULL, TRUE,'main');  ?>
+=======
+			<h1 class="pull-left">
+				<!--a href="/">lemon</a-->
+				<!--a href="/">VitalC</a-->
+			</h1>
+			<!--?= $this->load->view('snippets/menu', NULL, TRUE,'main');  ?-->
+			<!--?= $this->load->view('snippets/navigation', NULL, TRUE,'main');  ?-->
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 		</div>
 		
 	</header>
 	<div id='content'>
 		<div class='content-area'>
+<<<<<<< HEAD
 			<?= $this->load->view('snippets/alerts', NULL, TRUE,'main');  ?>
+=======
+			<!--?= $this->load->view('snippets/alerts', NULL, TRUE,'main');  ?-->
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 		</div>
 		<?= $content ?>
 	</div>
 	<footer>
 		<div class="grid12">
 			<div class="row">
+<<<<<<< HEAD
 				<p class="span5">@2015 Mitsukoshi Motors PHilippines Inc. All Rights Reserved.</p>
 				<ul class="span7" class="text-align:right;">
 					<li><a href="#">Home</a></li>
@@ -87,6 +105,18 @@
 			</div>
 			<div class="row">	
 				<p class='span12'>Powered by<a href="#"> MMPI IT Department</a></p>
+=======
+				<p class="span4">@2015 Mitsukoshi Motors Philippines, Inc. All Rights Reserved.</p>
+				<ul class="span8" class="text-align:right;">
+					<li><a href="/">Home</a></li>
+					<li><a href="/pages/privacy-policy">Privacy Policy</a></li>
+					<li><a href="/pages/terms-and-conditions">Terms and Conditions</a></li>
+					<li><a href="/pages/careers-at-mmpi">Careers</a></li>
+				</ul>
+			</div>
+			<div class="row">	
+				<p class='span12'>Powered by<a href="http://www.mitsukoshimotors.com"> MMPI elITes</a></p>
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 			</div>
 		</div>
 	</footer>

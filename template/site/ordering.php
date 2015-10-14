@@ -6,7 +6,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<<<<<<< HEAD
 	<title>Mitsukoshi Motors Philippines Inc</title>
+=======
+	<title>MMPI</title>
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	<meta name="description" content="">
 	<meta name="author" content="">
 

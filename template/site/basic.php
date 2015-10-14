@@ -6,7 +6,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<<<<<<< HEAD
 	<title>Mitsukoshi Motors Philippines Inc</title>
+=======
+	<title>MMPI</title>
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<meta name="google-site-verification" content="n3OStZb5h80YSMRjBwO8RTzDFXGEWuDdF-pYHUmNDus" />
@@ -47,6 +51,7 @@
 		
 		
 		<div class="clearfix">
+<<<<<<< HEAD
 			<h1 class="pull-left" style="margin-top:-10px;">
 				<a href="/">MMPI</a>
 				<!--a href="/">VitalC</a-->
@@ -56,6 +61,17 @@
 				<li><a href="/">Join Us</a></li>
 				<li><a href="#">Contact Us</a></li>
 				<li><a href="#">FAQs</a></li>
+=======
+			<h1 class="pull-left">
+				<a href="/">lemon</a>
+				<a href="/">VitalC</a>
+			</h1>
+			<ul class="nav pull-right">
+				<li><a href="/members/signin">Login</a></li>
+				<li><a href="/">Join Us</a></li>
+				<li><a href="/main/contactus">Contact Us</a></li>
+				<li><a href="/main/faqs">FAQs</a></li>
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 				<li>
 					<form class="search-query">
 						<input placeholder="Search"/>
@@ -73,6 +89,7 @@
 	<footer>
 		<div class="grid12">
 			<div class="row-fluid">
+<<<<<<< HEAD
 				<p class="span5">@2015 Mitsukoshi Motors Philippines Inc. All Rights Reserved.</p>
 				<ul class="span7">
 					<li><a href="#">Home</a></li>
@@ -83,6 +100,18 @@
 			</div>
 			<div class="row-fluid">
 				<p>Powered by<a href="http://www.mitsukoshimotors.com"> Mitsukoshi Motors Philippines, Inc.</a></p>
+=======
+				<p class="span4">@2015 Mitsukoshi Motors Philippines, Inc. All Rights Reserved.</p>
+				<ul class="span8">
+					<li><a href="/">Home</a></li>
+					<li><a href="/pages/privacy-policy">Privacy Policy</a></li>
+					<li><a href="/pages/terms-and-conditions">Terms and Conditions</a></li>
+					<li><a href="/pages/careers-at-mmpi">Careers</a></li>
+				</ul>
+			</div>
+			<div class="row-fluid">
+				<p class='span12'>Powered by<a href="http://www.mitsukoshimotors.com"> MMPI elITes</a></p>
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 			</div>
 		</div>
 	</footer>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #item-list {
 	height: 150px;
 	padding-right: 10px;
@@ -6,4 +7,14 @@
 }
 table.item-list {
 	margin-bottom: 0;
+=======
+#item-list {
+	height: 150px;
+	padding-right: 10px;
+	overflow: hidden;
+	overflow-y: scroll;
+}
+table.item-list {
+	margin-bottom: 0;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 }

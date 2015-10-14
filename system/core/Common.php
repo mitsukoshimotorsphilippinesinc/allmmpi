@@ -225,6 +225,10 @@ if ( ! function_exists('get_config'))
 	function &get_config($replace = array())
 	{
 		static $_config;
+<<<<<<< HEAD
+=======
+		$config = "";
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 
 		if (isset($_config))
 		{
@@ -265,8 +269,14 @@ if ( ! function_exists('get_config'))
 			}
 		}
 
+<<<<<<< HEAD
 		$_config[0] =& $config;
 		return $_config[0];
+=======
+		#return $_config[0] =& $config;
+		$_config[0] =& $config;
+		return $_config[0]; 
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	}
 }
 

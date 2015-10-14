@@ -1,7 +1,11 @@
 body{
 	font-family: "Helvetica Neue", "Helvetica" , "Arial" , "Sans Serif", Georgia, Serif;
+<<<<<<< HEAD
 	/*background: url(../img/header_bg.png) repeat-x 0 0 #fcf9f2;*/
 	/*background: rgba(0, 0, 0, 0) linear-gradient(90deg, #cbccc7 10%, #cbccc7 90%) repeat scroll 0 0;*/
+=======
+	background: url(../img/header_bg.png) repeat-x 0 0 #fcf9f2;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	font-size: 14px;
 }
 .upper-wrapper{
@@ -11,8 +15,12 @@ body{
 
 /***** =content *****/
 #content {
+<<<<<<< HEAD
 	/*min-width: 1100px;*/
 	min-width: 800px;
+=======
+	min-width: 1100px;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	min-height: 1100px;
 }
 .container{
@@ -21,9 +29,14 @@ body{
 }
 /***** =header *****/
 header{
+<<<<<<< HEAD
 	height: 100px;
 	min-width: 1100px;
 	background: rgba(0, 0, 0, 0) url("../img/footer_bg.png") repeat scroll 0 0;
+=======
+	height: 130px;
+	min-width: 1100px;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 }
 header > div{
 	width: 960px;
@@ -35,18 +48,28 @@ header > div h1{
 }
 header > div h1 a{
 	display: inline-block;
+<<<<<<< HEAD
 	background: url(../img/sym_logo.jpg) no-repeat;
+=======
+	background: url(../img/lemon_bg.png) no-repeat;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	width: 157px;
 	height: 113px;
 	text-indent: -9999px;
 }
 header > div h1 a:last-child{
+<<<<<<< HEAD
 	background: url(http://mmpi.local/assets/img/mmpi_logo2.png) no-repeat;
 	/*width: 134px;*/
 	/*height: 67px;*/
 	width: 300px;
 	height: 80px;
 	margin-top: 10px;
+=======
+	background: url(../img/logo_bg.png) no-repeat;
+	width: 134px;
+	height: 67px;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 }
 header > div ul{
 
@@ -137,6 +160,15 @@ header > ul > li > .dropdown-menu > li > a:hover{
 
 }
 
+<<<<<<< HEAD
+=======
+.content-admin{
+	width: 1000px;
+	margin: 0 auto;
+	padding: 10px 0;
+	max-width: 90%;
+}
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 /***** =content-area *****/
 .content-area{
 	width: 960px;
@@ -409,7 +441,11 @@ header > ul > li > .dropdown-menu > li > a:hover{
 	margin: 6px 0 0 2px;
 }
 .content-area .news h2, .content-area .social-network h2, .content-area h2, .social-network h2{
+<<<<<<< HEAD
 	color: #0088CC;
+=======
+	color: #558033;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	margin-bottom: 16px;
 	font-weight: normal;
 }
@@ -998,10 +1034,17 @@ footer .grid12 a:hover{
 	color: #4d4d4d;
 	float: left;
 	width: 940px;
+<<<<<<< HEAD
 	margin: 0 auto;
 }
 .error-404 div{
 	font-size: 180px;
+=======
+	margin: 0 auto;	
+}
+.error-404 div{
+	font-size: 180px;	
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 	float: left;
 	line-height: 200px;
 	width: 294px;

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #lightbox-slider .layer {
 	font-family: 'Open Sans', sans-serif;
 	text-align: center;
@@ -7,4 +8,15 @@
 #custom-controls {
 	width: 460px;
 	margin: 20px auto;
+=======
+#lightbox-slider .layer {
+	font-family: 'Open Sans', sans-serif;
+	text-align: center;
+}
+
+
+#custom-controls {
+	width: 460px;
+	margin: 20px auto;
+>>>>>>> 814faae5d63c225913c29c7f628440a425af8b16
 }
